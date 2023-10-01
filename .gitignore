@@ -1,1 +1,3 @@
 *.pkl
+logs/fit
+training_checkpoints
