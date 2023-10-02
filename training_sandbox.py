@@ -19,7 +19,7 @@ def train_model(model, loss_fn, metrics, callbacks):
     ds_test = np_data_base[1:]
 
     model.compile(
-        optimizer = tf.keras.optimizers.Adam(0.01),
+        optimizer = tf.keras.optimizers.Adam(0.1),
         loss = loss_fn,
         metrics = metrics
     )
@@ -28,7 +28,7 @@ def train_model(model, loss_fn, metrics, callbacks):
         ds_train,
         ds_test,
         epochs = 5000,
-        batch_size = 300,
+        batch_size = 150,
         validation_split = 0.1,
         callbacks=callbacks
     )
@@ -56,6 +56,13 @@ def create_model():
     ])
     return model
 
+def load_saved_model(checkpoint_path):
+    new_model = create_model()
+    path = path_join(CHECKPOINT_DIR,checkpoint_path)
+    new_model.load_weights(path)
+    new_model.summary()
+    return new_model
+
 model = create_model()
 loss_fn = tf.keras.losses.MeanSquaredError()
 metrics = [tf.keras.metrics.MeanAbsoluteError()]
@@ -79,4 +86,6 @@ callbacks = [tf.keras.callbacks.ModelCheckpoint(
 ]
 
 if __name__ == "__main__":
+    # train_model(model, loss_fn, metrics, callbacks)
+    model = load_saved_model(path_join("ckpt_02450","variables","variables"))
     train_model(model, loss_fn, metrics, callbacks)
