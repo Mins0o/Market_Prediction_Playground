@@ -3,7 +3,7 @@ import pickle
 
 
 def load_data():
-    with open("KRX_data.pkl", "rb") as data_file:
+    with open("data_pkl/KRX_data.pkl", "rb") as data_file:
         all_data = pickle.load(data_file)
     return all_data
 
@@ -16,5 +16,5 @@ def combine_single_column(all_data, column_name):
 
 def save_combined_data(all_data, column_name):
     combined = combine_single_column(all_data, column_name)
-    with open(f"{column_name}.pkl", "wb") as save_file:
+    with open(f"data_pkl/{column_name}.pkl", "wb") as save_file:
         pickle.dump(combined, save_file)

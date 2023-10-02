@@ -53,7 +53,7 @@ def get_all_data():
 
 def save_all_data():
     all_data = get_all_data()
-    with open("KRX_data.pkl","wb") as file:
+    with open("data_pkl/KRX_data.pkl","wb") as file:
         pickle.dump(all_data, file)
 
 if __name__ == "__main__":
