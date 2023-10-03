@@ -46,21 +46,21 @@ def create_custom_activation():
 
 def create_model():
     model = tf.keras.models.Sequential([
-        tf.keras.layers.LSTM(300, return_sequences=True, input_shape=(1, 3446)),
+        tf.keras.layers.LSTM(3000, return_sequences=True, input_shape=(1, 3446)),
         tf.keras.layers.Dropout(0.2),
-        tf.keras.layers.LSTM(200),
+        tf.keras.layers.LSTM(1000),
         tf.keras.layers.Dropout(0.2),
-        tf.keras.layers.Dense(5000, activation = "relu"),
+        tf.keras.layers.Dense(3000, activation = "relu"),
         tf.keras.layers.Dropout(0.2),
         tf.keras.layers.Dense(3446, activation = create_custom_activation())
     ])
+    model.summary()
     return model
 
 def load_saved_model(checkpoint_path):
     new_model = create_model()
     path = path_join(CHECKPOINT_DIR,checkpoint_path)
     new_model.load_weights(path)
-    new_model.summary()
     return new_model
 
 model = create_model()
@@ -77,15 +77,15 @@ callbacks = [tf.keras.callbacks.ModelCheckpoint(
             ),
             tf.keras.callbacks.ModelCheckpoint(
                 filepath=path_join(CHECKPOINT_DIR,
-                                   "ckpt_{epoch:05d}_{evaluation_mean_absolute_error:03.4f}"), 
+                                   "ckpt_{epoch:05d}"), 
                 verbose=0, 
                 mode='auto', 
-                save_freq=27*50
+                save_freq=53*50
             ),
             tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 ]
 
 if __name__ == "__main__":
     # train_model(model, loss_fn, metrics, callbacks)
-    model = load_saved_model(path_join("ckpt_02450","variables","variables"))
+    # model = load_saved_model(path_join("ckpt_02450","variables","variables"))
     train_model(model, loss_fn, metrics, callbacks)
