@@ -17,19 +17,17 @@ def train_model(model, loss_fn, metrics, callbacks):
     np_data_base = np.array(load_data())
     ds_train = np_data_base[:-1].reshape((-1,1,3446))
     ds_test = np_data_base[1:]
-
     model.compile(
-        optimizer = tf.keras.optimizers.Adam(0.1),
+        optimizer = tf.keras.optimizers.Adam(0.05),
         loss = loss_fn,
         metrics = metrics
     )
-
     model.fit(
         ds_train,
         ds_test,
-        epochs = 5000,
-        batch_size = 150,
-        validation_split = 0.1,
+        epochs = 1000,
+        batch_size = 300,
+        validation_split = 0.05,
         callbacks=callbacks
     )
 
@@ -80,7 +78,7 @@ callbacks = [tf.keras.callbacks.ModelCheckpoint(
                                    "ckpt_{epoch:05d}"), 
                 verbose=0, 
                 mode='auto', 
-                save_freq=53*50
+                save_freq=28*50
             ),
             tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 ]
