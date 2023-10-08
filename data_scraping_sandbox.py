@@ -81,8 +81,13 @@ class DataFetcher():
         return merged[0].values.tolist()
 
     def _get_ticker_names(self, ticker_list):
-        return [self._name_fetcherf(ticker) for ticker in ticker_list
-                    if len(self._name_fetcherf(ticker)) else ""]
+        name_list = []
+        for ticker in ticker_list:
+            name = self._name_fetcherf(ticker)
+            if not len(name):
+                name = f"{ticker} No Name"
+            name_list.append(name)
+        return name_list
 
     def _get_ohlcvs_list(self, ticker_list, name_list):
         ohlcv_list=[]
@@ -113,6 +118,7 @@ class DataFetcher():
         return ohlcv_list
 
     def get_all_data(self):
+        print(f"Getting {self._mode}")
         self.ticker_list = self._get_ticker_list()
         self.name_list = self._get_ticker_names(self.ticker_list)
         self.ohlcv_list = self._get_ohlcvs_list(self.ticker_list, self.name_list)    
