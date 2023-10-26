@@ -3,3 +3,4 @@ data_csv
 logs/fit
 training_checkpoints
 _build
+.vscode
