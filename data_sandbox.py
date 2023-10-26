@@ -3,7 +3,7 @@ import pickle
 
 
 def load_data():
-    with open("data_pkl/KRX_data.pkl", "rb") as data_file:
+    with open("data_pkl/KRX_stocks.pkl", "rb") as data_file:
         all_data = pickle.load(data_file)
     return all_data
 
