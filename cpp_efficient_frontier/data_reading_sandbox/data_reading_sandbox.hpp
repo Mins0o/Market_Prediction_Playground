@@ -28,7 +28,8 @@ public:
 
 class DataReader{
 private:
-    int line_count_ = 0;
+    size_t row_count_ = 0;
+    size_t column_count_ = 0;
     std::ifstream reading_file_;
 public:
 private:
