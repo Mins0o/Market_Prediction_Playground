@@ -9,7 +9,14 @@
 #include "data_reading_sandbox.hpp"
 
 namespace data_reading_sandbox{
-void DataReader::ParseLine(const std::string& line, 
+void DataReader::OpenFile(){
+    std::filesystem::path directory("data_csv");
+    std::filesystem::path file_name("stocks.tsv");
+    row_count_ = 0;
+    reading_file_ = std::ifstream(".." / directory / file_name);
+}
+
+const void DataReader::ParseLine(const std::string& line, 
                             Tokens& parsed_tokens){
     std::stringstream stream_data(line);
     std::string token;
@@ -18,22 +25,20 @@ void DataReader::ParseLine(const std::string& line,
     }
 }
 
-void DataReader::OpenFile(){
-    std::filesystem::path directory("data_csv");
-    std::filesystem::path file_name("stocks.tsv");
-    row_count_ = 0;
-    reading_file_ = std::ifstream(".." / directory / file_name);
-}
-
 void DataReader::GetStockNameList(Tokens& stock_name_list){
-    if(row_count_++ != 0) return;
+    if(row_count_++ != 0) {
+        std::cout << "GetStockNameList() called on non-first line" << std::endl;
+        return;
+    }
 
     std::string first_line;
     std::getline(reading_file_, first_line);
+    // skipping the first column title "date"
     ParseLine(first_line.substr(5), stock_name_list);
+    column_count_ = stock_name_list.size();
 }
 
-void DataReader::ParseDataLine(const std::string& line, 
+const void DataReader::ParseDataLine(const std::string& line, 
                                 Dates& dates,
                                 ReturnTable&return_table){
     Tokens parsed_tokens;
@@ -48,8 +53,8 @@ void DataReader::ParseDataLine(const std::string& line,
 
 
     Tokens::iterator token = parsed_tokens.begin();
-    for(int ii=1;ii<column_count_;ii++){
-        std::string token_content = *(token+ii);
+    for(int ii=1; ii<column_count_; ii++){
+        std::string token_content = *(token + ii);
         float value;
         if (token_content == ""){
             value = 0.0f;
@@ -68,8 +73,7 @@ void DataReader::ReadData(Data& data){
 
     OpenFile();
     GetStockNameList(stock_names);
-
-    column_count_ = stock_names.size();
+    data.stock_count = column_count_;
 
     std::cout << "Number of columns: " << column_count_ << std::endl;
 
@@ -85,6 +89,7 @@ void DataReader::ReadData(Data& data){
         ParseDataLine(line, dates, return_table);
         row_count_++;
     }
+    data.time_point_count = row_count_-1;
     std::cout<< "Number of rows: " << data.dates_.size()<<std::endl;
 }
 
