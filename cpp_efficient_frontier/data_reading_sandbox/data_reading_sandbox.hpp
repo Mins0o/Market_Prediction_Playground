@@ -39,7 +39,7 @@ public:
 private:
     ;
 public:
-    std::vector<float> GetStock(std::string stock_name);
+    void GetStock(std::string stock_name);
     Dates GetDate(std::string target_date);
 };
 

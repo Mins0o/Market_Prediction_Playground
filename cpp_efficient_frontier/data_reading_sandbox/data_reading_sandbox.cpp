@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <vector>
 #include <ctime>
+#include <algorithm>
 
 #include "data_reading_sandbox.hpp"
 
@@ -35,6 +36,7 @@ void DataReader::GetStockNameList(Tokens& stock_name_list){
     std::getline(reading_file_, first_line);
     // skipping the first column title "date"
     ParseLine(first_line.substr(5), stock_name_list);
+
     column_count_ = stock_name_list.size();
 }
 
@@ -89,12 +91,14 @@ void DataReader::ReadData(Data& data){
         ParseDataLine(line, dates, return_table);
         row_count_++;
     }
-    data.time_point_count = row_count_-1;
+    data.time_point_count = row_count_ - 1;
     std::cout<< "Number of rows: " << data.dates_.size()<<std::endl;
 }
 
-std::vector<float> Data::GetStock(std::string stock_name){
-    return std::vector<float>();
+void Data::GetStock(std::string stock_name){
+    auto name_match = std::find(stock_names_.begin(), stock_names_.end(), stock_name);
+    unsigned int match_index = name_match - stock_names_.begin();
+    std::cout << stock_name << " " << match_index << std::endl;
 };
 
 Dates Data::GetDate(std::string target_date){
