@@ -95,14 +95,74 @@ void DataReader::ReadData(Data& data){
     std::cout<< "Number of rows: " << data.dates_.size()<<std::endl;
 }
 
-void Data::GetStock(std::string stock_name){
-    auto name_match = std::find(stock_names_.begin(), stock_names_.end(), stock_name);
-    unsigned int match_index = name_match - stock_names_.begin();
-    std::cout << stock_name << " " << match_index << std::endl;
+void Data::GetStock(std::string target_name, StockColumn& stock_column){
+    auto name_match = std::find(stock_names_.begin(), stock_names_.end(), target_name);
+
+    if (name_match == stock_names_.end()){
+        std::cout << target_name << "does not exist." << std::endl;
+        return;
+    }
+    uint match_index = name_match - stock_names_.begin();
+    stock_column = StockColumn(returns_[match_index]);
 };
 
 Dates Data::GetDate(std::string target_date){
     return Dates();
+}
+
+Dates StockColumn::dates;
+
+StockColumn::StockColumn(std::vector<float> data){
+    returns_ = data;
+    get_date_range();
+}
+
+StockColumn::StockColumn(){
+    ;
+}
+
+void StockColumn::get_date_range(){
+    uint index = 0;
+    bool started = false;
+
+    uint end_index_candidate = 0;
+    end_index_ = dates.size() - 1;
+    bool zero_started = false;
+
+    for (auto value_it = returns_.begin(); 
+                value_it != returns_.end(); 
+                        index++, value_it++){
+        float current_value = *value_it;
+
+        if(!started && (current_value != 0.0f)){
+            started = true;
+            start_index_ = index;
+        }
+
+        if(started && !zero_started && (current_value == 0.0f)){
+            zero_started = true;
+            end_index_candidate = index;
+        }
+        if(zero_started && (current_value != 0.0f)){
+            zero_started = false;
+        }
+    }
+
+    start_date_ = dates[start_index_];
+    if(zero_started == true){
+        end_index_ = end_index_candidate;
+    }
+    end_date_ = dates[end_index_];
+}
+
+std::vector<float> StockColumn::Strip(){
+    uint required_size = end_index_ - start_index_;
+    std::vector<float> stripped;
+    stripped.reserve(required_size);
+    for(int ii=start_index_; ii <= end_index_; ii++){
+        stripped.emplace_back(returns_[ii]);
+    }
+    return stripped;
 }
 
 }
