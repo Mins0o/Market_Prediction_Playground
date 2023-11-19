@@ -11,14 +11,11 @@ int main(){
     auto data = data_reading_sandbox::Data();
     hello.ReadData(data);
     auto hi = calculations::Calculations();
-    calculations::Calculations::data_test(data);
-    hi.data_test(data);
 
     data_reading_sandbox::StockColumn::dates = data.dates_;
 
     for(int ii=0; ii<30; ii++){
         int stock_lookup = std::rand() % 3526;
-        stock_lookup = 1034;
         std::string stock_name = data.stock_names_[stock_lookup];
         std::cout << stock_lookup << " " << stock_name << " ";
         data_reading_sandbox::StockColumn stock_column;
@@ -33,9 +30,13 @@ int main(){
         std::cout << std::endl << "start" << ctime(&stock_column.start_date_) << " "
                 << "end" << ctime(&stock_column.end_date_) << " ";
 
-        for(float value: stock_column.Strip()){
+        std::vector<float> stock_lifetime = stock_column.Strip();
+        for(float value: stock_lifetime){
             std::cout << value << " ";
         }
+        std::cout << std::endl;
+        std::cout << "Net Value"
+                << calculations::Calculations::NetReturn(stock_lifetime);
         std::cout << std::endl;
     }
 }
