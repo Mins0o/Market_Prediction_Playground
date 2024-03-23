@@ -55,7 +55,7 @@ public:
     uint start_index_;
     uint end_index_;
 private:
-    void get_date_range();
+    void get_valid_date_range();
 public:
     StockColumn();
     StockColumn(std::vector<float> data);

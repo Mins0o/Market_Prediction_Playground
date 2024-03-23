@@ -4,3 +4,4 @@ logs/fit
 training_checkpoints
 _build
 .vscode
+build/*

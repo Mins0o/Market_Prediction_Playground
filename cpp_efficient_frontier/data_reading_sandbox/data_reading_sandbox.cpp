@@ -14,6 +14,7 @@ void DataReader::OpenFile(){
     std::filesystem::path directory("data_csv");
     std::filesystem::path file_name("stocks.tsv");
     row_count_ = 0;
+    std::cout << ".." / directory / file_name;
     reading_file_ = std::ifstream(".." / directory / file_name);
 }
 
@@ -114,14 +115,14 @@ Dates StockColumn::dates;
 
 StockColumn::StockColumn(std::vector<float> data){
     returns_ = data;
-    get_date_range();
+    get_valid_date_range();
 }
 
 StockColumn::StockColumn(){
     ;
 }
 
-void StockColumn::get_date_range(){
+void StockColumn::get_valid_date_range(){
     uint index = 0;
     bool started = false;
 

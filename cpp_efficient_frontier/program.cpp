@@ -37,6 +37,11 @@ int main(){
         std::cout << std::endl;
         std::cout << "Net Value"
                 << calculations::Calculations::NetReturn(stock_lifetime);
+        std::cout << "Net of whole"
+                << calculations::Calculations::NetReturn(stock_column.returns_);
         std::cout << std::endl;
+
+        double starting_value;
+        std::cin >> starting_value;
     }
 }

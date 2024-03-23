@@ -10,7 +10,8 @@ namespace calculations{
 
 class Calculations{
 public: 
-    static float NetReturn(std::vector<float> stock_column);
+    static float NetReturn(const std::vector<float>& returns);
+    static void Returns2Values(const std::vector<float>& returns, std::vector<float>& values);
 };
 
 }
