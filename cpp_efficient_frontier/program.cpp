@@ -30,12 +30,12 @@ int main(int argc, char* argv[]){
       - select stock columns by names
     */
 
-   std::ifstream testing_stream;
-   read_file(argv[1], testing_stream);
+    std::ifstream testing_stream;
+    read_file(argv[1], testing_stream);
    
-   test_data_manipulation();
+    test_data_manipulation();
 
-   data::Data testing_data = data::Data(testing_stream);
+    data::Data testing_data = data::Data(testing_stream);
 
 
     std::srand(std::time(0));
