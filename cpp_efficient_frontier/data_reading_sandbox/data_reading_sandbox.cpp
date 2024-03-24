@@ -14,7 +14,7 @@ void DataReader::OpenFile(){
     std::filesystem::path directory("data_csv");
     std::filesystem::path file_name("stocks.tsv");
     row_count_ = 0;
-    std::cout << ".." / directory / file_name;
+    std::cout << ".." / directory / file_name << std::endl;
     reading_file_ = std::ifstream(".." / directory / file_name);
 }
 

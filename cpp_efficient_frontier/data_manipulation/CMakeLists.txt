@@ -1,0 +1,1 @@
+add_library(lib_data "data_manipulation.cpp" "data_manipulation.hpp")
