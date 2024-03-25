@@ -23,6 +23,13 @@ private:
 public:
     int dummy;
 private:
+    /**
+     * Converts line into separated tokens
+     * @param line line to be tokenized
+     * @param tokens_return empty Tokens object to contain the result
+     * @return reference of the same Tokens object given as output parameter.\n\t Usage is not necessary.
+     * @note type Tokens is std::vector<std::string>
+    */
     Tokens& tokenize_line_(/*I*/ const std::string line,
                            /*O*/ Tokens& tokens_return) const;
     /**
@@ -31,15 +38,30 @@ private:
      * @param first_line <string> first line of the data table file
      * @return tokenized and trimmed symbols of securities.
     */
-    Tokens& parse_first_line_(/*In*/ const std::string first_line,
-                              /*Out*/ Tokens& tokens_return) const;
+    Tokens& parse_first_line_(/*I*/ const std::string first_line,
+                              /*O*/ Tokens& symbol_name) const;
+
+    std::time_t parse_data_line_(/*I*/ const std::string line,
+                                 /*O*/ std::vector<double>& data_values) const;
+
+    /**
+     * reserves memory space for the return table data
+     * @param column_count
+     * @param row_count
+    */
+    void init_return_table_(column_count, row_count);
+
+    /**
+     * Parses the whole data into this class instance.
+     * @param parsing_stream the std::ifstream of the file you are trying to read.
+    */
     void parse_(std::ifstream& parsing_stream);
 public:
     /**
      * Constructor with std::ifstream.
      * Parses data from the file stream and stores in to this instance.
      * 
-     * @param parsing_stream currently being developed for `.tsv` format
+     * @param data_file_stream currently being developed for `.tsv` format
     */
     Data(std::ifstream& data_file_stream);
 
