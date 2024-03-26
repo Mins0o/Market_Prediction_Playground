@@ -167,3 +167,4 @@ std::vector<float> StockColumn::Strip(){
 }
 
 }
+
