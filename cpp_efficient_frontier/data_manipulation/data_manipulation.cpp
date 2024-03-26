@@ -1,6 +1,9 @@
 #include <iostream>
+#include <vector>
 #include <fstream>
 #include <sstream>
+#include <string>
+#include <ctime>
 
 #include "data_manipulation.hpp"
 
@@ -9,8 +12,6 @@ void test_data_manipulation(){
 }
 
 namespace data{
-    namespace Data{
-    }
 /**
  * Takes in the file stream and parses it
 */
@@ -19,28 +20,53 @@ Data::Data(std::ifstream& data_file_stream){
     parse_(data_file_stream);
 }
 
-Tokens& Data::tokenize_line_(/*I*/ const std::string line, 
-                             /*O*/ Tokens& tokens_return) const{
+Tokens_t& Data::tokenize_line_(/*I*/ const std::string line, 
+                               /*O*/ Tokens_t& tokens_return) const{
     std::stringstream line_stream(line);
     std::string token;
     while (std::getline(line_stream, token, '\t')){
-        tokens_return.push_back(token);
+        tokens_return.emplace_back(token);
     }
     return tokens_return;
 }
 
-Tokens& Data::parse_first_line_(/*I*/ const std::string first_line,
-                                /*O*/ Tokens& symbol_names) const{
+Tokens_t& Data::parse_first_line_(/*I*/ const std::string first_line,
+                                  /*O*/ Tokens_t& symbol_names) const{
     symbol_names = tokenize_line_(first_line, symbol_names);
     symbol_names.erase(symbol_names.begin());
     return symbol_names;
 }
 
-std::time_t Data::parse_data_line_(/*I*/ const std::string,
-                                   /*O*/ std::vector<double>& data_values) const{
+std::time_t Data::extract_date_(/*I*/ const char* date_string) const{
+   tm temporary_tm = {0};
+   strptime(date_string, "%Y-%m-%d", &temporary_tm);
+   std:time_t time = mktime(&temporary_tm);
+
+   return time;
 }
 
-void Data::init_return_table_(column_count, row_count){
+double Data::stof_token_(/*I*/ std::string value_string) const{
+    if (value_string == "" || value_string ==" "){
+        return 0;
+    }
+    return std::stof(value_string);
+}
+
+std::time_t Data::parse_data_line_(/*I*/ const std::string line,
+                                   /*O*/ std::vector<double>& data_values) const{
+    Tokens_t tokens = {};
+    tokens = tokenize_line_(line, tokens);
+
+    std::time_t time = extract_date_(tokens.front().c_str());
+    
+    for(Tokens_t::iterator ii = tokens.begin()+1; ii != tokens.end(); ii++){
+        data_values.emplace_back(stof_token_(*ii));
+    }
+
+    return time;
+}
+
+void Data::init_return_table_(/*I*/size_t column_count, /*I*/size_t row_count){
     return_table_.reserve(column_count);
     for(int ii=0; ii<column_count; ii++){
         return_table_.emplace_back();
@@ -61,8 +87,14 @@ void Data::parse_(std::ifstream& parsing_stream){
     init_return_table_(column_count_, 9000);
 
     std::string data_line;
+    auto t1 = MILLISECOND_NOW();
     while(std::getline(parsing_stream, data_line)){
         std::vector<double> data_row;
-        std::time_t date = parse_data_line(data_line, data_row);
+        std::time_t date = parse_data_line_(data_line, data_row);
     }
+    auto t2 = MILLISECOND_NOW();
+    std::cout << COUNT_MILLISECONDS(t2-t1) << std::endl;
+
+    std::cout<<"finished parsing"<<std::endl;
+}
 }
