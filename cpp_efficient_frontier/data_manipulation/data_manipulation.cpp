@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 #include <ctime>
+#include<algorithm>
 
 #include "data_manipulation.hpp"
 
@@ -79,22 +80,40 @@ void Data::parse_(std::ifstream& parsing_stream){
     parsing_stream.seekg(0);
 
     std::string first_line;
-
     std::getline(parsing_stream, first_line);
+
     symbol_names_ = parse_first_line_(first_line, symbol_names_);
     column_count_ = symbol_names_.size();
 
     init_return_table_(column_count_, 9000);
 
     std::string data_line;
-    auto t1 = MILLISECOND_NOW();
+    size_t line_number = 0;
+    std::vector<time_t> testing_array;
+    testing_array.reserve(9000);
     while(std::getline(parsing_stream, data_line)){
         std::vector<double> data_row;
         std::time_t date = parse_data_line_(data_line, data_row);
+	date_map_[date] = line_number;
+	testing_array.emplace_back(date);
     }
-    auto t2 = MILLISECOND_NOW();
-    std::cout << COUNT_MILLISECONDS(t2-t1) << std::endl;
-
     std::cout<<"finished parsing"<<std::endl;
+    time_t rawtime = 1711437562;
+    std::cout<<rawtime<<std::endl;
+    time_t temp_tm = rawtime-35'000'000;
+    std::cout<<ctime(&temp_tm)<< " ";
+    auto lower = std::lower_bound(testing_array.begin(), testing_array.end(), temp_tm);
+    auto upper = std::upper_bound(testing_array.begin(), testing_array.end(), temp_tm);
+    std::cout<<ctime(&(*(lower-1)));
+    std::cout<<ctime(&(*lower));
+    std::cout<<ctime(&(*(lower+1)));
+    std::cout<<ctime(&(*(upper)));
+    std::cout<<std::endl;
+    lower = std::lower_bound(testing_array.begin(), testing_array.end(), 1676473200);
+    upper = std::upper_bound(testing_array.begin(), testing_array.end(), 1676473200);
+    std::cout<<ctime(&(*(lower-1)));
+    std::cout<<ctime(&(*lower));
+    std::cout<<ctime(&(*(lower+1)));
+    std::cout<<ctime(&(*(upper)));
 }
 }
