@@ -9,7 +9,7 @@
 #include "data_manipulation.hpp"
 
 void test_data_manipulation(){
-    std::cout<< "cpp_dat_manipulation" << std::endl;
+    std::cout<< "cpp_data_manipulation" << std::endl;
 }
 
 namespace data{
@@ -89,31 +89,34 @@ void Data::parse_(std::ifstream& parsing_stream){
 
     std::string data_line;
     size_t line_number = 0;
-    std::vector<time_t> testing_array;
-    testing_array.reserve(9000);
+    date_list_.reserve(9000);
     while(std::getline(parsing_stream, data_line)){
         std::vector<double> data_row;
+        
         std::time_t date = parse_data_line_(data_line, data_row);
-	date_map_[date] = line_number;
-	testing_array.emplace_back(date);
+        date_list_.emplace_back(date);
+
+        size_t row_number = 0;
+        for(double data_value: data_row){
+            return_table_[row_number++].emplace_back(data_value);
+        }
     }
     std::cout<<"finished parsing"<<std::endl;
-    time_t rawtime = 1711437562;
-    std::cout<<rawtime<<std::endl;
-    time_t temp_tm = rawtime-35'000'000;
-    std::cout<<ctime(&temp_tm)<< " ";
-    auto lower = std::lower_bound(testing_array.begin(), testing_array.end(), temp_tm);
-    auto upper = std::upper_bound(testing_array.begin(), testing_array.end(), temp_tm);
-    std::cout<<ctime(&(*(lower-1)));
-    std::cout<<ctime(&(*lower));
-    std::cout<<ctime(&(*(lower+1)));
-    std::cout<<ctime(&(*(upper)));
-    std::cout<<std::endl;
-    lower = std::lower_bound(testing_array.begin(), testing_array.end(), 1676473200);
-    upper = std::upper_bound(testing_array.begin(), testing_array.end(), 1676473200);
-    std::cout<<ctime(&(*(lower-1)));
-    std::cout<<ctime(&(*lower));
-    std::cout<<ctime(&(*(lower+1)));
-    std::cout<<ctime(&(*(upper)));
+}
+
+std::time_t Data::get_date(size_t date_index){
+    return date_list_[date_index];
+}
+
+std::vector<double> Data::select_symbol(size_t symbol_index){
+    return return_table_[symbol_index];
+}
+
+std::string Data::get_symbol_name(size_t symbol_index){
+    return symbol_names_[symbol_index];
+}
+
+size_t Data::time_point_count(){
+    return date_list_.size();
 }
 }

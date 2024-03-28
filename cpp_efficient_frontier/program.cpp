@@ -50,23 +50,26 @@ int main(int argc, char* argv[]){
 
     data_reading_sandbox::StockColumn::dates = data.dates_;
 
+
+
     for(int ii=0; ii<30; ii++){
         int stock_lookup = std::rand() % 3526;
-        std::string stock_name = data.stock_names_[stock_lookup];
+        std::string stock_name = testing_data.get_symbol_name(stock_lookup);
         std::cout << stock_lookup << " " << stock_name << " ";
-        data_reading_sandbox::StockColumn stock_column;
-        data.GetStock(stock_name, stock_column);
+        int hi;
+        std::cin >> hi;
+        data_reading_sandbox::StockColumn __stock_column;
 
-        for(int jj=0; jj<data.time_point_count; jj++){
-            auto date = data.dates_[jj];
-            auto value = data.returns_[stock_lookup][jj];
-            std::cout << value << " " ;//<< ctime(&date);
+        for(int jj=0; jj<testing_data.time_point_count(); jj++){
+            double value = testing_data.select_symbol(stock_lookup)[jj];
+            auto temp_t = testing_data.get_date(jj);
+            std::cout << value << ctime(&temp_t) << std::endl;
         }
 
-        std::cout << std::endl << "start" << ctime(&stock_column.start_date_) << " "
-                << "end" << ctime(&stock_column.end_date_) << " ";
+        std::cout << std::endl << "start" << ctime(&__stock_column.start_date_) << " "
+                << "end" << ctime(&__stock_column.end_date_) << " ";
 
-        std::vector<float> stock_lifetime = stock_column.Strip();
+        std::vector<float> stock_lifetime = __stock_column.Strip();
         for(float value: stock_lifetime){
             std::cout << value << " ";
         }
@@ -74,7 +77,7 @@ int main(int argc, char* argv[]){
         std::cout << "Net Value"
                 << calculations::Calculations::NetReturn(stock_lifetime);
         std::cout << "Net of whole"
-                << calculations::Calculations::NetReturn(stock_column.returns_);
+                << calculations::Calculations::NetReturn(__stock_column.returns_);
         std::cout << std::endl;
 
         double starting_value;

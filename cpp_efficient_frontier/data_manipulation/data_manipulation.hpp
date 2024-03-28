@@ -10,23 +10,22 @@
 
 void test_data_manipulation();
 
-typedef std::map<std::time_t,size_t> DateMap;
 typedef std::map<std::string,size_t> NameMap;
 typedef std::vector<std::vector<double>> FloatArray;
 typedef std::vector<std::string> Tokens_t;
 
 namespace data{
 class Data{
-private:
+private: // fields
     size_t row_count_ = 0;
     size_t column_count_ = 0;
-    DateMap date_map_;
+    std::vector<std::time_t> date_list_;
     NameMap name_map_;
     FloatArray return_table_;
     Tokens_t symbol_names_;
-public:
+public: // fields
     int dummy;
-private:
+private: // methods
     /**
      * Converts line into separated tokens
      * @param line line to be tokenized
@@ -79,7 +78,7 @@ private:
      * @param parsing_stream the std::ifstream of the file you are trying to read.
     */
     void parse_(std::ifstream& parsing_stream);
-public:
+public: // methods
     /**
      * Constructor with std::ifstream.
      * Parses data from the file stream and stores in to this instance.
@@ -90,6 +89,9 @@ public:
 
     void trim();
     void select_date_range();
-    void select_stock();
+    std::time_t get_date(size_t date_index);
+    std::vector<double> select_symbol(size_t symbol_index);
+    std::string get_symbol_name(size_t symbol_index);
+    size_t time_point_count();
 };
 }
