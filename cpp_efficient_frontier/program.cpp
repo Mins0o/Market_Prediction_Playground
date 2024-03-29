@@ -66,8 +66,6 @@ int main(int argc, char* argv[]){
             std::cout << value << ctime(&temp_t) << std::endl;
         }
 
-        std::cout << std::endl << "start" << ctime(&__stock_column.start_date_) << " "
-                << "end" << ctime(&__stock_column.end_date_) << " ";
 
         std::vector<float> stock_lifetime = __stock_column.Strip();
         for(float value: stock_lifetime){

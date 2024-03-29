@@ -23,6 +23,8 @@ private: // fields
     NameMap name_map_;
     FloatArray return_table_;
     Tokens_t symbol_names_;
+    std::vector<std::time_t> start_date_list_;
+    std::vector<std::time_t> end_date_list_;
 public: // fields
     int dummy;
 private: // methods
@@ -74,6 +76,11 @@ private: // methods
     void init_return_table_(/*I*/size_t column_count, /*I*/size_t row_count);
 
     /**
+     * 
+    */
+    void process_data_row_(/*I*/std::vector<double> data_row, /*IO*/std::vector<bool>& symbol_life_tracker);
+
+    /**
      * Parses the whole data into this class instance.
      * @param parsing_stream the std::ifstream of the file you are trying to read.
     */
@@ -89,9 +96,9 @@ public: // methods
 
     void trim();
     void select_date_range();
-    std::time_t get_date(size_t date_index);
-    std::vector<double> select_symbol(size_t symbol_index);
-    std::string get_symbol_name(size_t symbol_index);
-    size_t time_point_count();
+    std::time_t get_date(size_t date_index) const;
+    std::vector<double> select_symbol(size_t symbol_index) const;
+    std::string get_symbol_name(size_t symbol_index) const;
+    size_t time_point_count() const;
 };
 }

@@ -18,6 +18,9 @@ namespace data{
 */
 Data::Data(std::ifstream& data_file_stream){
     std::cout << "file stream constructor" << std::endl;
+    date_list_.reserve(9000);
+    start_date_list_ = std::vector<std::time_t>(column_count_, 0);
+    end_date_list_ = std::vector<std::time_t>(column_count_, 9'999'999'999);
     parse_(data_file_stream);
 }
 
@@ -75,6 +78,13 @@ void Data::init_return_table_(/*I*/size_t column_count, /*I*/size_t row_count){
     }
 }
 
+void Data::process_data_row_(std::vector<double> data_row, std::vector<bool>& symbol_life_tracker){
+    size_t column_number = 0;
+    for(double data_value: data_row){
+        return_table_[column_number++].emplace_back(data_value);
+    }
+}
+
 void Data::parse_(std::ifstream& parsing_stream){
     parsing_stream.clear();
     parsing_stream.seekg(0);
@@ -89,34 +99,33 @@ void Data::parse_(std::ifstream& parsing_stream){
 
     std::string data_line;
     size_t line_number = 0;
-    date_list_.reserve(9000);
+
+    std::vector<bool> is_symbol_alive_list(column_count_,false);
+
     while(std::getline(parsing_stream, data_line)){
         std::vector<double> data_row;
         
         std::time_t date = parse_data_line_(data_line, data_row);
         date_list_.emplace_back(date);
 
-        size_t row_number = 0;
-        for(double data_value: data_row){
-            return_table_[row_number++].emplace_back(data_value);
-        }
+        process_data_row_(data_row, is_symbol_alive_list);
     }
     std::cout<<"finished parsing"<<std::endl;
 }
 
-std::time_t Data::get_date(size_t date_index){
+std::time_t Data::get_date(size_t date_index) const{
     return date_list_[date_index];
 }
 
-std::vector<double> Data::select_symbol(size_t symbol_index){
+std::vector<double> Data::select_symbol(size_t symbol_index) const{
     return return_table_[symbol_index];
 }
 
-std::string Data::get_symbol_name(size_t symbol_index){
+std::string Data::get_symbol_name(size_t symbol_index) const{
     return symbol_names_[symbol_index];
 }
 
-size_t Data::time_point_count(){
+size_t Data::time_point_count() const{
     return date_list_.size();
 }
 }
