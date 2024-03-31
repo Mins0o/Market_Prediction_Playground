@@ -8,8 +8,6 @@
 #define MILLISECOND_NOW std::chrono::high_resolution_clock::now
 #define COUNT_MILLISECONDS(x) ((std::chrono::duration<double, std::milli>)(x)).count()
 
-void test_data_manipulation();
-
 typedef std::map<std::string,size_t> NameMap;
 typedef std::vector<std::vector<double>> FloatArray;
 typedef std::vector<std::string> Tokens_t;
@@ -23,8 +21,8 @@ private: // fields
     NameMap name_map_;
     FloatArray return_table_;
     Tokens_t symbol_names_;
-    std::vector<std::time_t> start_date_list_;
-    std::vector<std::time_t> end_date_list_;
+    std::vector<std::time_t> symbol_start_date_list_;
+    std::vector<std::time_t> symbol_end_date_list_;
 public: // fields
     int dummy;
 private: // methods
@@ -78,7 +76,9 @@ private: // methods
     /**
      * 
     */
-    void process_data_row_(/*I*/std::vector<double> data_row, /*IO*/std::vector<bool>& symbol_life_tracker);
+    void process_data_row_(/*I*/time_t date, 
+                            /*I*/std::vector<double> data_row, 
+                            /*IO*/std::vector<bool>& symbol_life_tracker);
 
     /**
      * Parses the whole data into this class instance.
@@ -99,6 +99,8 @@ public: // methods
     std::time_t get_date(size_t date_index) const;
     std::vector<double> select_symbol(size_t symbol_index) const;
     std::string get_symbol_name(size_t symbol_index) const;
+    std::time_t get_start_date(size_t symbol_index) const;
+    std::time_t get_end_date(size_t symbol_index) const;
     size_t time_point_count() const;
 };
 }

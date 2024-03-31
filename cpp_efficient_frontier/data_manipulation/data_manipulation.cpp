@@ -8,10 +8,6 @@
 
 #include "data_manipulation.hpp"
 
-void test_data_manipulation(){
-    std::cout<< "cpp_data_manipulation" << std::endl;
-}
-
 namespace data{
 /**
  * Takes in the file stream and parses it
@@ -19,8 +15,6 @@ namespace data{
 Data::Data(std::ifstream& data_file_stream){
     std::cout << "file stream constructor" << std::endl;
     date_list_.reserve(9000);
-    start_date_list_ = std::vector<std::time_t>(column_count_, 0);
-    end_date_list_ = std::vector<std::time_t>(column_count_, 9'999'999'999);
     parse_(data_file_stream);
 }
 
@@ -78,10 +72,21 @@ void Data::init_return_table_(/*I*/size_t column_count, /*I*/size_t row_count){
     }
 }
 
-void Data::process_data_row_(std::vector<double> data_row, std::vector<bool>& symbol_life_tracker){
-    size_t column_number = 0;
+void Data::process_data_row_(/*I*/ time_t date, 
+                             /*I*/ std::vector<double> data_row,
+                             /*I*/ std::vector<bool>& symbol_life_tracker){
+    size_t column_index = 0;
     for(double data_value: data_row){
-        return_table_[column_number++].emplace_back(data_value);
+        if (data_value != 0){
+            if(symbol_life_tracker[column_index] == false){
+                symbol_life_tracker[column_index] = true;
+                symbol_start_date_list_[column_index] = date;
+            }
+            else{
+                symbol_end_date_list_[column_index] = date;
+            }
+        }
+        return_table_[column_index++].emplace_back(data_value);
     }
 }
 
@@ -100,7 +105,9 @@ void Data::parse_(std::ifstream& parsing_stream){
     std::string data_line;
     size_t line_number = 0;
 
-    std::vector<bool> is_symbol_alive_list(column_count_,false);
+    std::vector<bool> is_symbol_alive_list(column_count_, false);
+    symbol_start_date_list_ = std::vector<time_t>(column_count_, 0);
+    symbol_end_date_list_ = std::vector<time_t>(column_count_, 9'999'999);
 
     while(std::getline(parsing_stream, data_line)){
         std::vector<double> data_row;
@@ -108,7 +115,7 @@ void Data::parse_(std::ifstream& parsing_stream){
         std::time_t date = parse_data_line_(data_line, data_row);
         date_list_.emplace_back(date);
 
-        process_data_row_(data_row, is_symbol_alive_list);
+        process_data_row_(date, data_row, is_symbol_alive_list);
     }
     std::cout<<"finished parsing"<<std::endl;
 }
@@ -123,6 +130,14 @@ std::vector<double> Data::select_symbol(size_t symbol_index) const{
 
 std::string Data::get_symbol_name(size_t symbol_index) const{
     return symbol_names_[symbol_index];
+}
+
+std::time_t Data::get_start_date(size_t symbol_index) const{
+    return symbol_start_date_list_[symbol_index];
+}
+
+std::time_t Data::get_end_date(size_t symbol_index) const{
+    return symbol_end_date_list_[symbol_index];
 }
 
 size_t Data::time_point_count() const{
