@@ -90,6 +90,11 @@ void Data::process_data_row_(/*I*/ time_t date,
     }
 }
 
+size_t Data::match_date_(time_t target, std::vector<time_t>::iterator& match){
+    match = std::lower_bound(date_list_.begin(), date_list_.end(), target);
+    return (match - date_list_.begin());
+}
+
 void Data::parse_(std::ifstream& parsing_stream){
     parsing_stream.clear();
     parsing_stream.seekg(0);
@@ -117,7 +122,15 @@ void Data::parse_(std::ifstream& parsing_stream){
 
         process_data_row_(date, data_row, is_symbol_alive_list);
     }
-    std::cout<<"finished parsing"<<std::endl;
+
+}
+
+std::vector<double> Data::trim(std::vector<double> full_length_symbol, time_t start, time_t end){
+    std::vector<time_t>::iterator temp_it;
+    size_t start_index = match_date_(start, temp_it);
+    size_t end_index = match_date_(end, temp_it);
+    auto start_it = full_length_symbol.begin();
+    return std::vector<double>(start_it + start_index, start_it + end_index + 1);
 }
 
 std::time_t Data::get_date(size_t date_index) const{

@@ -39,10 +39,10 @@ int main(int argc, char* argv[]){
 
     for(int ii=0; ii<30; ii++){
         int stock_lookup = std::rand() % 3526;
-        std::string stock_name = testing_data.get_symbol_name(stock_lookup);
+        std::string symbol_name = testing_data.get_symbol_name(stock_lookup);
         auto start_date = testing_data.get_start_date(stock_lookup);
         auto end_date = testing_data.get_end_date(stock_lookup);
-        std::cout << stock_lookup << " " << stock_name << 
+        std::cout << stock_lookup << " " << symbol_name << 
                     "\nstart_date: " << ctime(&start_date) <<
                     "\nend_date: " << ctime(&end_date);
         std::cin.get();
@@ -54,6 +54,8 @@ int main(int argc, char* argv[]){
             std::cout << symbol_values[jj] << /*std::endl <<*/ ctime(&temp_t);
         }
         std::cin.get();
+
+        auto trimmed = testing_data.trim(symbol_values, start_date, end_date);
     }
 }
 

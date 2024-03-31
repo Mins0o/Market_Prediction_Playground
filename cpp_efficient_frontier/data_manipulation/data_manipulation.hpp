@@ -80,6 +80,8 @@ private: // methods
                             /*I*/std::vector<double> data_row, 
                             /*IO*/std::vector<bool>& symbol_life_tracker);
 
+    size_t match_date_(time_t target, std::vector<time_t>::iterator& match);
+
     /**
      * Parses the whole data into this class instance.
      * @param parsing_stream the std::ifstream of the file you are trying to read.
@@ -94,7 +96,7 @@ public: // methods
     */
     Data(std::ifstream& data_file_stream);
 
-    void trim();
+    std::vector<double> trim(std::vector<double> full_length_symbol, time_t start, time_t end);
     void select_date_range();
     std::time_t get_date(size_t date_index) const;
     std::vector<double> select_symbol(size_t symbol_index) const;
