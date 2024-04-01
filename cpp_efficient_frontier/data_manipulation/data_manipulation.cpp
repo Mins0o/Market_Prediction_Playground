@@ -127,10 +127,11 @@ void Data::parse_(std::ifstream& parsing_stream){
 
 std::vector<double> Data::trim(std::vector<double> full_length_symbol, time_t start, time_t end){
     std::vector<time_t>::iterator temp_it;
-    size_t start_index = match_date_(start, temp_it);
-    size_t end_index = match_date_(end, temp_it);
+    const size_t start_index = match_date_(start, temp_it);
+    const size_t end_index = match_date_(end, temp_it);
+    const size_t max_index = full_length_symbol.size();
     auto start_it = full_length_symbol.begin();
-    return std::vector<double>(start_it + start_index, start_it + end_index + 1);
+    return std::vector<double>(start_it + start_index, start_it + std::min(end_index + 1, max_index));
 }
 
 std::time_t Data::get_date(size_t date_index) const{

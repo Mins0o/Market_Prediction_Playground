@@ -56,6 +56,10 @@ int main(int argc, char* argv[]){
         std::cin.get();
 
         auto trimmed = testing_data.trim(symbol_values, start_date, end_date);
+        std::cout << trimmed.front() << " "
+                  << trimmed.back() << " " 
+                  << trimmed.size() << std::endl
+                  << symbol_name << std::endl;
     }
 }
 
