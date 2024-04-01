@@ -28,7 +28,7 @@ Tokens_t& Data::tokenize_line_(/*I*/ const std::string line,
     return tokens_return;
 }
 
-Tokens_t& Data::parse_first_line_(/*I*/ const std::string first_line,
+Tokens_t& Data::parse_first_line_(/*I*/ const std::string& first_line,
                                   /*O*/ Tokens_t& symbol_names) const{
     symbol_names = tokenize_line_(first_line, symbol_names);
     symbol_names.erase(symbol_names.begin());
@@ -50,7 +50,7 @@ double Data::stof_token_(/*I*/ std::string value_string) const{
     return std::stof(value_string);
 }
 
-std::time_t Data::parse_data_line_(/*I*/ const std::string line,
+std::time_t Data::parse_data_line_(/*I*/ const std::string& line,
                                    /*O*/ std::vector<double>& data_values) const{
     Tokens_t tokens = {};
     tokens = tokenize_line_(line, tokens);
@@ -73,7 +73,7 @@ void Data::init_return_table_(/*I*/size_t column_count, /*I*/size_t row_count){
 }
 
 void Data::process_data_row_(/*I*/ time_t date, 
-                             /*I*/ std::vector<double> data_row,
+                             /*I*/ const std::vector<double>& data_row,
                              /*I*/ std::vector<bool>& symbol_life_tracker){
     size_t column_index = 0;
     for(double data_value: data_row){
@@ -125,7 +125,7 @@ void Data::parse_(std::ifstream& parsing_stream){
 
 }
 
-std::vector<double> Data::trim(std::vector<double> full_length_symbol, time_t start, time_t end){
+std::vector<double> Data::trim(const std::vector<double>& full_length_symbol, time_t start, time_t end){
     std::vector<time_t>::iterator temp_it;
     const size_t start_index = match_date_(start, temp_it);
     const size_t end_index = match_date_(end, temp_it);

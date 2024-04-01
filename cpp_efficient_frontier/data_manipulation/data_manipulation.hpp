@@ -41,7 +41,7 @@ private: // methods
      * @param first_line <string> first line of the data table file
      * @return tokenized and trimmed symbols of securities.
     */
-    Tokens_t& parse_first_line_(/*I*/ const std::string first_line,
+    Tokens_t& parse_first_line_(/*I*/ const std::string& first_line,
                                 /*O*/ Tokens_t& symbol_name) const;
 
     /**
@@ -63,7 +63,7 @@ private: // methods
      * @param data_values the output vector of double to contain the result
      * @return date of the corresponding line in time_t type
     */
-    std::time_t parse_data_line_(/*I*/ const std::string line,
+    std::time_t parse_data_line_(/*I*/ const std::string& line,
                                  /*O*/ std::vector<double>& data_values) const;
 
     /**
@@ -77,7 +77,7 @@ private: // methods
      * 
     */
     void process_data_row_(/*I*/time_t date, 
-                            /*I*/std::vector<double> data_row, 
+                            /*I*/const std::vector<double>& data_row, 
                             /*IO*/std::vector<bool>& symbol_life_tracker);
 
     size_t match_date_(time_t target, std::vector<time_t>::iterator& match);
@@ -96,7 +96,7 @@ public: // methods
     */
     Data(std::ifstream& data_file_stream);
 
-    std::vector<double> trim(std::vector<double> full_length_symbol, time_t start, time_t end);
+    std::vector<double> trim(const std::vector<double>& full_length_symbol, time_t start, time_t end);
     void select_date_range();
     std::time_t get_date(size_t date_index) const;
     std::vector<double> select_symbol(size_t symbol_index) const;
