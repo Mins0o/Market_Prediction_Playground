@@ -2,7 +2,7 @@
 
 namespace calculations {
 
-float Calculations::net_return(const std::vector<double>& returns){
+double Calculations::net_return(const std::vector<double>& returns){
     double net_value = 1.0;
     for(double return_value: returns){
         net_value *= 1 + (return_value/100);
@@ -10,7 +10,7 @@ float Calculations::net_return(const std::vector<double>& returns){
     return net_value;
 }
 
-void Calculations::get_acc_return_list(const std::vector<double>& returns, std::vector<double>& values){
+std::vector<double>& Calculations::get_acc_return_list(const std::vector<double>& returns, std::vector<double>& values){
     double net_value = 1.0;
     values.reserve(returns.size());
     values.emplace_back(net_value);
@@ -18,6 +18,7 @@ void Calculations::get_acc_return_list(const std::vector<double>& returns, std::
         net_value *= 1 + (return_value/100);
         values.emplace_back(net_value);
     }
+    return values;
 }
 
 }

@@ -97,7 +97,6 @@ public: // methods
     Data(std::ifstream& data_file_stream);
 
     std::vector<double> trim(const std::vector<double>& full_length_symbol, time_t start, time_t end);
-    void select_date_range();
     std::time_t get_date(size_t date_index) const;
     std::vector<double> select_symbol(size_t symbol_index) const;
     std::string get_symbol_name(size_t symbol_index) const;

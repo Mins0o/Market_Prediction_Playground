@@ -55,11 +55,20 @@ int main(int argc, char* argv[]){
         std::cin.get();
 
         auto trimmed = testing_data.trim(symbol_values, start_date, end_date);
+        std::vector<double> net_returns;
+        double net_return = calculations::Calculations::net_return(trimmed);
+        calculations::Calculations::get_acc_return_list(trimmed, net_returns);
 
         std::cout << trimmed.front() << " "
                   << trimmed.back() << " " 
                   << trimmed.size() << std::endl
-                  << symbol_name << std::endl;
+                  << symbol_name << std::endl
+                  << net_return << std::endl;
+
+        for(int ii = 0; ii < trimmed.size(); ii++){
+            std::cout << trimmed[ii] << " " << net_returns[ii] << std::endl;
+            std::cin.get();
+        }
     }
 }
 
