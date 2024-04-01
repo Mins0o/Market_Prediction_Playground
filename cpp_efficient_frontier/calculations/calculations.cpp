@@ -1,10 +1,8 @@
 #include "calculations.hpp"
-#include "../data_reading_sandbox/data_reading_sandbox.hpp"
-
 
 namespace calculations {
 
-float Calculations::NetReturn(const std::vector<float>& returns){
+float Calculations::net_return(const std::vector<double>& returns){
     double net_value = 1.0;
     for(double return_value: returns){
         net_value *= 1 + (return_value/100);
@@ -12,7 +10,7 @@ float Calculations::NetReturn(const std::vector<float>& returns){
     return net_value;
 }
 
-void Calculations::Returns2Values(const std::vector<float>& returns, std::vector<float>& values){
+void Calculations::get_acc_return_list(const std::vector<double>& returns, std::vector<double>& values){
     double net_value = 1.0;
     values.reserve(returns.size());
     values.emplace_back(net_value);

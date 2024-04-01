@@ -1,4 +1,3 @@
-#include "data_reading_sandbox/data_reading_sandbox.hpp"
 #include "calculations/calculations.hpp"
 #include "data_manipulation/data_manipulation.hpp"
 
@@ -56,6 +55,7 @@ int main(int argc, char* argv[]){
         std::cin.get();
 
         auto trimmed = testing_data.trim(symbol_values, start_date, end_date);
+
         std::cout << trimmed.front() << " "
                   << trimmed.back() << " " 
                   << trimmed.size() << std::endl
