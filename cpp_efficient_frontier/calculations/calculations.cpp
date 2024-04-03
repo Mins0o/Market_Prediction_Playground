@@ -40,4 +40,21 @@ double Calculations::standard_deviation(const std::vector<double>& returns){
     return std::sqrt(accumulate / returns.size());
 }
 
+std::vector<double> weighted_sum(/*I*/ const std::vector<double>& returns_a, 
+                                  /*I*/ const double weight_a,
+                                  /*I*/ const std::vector<double>& returns_b,
+                                  /*I*/ const double weight_b){
+    std::vector<double> result = {};
+    result.reserve(returns_a.size());
+
+    if (returns_a.size() != returns_b.size()){
+        return result;
+    }
+
+    for (int ii = 0; ii < returns_a.size(); ii++){
+        result.emplace_back(returns_a[ii]*weight_a + returns_b[ii]*weight_b);
+    }
+    return result;
+}
+
 }
