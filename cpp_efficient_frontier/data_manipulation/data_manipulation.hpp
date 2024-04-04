@@ -98,6 +98,7 @@ public: // methods
 
     std::vector<double> trim(const std::vector<double>& full_length_symbol, time_t start, time_t end);
     std::time_t get_date(size_t date_index) const;
+    size_t search_symbol_by_name(const std::string& symbol_name) const;
     std::vector<double> select_symbol(size_t symbol_index) const;
     std::string get_symbol_name(size_t symbol_index) const;
     std::time_t get_start_date(size_t symbol_index) const;

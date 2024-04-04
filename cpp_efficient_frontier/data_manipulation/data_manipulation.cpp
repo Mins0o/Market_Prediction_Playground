@@ -4,7 +4,8 @@
 #include <sstream>
 #include <string>
 #include <ctime>
-#include<algorithm>
+#include <algorithm>
+#include <rapidfuzz/fuzz.hpp>
 
 #include "data_manipulation.hpp"
 
@@ -12,6 +13,27 @@ namespace data{
 /**
  * Takes in the file stream and parses it
 */
+
+template <typename Sentence1,
+          typename Iterable, typename Sentence2 = typename Iterable::value_type>
+std::vector<std::pair<Sentence2, double>>
+extract(const Sentence1& query, const Iterable& choices, const double score_cutoff = 0.0)
+{
+  std::vector<std::pair<Sentence2, double>> results;
+
+  rapidfuzz::fuzz::CachedRatio<typename Sentence1::value_type> scorer(query);
+
+  for (const auto& choice : choices) {
+    double score = scorer.similarity(choice, score_cutoff);
+
+    if (score >= score_cutoff) {
+      results.emplace_back(choice, score);
+    }
+  }
+
+  return results;
+}
+
 Data::Data(std::ifstream& data_file_stream){
     std::cout << "file stream constructor" << std::endl;
     date_list_.reserve(9000);
@@ -132,6 +154,10 @@ std::vector<double> Data::trim(const std::vector<double>& full_length_symbol, ti
     const size_t max_index = full_length_symbol.size();
     auto start_it = full_length_symbol.begin();
     return std::vector<double>(start_it + start_index, start_it + std::min(end_index + 1, max_index));
+}
+
+size_t Data::search_symbol_by_name(const std::string& symbol_name) const{
+    extract(symbol_name, symbol_names_, 60);
 }
 
 std::time_t Data::get_date(size_t date_index) const{
