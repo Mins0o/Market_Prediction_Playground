@@ -109,14 +109,14 @@ class DataFetcher():
         OUTPUT_LOCK.acquire()
         for ii, thread in enumerate(thread_list):
             thread.start()
-            print(f" {ii:5d}/{list_size} started", end = "              \r")
+            print(f" {ii+1:5d}/{list_size} started", end = "              \r")
         OUTPUT_LOCK.release()
         
         print("\nJoining Threads                  ")
         for ii, thread in enumerate(thread_list):
             thread.join()
             OUTPUT_LOCK.acquire()
-            print(f" {ii:5d}/{list_size} {ticker_list[ii]} {thread.ticker} {get_name(ii)} finished", end = "              \r")
+            print(f" {ii:5d}/{list_size} {ticker_list[ii]} {thread.ticker} {get_name(ii)} finished", end = "                       \r")
             OUTPUT_LOCK.release()
             ohlcv_list.append(thread.result)
         print("Data scraping complete.                        ")
