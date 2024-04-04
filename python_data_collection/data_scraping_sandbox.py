@@ -3,7 +3,7 @@ import pandas as pd
 import pickle
 from tqdm import tqdm
 import threading
-import datetime
+from datetime import datetime
 
 OHLCV_REPLACE_NAMINGS = {"날짜": "date", 
                          "시가": "Open", 
@@ -68,12 +68,12 @@ class DataFetcher():
         self._name_fetcherf = stock.get_etf_ticker_name
         self._ohlcv_fetcherf = lambda ticker: stock.get_etf_ohlcv_by_date("19700101","20301231", ticker)
 
-    def _get_ticker_list(self, range = 0):
+    def _get_ticker_list(self, year_range = 0):
         """
         @param range for value of 0, it will get currently available stocks. Other values go back in years from current year. This will introduce no longer available symbols into the mix.
         """
         today = datetime.today()
-        date_list = [f"{ii}{today.month:02d}{today.day:02d}" for ii in range(today.year+1, today.year-range, -1)]
+        date_list = [f"{ii}{today.month:02d}{today.day:02d}" for ii in range(today.year, today.year-1-year_range, -1)]
         ticker_list = []
         for date in date_list:
             tickers = self._ticker_fetcherf(date)
@@ -137,7 +137,7 @@ class DataFetcher():
     
     def save_all_data(self):
         all_data = self.get_all_data()
-        with open(f"../data_pkl/KRX_{self._mode}_{datetime.datetime.now().__str__()[:10]}.pkl", "wb") as file:
+        with open(f"../data_pkl/KRX_{self._mode}_{datetime.now().__str__()[:10]}.pkl", "wb") as file:
             pickle.dump(all_data, file)
         return all_data
 
