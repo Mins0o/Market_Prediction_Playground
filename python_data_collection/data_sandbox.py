@@ -1,9 +1,10 @@
 import pandas as pd
 import pickle
+import os.path
 
 
-def load_data():
-    with open("data_pkl/KRX_stocks.pkl", "rb") as data_file:
+def load_data(dir_name="data_pkl", file_name="KRX_stocks.pkl"):
+    with open(os.path.join(dir_name,file_name), "rb") as data_file:
         all_data = pickle.load(data_file)
     return all_data
 
@@ -14,7 +15,12 @@ def combine_single_column(all_data, column_name):
     combined = pd.concat(columns_collected, axis=1)
     return combined
 
-def save_combined_data(all_data, column_name):
+def save_combined_data(all_data, column_name, dir_name="data_pkl"):
     combined = combine_single_column(all_data, column_name)
-    with open(f"data_pkl/{column_name}.pkl", "wb") as save_file:
+    with open(os.path.join(dir_name,column_name)+".pkl", "wb") as save_file:
         pickle.dump(combined, save_file)
+
+def save_combined_data_as_csv(all_data, column_name, dir_name="data_pkl", delimitter=","):
+    combined = combine_single_column(all_data, column_name)
+    csv_filename = os.path.join(dir_name,f'{column_name}.csv')
+    combined.to_csv(csv_filename, index=False, sep = delimitter)
