@@ -4,6 +4,7 @@ project(efficient_frontier)
 
 add_subdirectory("calculations")
 add_subdirectory("data_manipulation")
+add_subdirectory(3rdparty/RapidFuzz)
 
 add_executable(main_program "program.cpp")
 
