@@ -4,6 +4,7 @@ import pickle
 from tqdm import tqdm
 import threading
 from datetime import datetime
+import time
 
 OHLCV_REPLACE_NAMINGS = {"날짜": "date", 
                          "시가": "Open", 
@@ -27,7 +28,8 @@ class OhlcvThread(threading.Thread):
         while fetched.empty and trial_count<=100:
             fetched = self.fetcherf(self.ticker)
             trial_count += 1
-        if trial_count > 10:
+            time.sleep(60)
+        if trial_count > 100:
             OUTPUT_LOCK.acquire()
             print(f"\n{self.ticker} failed", end="\r")
             OUTPUT_LOCK.release()
@@ -60,13 +62,13 @@ class DataFetcher():
         self._mode = "stocks"
         self._ticker_fetcherf = lambda date: stock.get_market_ticker_list(date, market="ALL")
         self._name_fetcherf = stock.get_market_ticker_name
-        self._ohlcv_fetcherf = lambda ticker: stock.get_market_ohlcv("19700101","20301231", ticker)
+        self._ohlcv_fetcherf = lambda ticker: stock.get_market_ohlcv("19700101","20301231", str(ticker))
 
     def _set_etf_mode(self):
         self._mode = "ETFs"
         self._ticker_fetcherf = stock.get_etf_ticker_list
         self._name_fetcherf = stock.get_etf_ticker_name
-        self._ohlcv_fetcherf = lambda ticker: stock.get_etf_ohlcv_by_date("19700101","20301231", ticker)
+        self._ohlcv_fetcherf = lambda ticker: stock.get_etf_ohlcv_by_date("19700101","20301231", str(ticker))
 
     def _get_ticker_list(self, year_range = 0):
         """
