@@ -128,6 +128,7 @@ class DataFetcher():
             for ii, ticker in enumerate(ticker_list):
                 fetched = pd.DataFrame()
                 trial_count=0
+                fetched = self._ohlcv_fetcherf(ticker)
                 while fetched.empty and trial_count<=5:
                     fetched = self._ohlcv_fetcherf(ticker)
                     trial_count += 1
