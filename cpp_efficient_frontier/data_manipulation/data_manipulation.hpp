@@ -20,9 +20,9 @@ private: // fields
     std::vector<std::time_t> date_list_;
     NameMap name_map_;
     FloatArray return_table_;
-    Tokens_t symbol_names_;
-    std::vector<std::time_t> symbol_start_date_list_;
-    std::vector<std::time_t> symbol_end_date_list_;
+    Tokens_t security_names_;
+    std::vector<std::time_t> security_start_date_list_;
+    std::vector<std::time_t> security_end_date_list_;
 public: // fields
     int dummy;
 private: // methods
@@ -37,12 +37,12 @@ private: // methods
                              /*O*/ Tokens_t& tokens_return) const;
     /**
      * Takes the first line (:string)) of the file to get the table headers
-     * which is the symbols of the security.
+     * which is the securities of the security.
      * @param first_line <string> first line of the data table file
-     * @return tokenized and trimmed symbols of securities.
+     * @return tokenized and trimmed securities of securities.
     */
     Tokens_t& parse_first_line_(/*I*/ const std::string& first_line,
-                                /*O*/ Tokens_t& symbol_name) const;
+                                /*O*/ Tokens_t& security_name) const;
 
     /**
      * Extracts time_t date from the cstring in %Y-%m-%d format
@@ -78,7 +78,7 @@ private: // methods
     */
     void process_data_row_(/*I*/time_t date, 
                             /*I*/const std::vector<double>& data_row, 
-                            /*IO*/std::vector<bool>& symbol_life_tracker);
+                            /*IO*/std::vector<bool>& security_life_tracker);
 
     size_t match_date_(time_t target, std::vector<time_t>::iterator& match);
 
@@ -96,13 +96,14 @@ public: // methods
     */
     Data(std::ifstream& data_file_stream);
 
-    std::vector<double> trim(const std::vector<double>& full_length_symbol, time_t start, time_t end);
+    std::vector<double> trim(const std::vector<double>& full_length_security, time_t start, time_t end);
     std::time_t get_date(size_t date_index) const;
-    size_t search_symbol_by_name(const std::string& symbol_name) const;
-    std::vector<double> select_symbol(size_t symbol_index) const;
-    std::string get_symbol_name(size_t symbol_index) const;
-    std::time_t get_start_date(size_t symbol_index) const;
-    std::time_t get_end_date(size_t symbol_index) const;
+    size_t search_security_by_name(const std::string& security_name) const;
+    std::vector<double> select_security(size_t security_index) const;
+    std::string get_security_name(size_t security_index) const;
+    std::time_t get_start_date(size_t security_index) const;
+    std::time_t get_end_date(size_t security_index) const;
+    size_t get_securities_count() const;
     size_t time_point_count() const;
 };
 }

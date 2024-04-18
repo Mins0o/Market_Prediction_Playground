@@ -72,7 +72,7 @@ class DataFetcher():
 
     def _get_ticker_list(self, year_range = 0):
         """
-        @param range for value of 0, it will get currently available stocks. Other values go back in years from current year. This will introduce no longer available symbols into the mix.
+        @param range for value of 0, it will get currently available stocks. Other values go back in years from current year. This will introduce no longer available securities into the mix.
         """
         today = datetime.today()
         date_list = [f"{ii}{today.month:02d}{today.day:02d}" for ii in range(today.year, today.year-1-year_range, -1)]

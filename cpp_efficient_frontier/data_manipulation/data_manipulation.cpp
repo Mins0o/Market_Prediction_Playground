@@ -51,10 +51,10 @@ Tokens_t& Data::tokenize_line_(/*I*/ const std::string line,
 }
 
 Tokens_t& Data::parse_first_line_(/*I*/ const std::string& first_line,
-                                  /*O*/ Tokens_t& symbol_names) const{
-    symbol_names = tokenize_line_(first_line, symbol_names);
-    symbol_names.erase(symbol_names.begin());
-    return symbol_names;
+                                  /*O*/ Tokens_t& security_names) const{
+    security_names = tokenize_line_(first_line, security_names);
+    security_names.erase(security_names.begin());
+    return security_names;
 }
 
 std::time_t Data::extract_date_(/*I*/ const char* date_string) const{
@@ -96,16 +96,16 @@ void Data::init_return_table_(/*I*/size_t column_count, /*I*/size_t row_count){
 
 void Data::process_data_row_(/*I*/ time_t date, 
                              /*I*/ const std::vector<double>& data_row,
-                             /*I*/ std::vector<bool>& symbol_life_tracker){
+                             /*I*/ std::vector<bool>& security_life_tracker){
     size_t column_index = 0;
     for(double data_value: data_row){
         if (data_value != 0){
-            if(symbol_life_tracker[column_index] == false){
-                symbol_life_tracker[column_index] = true;
-                symbol_start_date_list_[column_index] = date;
+            if(security_life_tracker[column_index] == false){
+                security_life_tracker[column_index] = true;
+                security_start_date_list_[column_index] = date;
             }
             else{
-                symbol_end_date_list_[column_index] = date;
+                security_end_date_list_[column_index] = date;
             }
         }
         return_table_[column_index++].emplace_back(data_value);
@@ -124,17 +124,17 @@ void Data::parse_(std::ifstream& parsing_stream){
     std::string first_line;
     std::getline(parsing_stream, first_line);
 
-    symbol_names_ = parse_first_line_(first_line, symbol_names_);
-    column_count_ = symbol_names_.size();
+    security_names_ = parse_first_line_(first_line, security_names_);
+    column_count_ = security_names_.size();
 
     init_return_table_(column_count_, 9000);
 
     std::string data_line;
     size_t line_number = 0;
 
-    std::vector<bool> is_symbol_alive_list(column_count_, false);
-    symbol_start_date_list_ = std::vector<time_t>(column_count_, 0);
-    symbol_end_date_list_ = std::vector<time_t>(column_count_, 9'999'999);
+    std::vector<bool> is_security_alive_list(column_count_, false);
+    security_start_date_list_ = std::vector<time_t>(column_count_, 0);
+    security_end_date_list_ = std::vector<time_t>(column_count_, 9'999'999);
 
     while(std::getline(parsing_stream, data_line)){
         std::vector<double> data_row;
@@ -142,42 +142,47 @@ void Data::parse_(std::ifstream& parsing_stream){
         std::time_t date = parse_data_line_(data_line, data_row);
         date_list_.emplace_back(date);
 
-        process_data_row_(date, data_row, is_symbol_alive_list);
+        process_data_row_(date, data_row, is_security_alive_list);
     }
 
 }
 
-std::vector<double> Data::trim(const std::vector<double>& full_length_symbol, time_t start, time_t end){
+std::vector<double> Data::trim(const std::vector<double>& full_length_security, time_t start, time_t end){
     std::vector<time_t>::iterator temp_it;
     const size_t start_index = match_date_(start, temp_it);
     const size_t end_index = match_date_(end, temp_it);
-    const size_t max_index = full_length_symbol.size();
-    auto start_it = full_length_symbol.begin();
+    const size_t max_index = full_length_security.size();
+    auto start_it = full_length_security.begin();
     return std::vector<double>(start_it + start_index, start_it + std::min(end_index + 1, max_index));
 }
 
-size_t Data::search_symbol_by_name(const std::string& symbol_name) const{
-    extract(symbol_name, symbol_names_, 60);
+size_t Data::search_security_by_name(const std::string& security_name) const{
+    extract(security_name, security_names_, 60);
+    return 0;
 }
 
 std::time_t Data::get_date(size_t date_index) const{
     return date_list_[date_index];
 }
 
-std::vector<double> Data::select_symbol(size_t symbol_index) const{
-    return return_table_[symbol_index];
+std::vector<double> Data::select_security(size_t security_index) const{
+    return return_table_[security_index];
 }
 
-std::string Data::get_symbol_name(size_t symbol_index) const{
-    return symbol_names_[symbol_index];
+std::string Data::get_security_name(size_t security_index) const{
+    return security_names_[security_index];
 }
 
-std::time_t Data::get_start_date(size_t symbol_index) const{
-    return symbol_start_date_list_[symbol_index];
+std::time_t Data::get_start_date(size_t security_index) const{
+    return security_start_date_list_[security_index];
 }
 
-std::time_t Data::get_end_date(size_t symbol_index) const{
-    return symbol_end_date_list_[symbol_index];
+std::time_t Data::get_end_date(size_t security_index) const{
+    return security_end_date_list_[security_index];
+}
+
+size_t Data::get_securities_count() const{
+    return column_count_;
 }
 
 size_t Data::time_point_count() const{
