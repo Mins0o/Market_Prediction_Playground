@@ -129,11 +129,15 @@ class DataFetcher():
                 fetched = pd.DataFrame()
                 trial_count=0
                 fetched = self._ohlcv_fetcherf(ticker)
-                while fetched.empty and trial_count<=5:
-                    fetched = self._ohlcv_fetcherf(ticker)
+                while fetched.empty and trial_count<=2:
+                    time.sleep(40)
+                    try:
+                        fetched = self._ohlcv_fetcherf(ticker)
+                    except e:
+                        print(e)
+                        fetched = pd.DataFrame()
                     trial_count += 1
-                    time.sleep(60)
-                if trial_count > 5:
+                if trial_count > 2:
                     print(f"\n{self.ticker} failed")
                 fetched = self._ohlcv_fetcherf(ticker)
                 fetched = fetched.rename(columns=OHLCV_REPLACE_NAMINGS)
