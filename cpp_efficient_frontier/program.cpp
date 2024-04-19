@@ -4,6 +4,10 @@
 #include <algorithm>
 #include <ctime>
 #include <fstream>
+#include <iostream>
+#include <iomanip>
+
+#define s(x) std::setw(x) <<
 
 void read_file(const char* file_path, std::ifstream& read_file){
     std::cout<< "read_file " << file_path << std::endl;
@@ -12,7 +16,7 @@ void read_file(const char* file_path, std::ifstream& read_file){
 
 std::vector<double> test_suite(/*I*/ const size_t security_index, 
                                 /*I*/ data::Data& testing_data, 
-                                /*O*/ std::vector<double>& stripped,
+                                /*O*/ std::vector<double>& stripped_returns,
                                 /*O*/ time_t& start_date,
                                 /*O*/ time_t& end_date){
     std::string security_name = testing_data.get_security_name(security_index);
@@ -23,29 +27,28 @@ std::vector<double> test_suite(/*I*/ const size_t security_index,
                 "end_date: " << ctime(&end_date);
     std::cin.get();
 
-    std::vector<double> security_values = testing_data.select_security(security_index);
+    std::vector<double> security_returns = testing_data.select_security(security_index);
 
-    stripped = testing_data.trim(security_values, start_date, end_date);
+    stripped_returns = testing_data.trim(security_returns, start_date, end_date);
 
-    std::vector<double> net_returns1;
-    double net_return = calculations::Calculations::net_return(stripped);
-    calculations::Calculations::value_series(stripped, net_returns1);
-    double average = calculations::Calculations::average(stripped);
-    double stdv = calculations::Calculations::standard_deviation(stripped);
+    double net_value = calculations::Calculations::net_value(stripped_returns);
+    std::vector<double> net_values = calculations::Calculations::value_series(stripped_returns);
+    double average = calculations::Calculations::average(stripped_returns);
+    double stdv = calculations::Calculations::standard_deviation(stripped_returns);
 
-    std::cout << stripped.front() << " "
-                << stripped.back() << " " 
-                << stripped.size() << std::endl
-                << security_name << std::endl
-                << net_return << std::endl
+    std::cout << "front back length: " << stripped_returns.front() << " "
+                << stripped_returns.back() << " " 
+                << stripped_returns.size() << std::endl
+                << "name: " << security_name << std::endl
+                << "net_value: " << net_value << std::endl
                 << "avg " << average << std::endl
                 << "stdv " << stdv << std::endl;
 
-    for(int ii = 0; ii < stripped.size()/1'000; ii++){
-        std::cout << stripped[ii] << " " << net_returns1[ii] << std::endl;
-        std::cin.get();
+    for(int ii = 1; ii < stripped_returns.size()/1'000; ii++){
+        std::cout << s(3) ii << s(10) stripped_returns[ii-1] << s(10) net_values[ii] << std::endl;
     }
-    return(security_values);
+    std::cin.get();
+    return(security_returns);
 }
 
 int main(int argc, char* argv[]){
@@ -80,20 +83,29 @@ int main(int argc, char* argv[]){
         time_t start_date01={};
         time_t end_date01={};
 
-        auto values1 = test_suite(security_index1, testing_data, stripped01, start_date01, end_date01);
-        auto trimmed01 = testing_data.trim(values1, start_time,end_time);
+        auto returns1 = test_suite(security_index1, testing_data, stripped01, start_date01, end_date01);
+        auto trimmed_returns01 = testing_data.trim(returns1, start_time,end_time);
 
         int security_index2 = std::rand() % testing_data.get_securities_count();
         std::vector<double> stripped02={};
         time_t start_date02={};
         time_t end_date02={};
 
-        auto values2 = test_suite(security_index2, testing_data, stripped02, start_date02, end_date02);
-        auto trimmed02 = testing_data.trim(values2, start_time,end_time);
-        auto summed = calculations::Calculations::weighted_sum(trimmed01,0.3,trimmed02,0.7);
+        auto returns2 = test_suite(security_index2, testing_data, stripped02, start_date02, end_date02);
+        auto trimmed_returns02 = testing_data.trim(returns2, start_time,end_time);
 
-        for (size_t ii=0; ii < summed.size(); ii++){
-            std::cout << trimmed01[ii] << "\t" << trimmed02[ii] << "\t" << summed[ii] << std::endl;
+        std::vector<double> trimmed_values01 = calculations::Calculations::value_series(trimmed_returns01);
+        std::vector<double> trimmed_values02 = calculations::Calculations::value_series(trimmed_returns02);
+ 
+        auto summed = calculations::Calculations::weighted_sum(trimmed_values01,0.3,trimmed_values02,0.7);
+        auto portfolio_retruns = calculations::Calculations::values_to_change(summed);
+
+        std::cout << s(10) "return01" << s(10) "return02" << s(10) "value01" 
+                    << s(10) "value02" << s(15) "combined value" << s(20) "portfolio returns" << std::endl;
+        for (size_t ii=1; ii < summed.size(); ii++){
+            std::cout << s(10) trimmed_returns01[ii-1] << s(10) trimmed_returns02[ii-1]
+                        << s(10) trimmed_values01[ii] << s(10) trimmed_values02[ii]
+                        << s(15) summed[ii] << s(20) portfolio_retruns[ii] << std::endl;
         }
     }
 }

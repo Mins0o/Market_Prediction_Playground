@@ -5,7 +5,7 @@
 
 namespace calculations {
 
-double Calculations::net_return(const std::vector<double>& returns){
+double Calculations::net_value(const std::vector<double>& returns){
     double net_value = 1.0;
     for(double return_value: returns){
         net_value *= 1 + (return_value/100);
@@ -13,8 +13,9 @@ double Calculations::net_return(const std::vector<double>& returns){
     return net_value;
 }
 
-std::vector<double>& Calculations::value_series(const std::vector<double>& returns, std::vector<double>& values){
+std::vector<double> Calculations::value_series(/*I*/ const std::vector<double>& returns){
     double net_value = 1.0;
+    std::vector<double> values={};
     values.reserve(returns.size());
     values.emplace_back(net_value);
     for(double return_value: returns){
@@ -22,6 +23,17 @@ std::vector<double>& Calculations::value_series(const std::vector<double>& retur
         values.emplace_back(net_value);
     }
     return values;
+}
+
+std::vector<double> Calculations::values_to_change(/*I*/ const std::vector<double>& stripped_values){
+    double prev = stripped_values[0];
+    std::vector<double> change_rates = {};
+    change_rates.reserve(stripped_values.size());
+    for (double value: stripped_values){
+        change_rates.emplace_back((value/prev - 1)*100);
+        prev = value;
+    }
+    return change_rates;
 }
 
 double Calculations::average(const std::vector<double>& returns){

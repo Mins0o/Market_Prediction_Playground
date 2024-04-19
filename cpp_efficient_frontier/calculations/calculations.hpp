@@ -11,14 +11,21 @@ public:
      * calculates the end value assuming value of 1 at the start of the vector
      * @param returns vector of periodic returns on the security
     */
-    static double net_return(/*I*/ const std::vector<double>& returns);
+    static double net_value(/*I*/ const std::vector<double>& returns);
 
     /**
-     * creates a vector that has compiles the periodic return into the values at the given time
+     * creates a vector of compounded values at times that compiles the periodic returns
      * @param returns vector of periodic returns on the security
+     * @return compounded value of the returns, assuming the starting value is 1
     */
-    static std::vector<double>& value_series(/*I*/ const std::vector<double>& returns, 
-                                             /*O*/ std::vector<double>& values);
+    static std::vector<double> value_series(/*I*/ const std::vector<double>& returns);
+
+    /**
+     * creates a vector of change rates from a vector of compounded values.
+     * @param stripped_value timeseries of values of a security. assumes there are no 0 value
+     * @return change rates calculated from the compounded valueinput
+    */
+    static std::vector<double> values_to_change(/*I*/ const std::vector<double>& stripped_values);
 
     /**
      * calulates the average of the periodic returns
