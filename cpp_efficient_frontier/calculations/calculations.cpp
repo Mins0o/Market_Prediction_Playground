@@ -2,6 +2,7 @@
 #include <vector>
 #include <numeric>
 #include <cmath>
+#include <algorithm>
 
 namespace calculations {
 
@@ -50,6 +51,23 @@ double Calculations::standard_deviation(const std::vector<double>& returns){
         accumulate += (return_v-average_return) * (return_v-average_return);
     }
     return std::sqrt(accumulate / returns.size());
+}
+
+double Calculations::expected_return(const std::vector<double>& returns){
+    return 0;
+}
+
+double Calculations::expected_return_avg(const std::vector<double>& returns){
+    // double sum = 0;
+    // for (double return_value: returns){
+    //     sum += return_value;
+    // }
+    // return sum/returns.size();
+    return Calculations::average(returns);
+}
+
+double Calculations::expected_return_histogram(const std::vector<double>& returns, double bin_size){
+    
 }
 
 std::vector<double> Calculations::weighted_sum(/*I*/ const std::vector<double>& returns_a, 

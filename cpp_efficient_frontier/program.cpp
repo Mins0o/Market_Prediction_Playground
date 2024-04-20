@@ -68,12 +68,6 @@ int main(int argc, char* argv[]){
     std::srand(std::time(0));
 
     std::cout << testing_data.get_securities_count() << std::endl;
-    
-    tm temporary_tm = {0};
-    strptime("2024-03-01", "%Y-%m-%d", &temporary_tm);
-    std::time_t start_time = mktime(&temporary_tm);
-    strptime("2024-04-01", "%Y-%m-%d", &temporary_tm);
-    std::time_t end_time = mktime(&temporary_tm);
 
 
     for(int ii=0; ii<30; ii++){
@@ -84,7 +78,6 @@ int main(int argc, char* argv[]){
         time_t end_date01={};
 
         auto returns1 = test_suite(security_index1, testing_data, stripped01, start_date01, end_date01);
-        auto trimmed_returns01 = testing_data.trim(returns1, start_time,end_time);
 
         int security_index2 = std::rand() % testing_data.get_securities_count();
         std::vector<double> stripped02={};
@@ -92,7 +85,12 @@ int main(int argc, char* argv[]){
         time_t end_date02={};
 
         auto returns2 = test_suite(security_index2, testing_data, stripped02, start_date02, end_date02);
-        auto trimmed_returns02 = testing_data.trim(returns2, start_time,end_time);
+
+        time_t start_date = start_date01>start_date02?start_date01:start_date02;
+        time_t end_date = end_date01<end_date02?end_date01:end_date02;
+
+        auto trimmed_returns01 = testing_data.trim(returns1, start_date,end_date);
+        auto trimmed_returns02 = testing_data.trim(returns2, start_date,end_date);
 
         std::vector<double> trimmed_values01 = calculations::Calculations::value_series(trimmed_returns01);
         std::vector<double> trimmed_values02 = calculations::Calculations::value_series(trimmed_returns02);
@@ -100,13 +98,20 @@ int main(int argc, char* argv[]){
         auto summed = calculations::Calculations::weighted_sum(trimmed_values01,0.3,trimmed_values02,0.7);
         auto portfolio_retruns = calculations::Calculations::values_to_change(summed);
 
+        std::cout << "start date" << ctime(&start_date) 
+                    << "end date" << ctime(&end_date) << std::endl;
         std::cout << s(10) "return01" << s(10) "return02" << s(10) "value01" 
                     << s(10) "value02" << s(15) "combined value" << s(20) "portfolio returns" << std::endl;
-        for (size_t ii=1; ii < summed.size(); ii++){
+        for (size_t ii=1; ii < summed.size() && ii < 30; ii++){
             std::cout << s(10) trimmed_returns01[ii-1] << s(10) trimmed_returns02[ii-1]
                         << s(10) trimmed_values01[ii] << s(10) trimmed_values02[ii]
                         << s(15) summed[ii] << s(20) portfolio_retruns[ii] << std::endl;
         }
+
+        double p_expected_return = calculations::Calculations::expected_return_avg(portfolio_retruns);
+        double p_risk = calculations::Calculations::standard_deviation(portfolio_retruns);
+
+        std::cout << s(20) "expected_return (avg)" << s(10) "risk" << std::endl
+                    << s(20) p_expected_return << s(10) p_risk << std::endl;
     }
 }
-

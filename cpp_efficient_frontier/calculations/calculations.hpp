@@ -39,7 +39,12 @@ public:
     */
     static double standard_deviation(/*I*/ const std::vector<double>& returns);
 
+    /**
+     * calculates an expected return for the next single period in the time series based on the given historical record
+    */
     static double expected_return(const std::vector<double>& returns);
+    static double expected_return_avg(const std::vector<double>& returns);
+    static double expected_return_histogram(const std::vector<double>& returns, double bin_size);
 
     /**
      * returns a vector that combines the two given vectors with the given weights
