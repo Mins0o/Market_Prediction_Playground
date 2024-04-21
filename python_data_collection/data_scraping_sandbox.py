@@ -130,7 +130,7 @@ class DataFetcher():
                 trial_count=0
                 fetched = self._ohlcv_fetcherf(ticker)
                 while fetched.empty and trial_count<=2:
-                    time.sleep(40)
+                    time.sleep(10)
                     try:
                         fetched = self._ohlcv_fetcherf(ticker)
                     except e:
