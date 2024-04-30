@@ -1,6 +1,7 @@
 import pandas as pd
 import pickle
 import os.path
+import numpy as np
 
 
 def load_data(dir_name="data_pkl", file_name="KRX_stocks.pkl"):
