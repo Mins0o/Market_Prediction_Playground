@@ -114,4 +114,7 @@ std::vector<double> Calculations::aggregate_returns_by_period(/*I*/ const std::v
     return aggregated;
 }
 
+static void Calculations::set_expected_return_strategy(/*I*/ ExpectedReturnStrategy& strategy){
+    Calculations::expected_return_strategy = strategy;
+}
 }

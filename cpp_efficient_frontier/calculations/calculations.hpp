@@ -2,11 +2,14 @@
 
 #include <iostream>
 #include <vector>
+#include "expected_returns/expected_returns_strategy.hpp"
+#include "expected_returns/expected_returns.hpp"
 
 namespace calculations{
 
 class Calculations{
-public: 
+public:
+    static ExpectedReturnStrategy& expected_return_strategy;
     /**
      * calculates the end value assuming value of 1 at the start of the vector
      * @param returns vector of periodic returns on the security
@@ -66,6 +69,7 @@ public:
     static std::vector<double> aggregate_returns_by_period(/*I*/ const std::vector<double>& trimmed_daily_returns,
                                                     /*I*/ size_t intended_period);
 
+    static void set_expected_return_strategy(/*I*/ ExpectedReturnStrategy&);
 };
 
 }
