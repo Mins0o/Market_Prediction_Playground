@@ -67,7 +67,7 @@ double Calculations::expected_return_avg(const std::vector<double>& returns){
 }
 
 double Calculations::expected_return_histogram(const std::vector<double>& returns, double bin_size){
-    
+    return 0.0;
 }
 
 std::vector<double> Calculations::weighted_sum(/*I*/ const std::vector<double>& returns_a, 

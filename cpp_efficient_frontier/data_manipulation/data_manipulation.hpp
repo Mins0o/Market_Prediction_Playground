@@ -51,7 +51,8 @@ private: // methods
     std::time_t extract_date_(/*I*/ const char* date_string) const;
 
     /**
-     * takes in a potentially empty token and returns double value
+     * takes in a token and returns double value
+     * if the token is a empty string, return 0
     */
     double stof_token_(/*I*/ std::string value_string) const;
 
@@ -96,7 +97,15 @@ public: // methods
     */
     Data(std::ifstream& data_file_stream);
 
-    std::vector<double> trim(const std::vector<double>& full_length_security, time_t start, time_t end);
+    /**
+     * takes in a full length vector of doubles with a intended start date and end date.
+     * returns a new vector that is trimmed to the date range
+     * @param full_length_security the "full length" means in terms of the Data object's date list
+     * @param start locks to the available date of the Data object, in case the market was not available at the date.
+     * @param end locks to the available date of the Data object, in case the market was not available at the date.
+    */
+    std::vector<double> trim(/*I*/ const std::vector<double>& full_length_security, /*I*/ time_t start, /*I*/ time_t end);
+
     std::time_t get_date(size_t date_index) const;
     size_t search_security_by_name(const std::string& security_name) const;
     std::vector<double> select_security(size_t security_index) const;
@@ -105,5 +114,6 @@ public: // methods
     std::time_t get_end_date(size_t security_index) const;
     size_t get_securities_count() const;
     size_t time_point_count() const;
+
 };
 }

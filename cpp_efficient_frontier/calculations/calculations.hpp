@@ -57,6 +57,14 @@ public:
                                              /*I*/ const double weight_a,
                                              /*I*/ const std::vector<double>& returns_b,
                                              /*I*/ const double weight_b);
+
+    /**
+     * compounds daily returns into periodic return of a longer term.
+     * 
+    */
+    std::vector<double> aggregate_returns_by_period(/*I*/ const std::vector<double>& daily_returns,
+                                                    /*I*/ size_t intended_period);
+
 };
 
 }
