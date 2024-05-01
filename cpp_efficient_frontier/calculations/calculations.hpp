@@ -60,9 +60,10 @@ public:
 
     /**
      * compounds daily returns into periodic return of a longer term.
+     * For now, trimmed daily return is given and intended period is applied simply by the number of entries.
      * 
     */
-    std::vector<double> aggregate_returns_by_period(/*I*/ const std::vector<double>& daily_returns,
+    static std::vector<double> aggregate_returns_by_period(/*I*/ const std::vector<double>& trimmed_daily_returns,
                                                     /*I*/ size_t intended_period);
 
 };

@@ -87,4 +87,31 @@ std::vector<double> Calculations::weighted_sum(/*I*/ const std::vector<double>& 
     return result;
 }
 
+
+std::vector<double> Calculations::aggregate_returns_by_period(/*I*/ const std::vector<double>& trimmed_daily_returns,
+                                                /*I*/ size_t intended_period){
+    double current_value = 1.0;
+    auto current_return_it = trimmed_daily_returns.begin();
+    std::vector<double> aggregated ={};
+    size_t aggregated_length = trimmed_daily_returns.size()/intended_period;
+    aggregated.reserve(aggregated_length);
+    
+    bool is_end_reached = false;
+    while(not is_end_reached){
+        aggregated.emplace_back(current_value);
+        current_value = 1.0;
+
+        for (int ii=0; ii<intended_period; ii++){
+            if (current_return_it == trimmed_daily_returns.end()){
+                is_end_reached = true;
+                break;
+            }
+            current_value *= (1 + 0.01*(*current_return_it));
+            current_return_it++;
+        }
+    }
+
+    return aggregated;
+}
+
 }
