@@ -3,7 +3,6 @@
 #include <iostream>
 #include <vector>
 #include "expected_returns/expected_returns_strategy.hpp"
-#include "expected_returns/expected_returns.hpp"
 
 namespace calculations{
 
@@ -69,7 +68,9 @@ public:
     static std::vector<double> aggregate_returns_by_period(/*I*/ const std::vector<double>& trimmed_daily_returns,
                                                     /*I*/ size_t intended_period);
 
+
     static void set_expected_return_strategy(/*I*/ ExpectedReturnStrategy*);
+    static double get_expected_return(/*I*/ const std::vector<double>& returns);
 };
 
 }

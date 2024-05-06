@@ -1,5 +1,6 @@
 #include "calculations/calculations.hpp"
 #include "data_manipulation/data_manipulation.hpp"
+#include "calculations/expected_returns/expected_returns.hpp"
 
 #include <algorithm>
 #include <ctime>
@@ -43,7 +44,7 @@ std::vector<double> test_suite(/*I*/ const size_t security_index,
                 << "net_value: " << net_value << std::endl
                 << "avg " << average << std::endl
                 << "stdv " << stdv << std::endl;
-
+    
     for(int ii = 1; ii < stripped_returns.size()/1'000; ii++){
         std::cout << s(3) ii << s(10) stripped_returns[ii-1] << s(10) net_values[ii] << std::endl;
     }
@@ -69,6 +70,8 @@ int main(int argc, char* argv[]){
 
     std::cout << testing_data.get_securities_count() << std::endl;
 
+    ArithmeticMeanStrategy testing_strategy = {};
+    calculations::Calculations::set_expected_return_strategy(&testing_strategy);
 
     for(int ii=0; ii<30; ii++){
 
@@ -99,7 +102,7 @@ int main(int argc, char* argv[]){
         std::vector<double> chunked_returns02 = calculations::Calculations::aggregate_returns_by_period(trimmed_returns02, 20);
  
         auto summed = calculations::Calculations::weighted_sum(trimmed_values01,0.3,trimmed_values02,0.7);
-        auto portfolio_retruns = calculations::Calculations::values_to_change(summed);
+        auto portfolio_returns = calculations::Calculations::values_to_change(summed);
 
         std::cout << "start date" << ctime(&start_date) 
                     << "end date" << ctime(&end_date) << std::endl;
@@ -109,17 +112,18 @@ int main(int argc, char* argv[]){
         for (size_t ii=1; ii < summed.size() && ii < 60; ii++){
             std::cout << s(10) trimmed_returns01[ii-1] << s(10) trimmed_returns02[ii-1]
                         << s(10) trimmed_values01[ii] << s(10) trimmed_values02[ii]
-                        << s(15) summed[ii] << s(20) portfolio_retruns[ii];
+                        << s(15) summed[ii] << s(20) portfolio_returns[ii];
             if ((ii)%20==0){
                 std::cout << s(13) chunked_returns01[ii/20] << s(13) chunked_returns02[ii/20];
             }
             std::cout << std::endl;
         }
 
-        double p_expected_return = calculations::Calculations::expected_return_avg(portfolio_retruns);
-        double p_risk = calculations::Calculations::standard_deviation(portfolio_retruns);
+        double p_expected_return = calculations::Calculations::expected_return_avg(portfolio_returns);
+        double p_risk = calculations::Calculations::standard_deviation(portfolio_returns);
 
         std::cout << s(20) "expected_return (avg)" << s(10) "risk" << std::endl
                     << s(20) p_expected_return << s(10) p_risk << std::endl << std::endl << std::endl;
+	std::cout << "Strategy" << calculations::Calculations::get_expected_return(portfolio_returns)<<std::endl;
     }
 }

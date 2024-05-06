@@ -3,8 +3,11 @@
 #include <numeric>
 #include <cmath>
 #include <algorithm>
+#include "expected_returns/expected_returns_strategy.hpp"
 
 namespace calculations {
+
+ExpectedReturnStrategy* Calculations::expected_return_strategy=nullptr;
 
 double Calculations::net_value(const std::vector<double>& returns){
     double net_value = 1.0;
@@ -116,5 +119,9 @@ std::vector<double> Calculations::aggregate_returns_by_period(/*I*/ const std::v
 
 void Calculations::set_expected_return_strategy(/*I*/ ExpectedReturnStrategy* strategy){
     Calculations::expected_return_strategy = strategy;
+}
+
+double Calculations::get_expected_return(/*I*/ const std::vector<double>& returns){
+    return expected_return_strategy->get_expected_return(returns);
 }
 }

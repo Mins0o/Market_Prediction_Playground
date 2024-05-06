@@ -5,5 +5,5 @@
 
 class ArithmeticMeanStrategy:  public ExpectedReturnStrategy{
 public:
-    double get_expected_return(std::vector<double> returns_list);
+    double get_expected_return(const std::vector<double>& returns_list);
 };
