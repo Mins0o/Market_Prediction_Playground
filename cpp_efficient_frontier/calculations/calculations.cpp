@@ -122,6 +122,11 @@ void Calculations::set_expected_return_strategy(/*I*/ ExpectedReturnStrategy* st
 }
 
 double Calculations::get_expected_return(/*I*/ const std::vector<double>& returns){
+    if (!expected_return_strategy){
+        std::cout << "Calculations::get_expected_return: No strategy has been set.\n returning 0"
+	          << std::endl;
+	return 0;
+    }
     return expected_return_strategy->get_expected_return(returns);
 }
 }
