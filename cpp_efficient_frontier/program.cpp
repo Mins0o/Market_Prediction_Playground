@@ -119,11 +119,10 @@ int main(int argc, char* argv[]){
             std::cout << std::endl;
         }
 
-        double p_expected_return = calculations::Calculations::expected_return_avg(portfolio_returns);
         double p_risk = calculations::Calculations::standard_deviation(portfolio_returns);
 
-        std::cout << s(20) "expected_return (avg)" << s(10) "risk" << std::endl
-                    << s(20) p_expected_return << s(10) p_risk << std::endl << std::endl << std::endl;
+        std::cout << s(10) "risk" << std::endl
+                    << s(10) p_risk << std::endl << std::endl << std::endl;
 	std::cout << "Strategy" << calculations::Calculations::get_expected_return(portfolio_returns)<<std::endl;
     }
 }
