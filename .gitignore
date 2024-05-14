@@ -5,3 +5,4 @@ training_checkpoints
 _build
 .vscode
 build/*
+pye_fin
