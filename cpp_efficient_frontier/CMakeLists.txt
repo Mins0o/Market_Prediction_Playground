@@ -8,7 +8,7 @@ add_subdirectory(3rdparty/RapidFuzz)
 
 add_subdirectory("testing")
 
-add_executable(main_program "program.cpp")
+add_executable(main_program "program.cpp" "program.hpp")
 
 target_link_libraries(main_program lib_calculations)
 target_link_libraries(main_program lib_data)

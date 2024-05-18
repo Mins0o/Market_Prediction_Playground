@@ -13,6 +13,7 @@ typedef std::vector<std::vector<double>> FloatArray;
 typedef std::vector<std::string> Tokens_t;
 
 namespace data{
+
 class Data{
 private: // fields
     size_t row_count_ = 0;

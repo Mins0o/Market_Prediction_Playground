@@ -2,13 +2,25 @@
 #include "data_manipulation/data_manipulation.hpp"
 #include "calculations/expected_returns/expected_returns.hpp"
 
-#include <algorithm>
-#include <ctime>
 #include <fstream>
 #include <iostream>
 #include <iomanip>
 
+#include "program.hpp"
+
 int main(int argc, char* argv[]){
+
+	std::ifstream reading_file;
+	reading_file.open(argv[1]);
+	data::Data security_data = data::Data(reading_file);
+	
+	std::vector<security_column> selections;
+	choose_securities(security_data, selections);
+
+	portfolio_data optimal_mix;
+	optimize_portfolio(selections, optimal_mix);
+	
+	
 	// read file
 	// choose securities
 	// choose investment term

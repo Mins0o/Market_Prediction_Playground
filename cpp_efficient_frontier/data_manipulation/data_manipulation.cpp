@@ -157,7 +157,10 @@ std::vector<double> Data::trim(const std::vector<double>& full_length_security, 
 }
 
 size_t Data::search_security_by_name(const std::string& security_name) const{
-    extract(security_name, security_names_, 60);
+    auto results = extract(security_name, security_names_, 80);
+    for (auto result: results){
+	std::cout << result.first << " " << result.second << std::endl;
+    }
     return 0;
 }
 
