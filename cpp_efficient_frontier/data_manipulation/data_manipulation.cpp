@@ -170,10 +170,24 @@ std::vector<double> Data::trim(const std::vector<double>& full_length_security, 
 
 size_t Data::search_security_by_name(const std::string& security_name) const{
     auto results = extract(security_name, security_names_, 80);
-    for (auto result: results){
-	std::cout << result.first << " " << result.second << std::endl;
+    if (results.empty()){
+         std::cout << "Search result for \"" << security_name << "\" was not found." << std::endl;
+	 std::cout << "Did you mean:"<<std::endl;
+	 for(const auto& candidate: extract(security_name, security_names_,49)){
+	      std::cout << this->get_security_name(candidate.first) << std::endl;
+	 }
     }
-    return 0;
+    
+    // get Max
+    double max_score = 0;
+    size_t match = -1;
+    for (const auto& result : results){
+         if (result.second > max_score){
+	      match = result.first;
+	      max_score = result.second;
+	 }
+    }
+    return match;
 }
 
 std::time_t Data::get_date(size_t date_index) const{

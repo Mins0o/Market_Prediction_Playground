@@ -14,8 +14,9 @@ int main(int argc, char* argv[]){
 	reading_file.open(argv[1]);
 	data::Data security_data = data::Data(reading_file);
 	
+	std::vector<std::string> security_choices = {"삼성전자", "대양제지"};
 	std::vector<security_column> selections;
-	choose_securities(security_data, selections);
+	choose_securities(security_data, security_choices, selections);
 
 	portfolio_data optimal_mix;
 	optimize_portfolio(selections, optimal_mix);
