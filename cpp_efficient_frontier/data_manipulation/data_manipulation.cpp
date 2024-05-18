@@ -5,9 +5,18 @@
 #include <string>
 #include <ctime>
 #include <algorithm>
+#include <chrono>
+
 #include <rapidfuzz/fuzz.hpp>
 
 #include "data_manipulation.hpp"
+
+#define DEBUG_TIME(x,name) auto __start_time__ = std::chrono::high_resolution_clock::now();\
+                        x;\
+			auto __end_time__ = std::chrono::high_resolution_clock::now();\
+			std::cout<< #name << ": " \
+			<< ((std::chrono::duration<double, std::milli>) (__end_time__ - __start_time__)).count() \
+			<< " ms" << std::endl;
 
 namespace data{
 /**
@@ -16,18 +25,19 @@ namespace data{
 
 template <typename Sentence1,
           typename Iterable, typename Sentence2 = typename Iterable::value_type>
-std::vector<std::pair<Sentence2, double>>
+std::vector<std::pair<size_t, double>>
 extract(const Sentence1& query, const Iterable& choices, const double score_cutoff = 0.0)
 {
-  std::vector<std::pair<Sentence2, double>> results;
+  std::vector<std::pair<size_t, double>> results;
 
   rapidfuzz::fuzz::CachedRatio<typename Sentence1::value_type> scorer(query);
 
-  for (const auto& choice : choices) {
+  for (size_t ii=0; ii<choices.size(); ii++) {
+    const auto& choice = choices[ii];
     double score = scorer.similarity(choice, score_cutoff);
 
     if (score >= score_cutoff) {
-      results.emplace_back(choice, score);
+      results.emplace_back(ii, score);
     }
   }
 
@@ -37,7 +47,9 @@ extract(const Sentence1& query, const Iterable& choices, const double score_cuto
 Data::Data(std::ifstream& data_file_stream){
     std::cout << "file stream constructor" << std::endl;
     date_list_.reserve(9000);
+    DEBUG_TIME(
     parse_(data_file_stream);
+    , parse);
 }
 
 Tokens_t& Data::tokenize_line_(/*I*/ const std::string line, 
