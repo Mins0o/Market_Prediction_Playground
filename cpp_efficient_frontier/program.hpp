@@ -5,6 +5,9 @@
 #include <random>
 #include <algorithm>
 
+#include "data_manipulation/data_manipulation.hpp"
+#include "calculations/calculations.hpp"
+
 typedef std::vector<double> security_column;
 
 typedef struct {
@@ -25,6 +28,16 @@ void choose_securities(/*I*/ data::Data security_data,
 			selections.emplace_back(security_data.select_security(index));
 		}
 	}
+}
+
+void preprocess_securities(/*I*/ const std::vector<security_column>& selections,
+                           /*O*/ std::vector<security_column>& processed){
+	;
+}
+
+void compound_returns_to_values(/*I*/ const std::vector<security_column>& processed,
+                                /*O*/ std::vector<security_column>& columns_of_values){
+	;
 }
 
 std::vector<double> make_random_weights(size_t number_of_securities){
@@ -54,27 +67,32 @@ std::vector<double> make_random_weights(size_t number_of_securities){
 	return segments;
 }
 
-void mix_securities(){
-	std::cout << "mix_securities" << std::endl;
+void mix_securities(/*I*/ const std::vector<security_column>& selections,
+                    /*I*/ const std::vector<double>& weights,
+		    /*O*/ std::vector<double>& mixed){
+	mixed = calculations::Calculations::weighted_sum(selections,weights);
 }
 
 void get_portfolio_stats(){
-	std::cout << "get_portfolio_stats" << std::endl;
+	// std::cout << "get_portfolio_stats" << std::endl;
 }
 
-void optimize_portfolio(/*I*/ std::vector<security_column> selections,
+void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 			/*O*/ portfolio_data& optimal_mix){
 	size_t number_of_securities = selections.size();
-	std::cout << number_of_securities;
 	const size_t num_simulations = 999;
-	
+
+	std::vector<security_column> columns_of_values;
+	compound_returns_to_values(selections, columns_of_values);
+
 	for(int sim_cnt=0; sim_cnt < num_simulations; sim_cnt++){
+		std::vector<double> mixed;	
 		auto weights = make_random_weights(number_of_securities);
-		for(const auto& weight:weights){
-			std::cout << weight << " ";
+		mix_securities(selections, weights, mixed);
+		std::cout << "w0: " << weights[0] << " w1: " << weights[1] << std::endl;
+		for(int ii=3000;ii<selections[0].size()/200+3000;ii++){
+		     std::cout << "s0: " << selections[0][ii] << " s1: " << selections[1][ii] << " m: " << mixed[ii] << std::endl;
 		}
-		std::cout << std::endl;
-		// mix_securities();
-		// get_portfolio_stats();
+		std::cin.get();
 	}
 }

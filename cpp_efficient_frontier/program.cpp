@@ -18,6 +18,9 @@ int main(int argc, char* argv[]){
 	std::vector<security_column> selections;
 	choose_securities(security_data, security_choices, selections);
 
+	std::vector<security_column> processed;
+	preprocess_securities(selections, processed);
+
 	portfolio_data optimal_mix;
 	optimize_portfolio(selections, optimal_mix);
 	

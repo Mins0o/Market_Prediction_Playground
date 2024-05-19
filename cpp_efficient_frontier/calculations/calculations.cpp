@@ -56,23 +56,41 @@ double Calculations::standard_deviation(const std::vector<double>& returns){
     return std::sqrt(accumulate / returns.size());
 }
 
-std::vector<double> Calculations::weighted_sum(/*I*/ const std::vector<double>& returns_a, 
+std::vector<double> Calculations::weighted_sum(/*I*/ const std::vector<double>& values_a, 
                                   /*I*/ const double weight_a,
-                                  /*I*/ const std::vector<double>& returns_b,
+                                  /*I*/ const std::vector<double>& values_b,
                                   /*I*/ const double weight_b){
     std::vector<double> result = {};
-    result.reserve(returns_a.size());
+    result.reserve(values_a.size());
 
-    if (returns_a.size() != returns_b.size()){
+    if (values_a.size() != values_b.size()){
         return result;
     }
 
-    for (int ii = 0; ii < returns_a.size(); ii++){
-        result.emplace_back(returns_a[ii]*weight_a + returns_b[ii]*weight_b);
+    for (int ii = 0; ii < values_a.size(); ii++){
+        result.emplace_back(values_a[ii]*weight_a + values_b[ii]*weight_b);
     }
     return result;
 }
 
+std::vector<double> Calculations::weighted_sum(/*I*/ const std::vector<std::vector<double>>& columns_of_values,
+                                               /*I*/ const std::vector<double>& weights){
+    if(weights.empty() || columns_of_values.empty()){
+        std::cout << "Calculations::weighted_sum2: empty vectors" << std::endl;
+    }
+
+    size_t number_of_securities = columns_of_values.size();
+    std::vector<double> results(columns_of_values[0].size(), 0);
+    
+    for (int ii=0; ii<number_of_securities; ii++){
+        auto& values = columns_of_values[ii];
+    	for (int jj=0; jj<results.size(); jj++){
+	     results[jj] += values[jj]*weights[ii];
+	}
+    }
+
+    return results;
+}
 
 std::vector<double> Calculations::aggregate_returns_by_period(/*I*/ const std::vector<double>& trimmed_daily_returns,
                                                 /*I*/ size_t intended_period){

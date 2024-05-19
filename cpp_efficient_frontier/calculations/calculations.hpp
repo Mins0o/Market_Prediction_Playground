@@ -52,13 +52,23 @@ public:
      * returns a vector that combines the two given vectors with the given weights
      * the weights do not need to sum up to 1
      * the length of the two vectors should match
-     * @param returns_x 
+     * @param values_x 
      * @param weight_x 
     */
-    static std::vector<double> weighted_sum(/*I*/ const std::vector<double>& returns_a, 
+    static std::vector<double> weighted_sum(/*I*/ const std::vector<double>& values_a, 
                                              /*I*/ const double weight_a,
-                                             /*I*/ const std::vector<double>& returns_b,
+                                             /*I*/ const std::vector<double>& values_b,
                                              /*I*/ const double weight_b);
+
+    /**
+     * returns a vector that combines a list vectors with the given weights
+     * the weights do not need to sum up to 1
+     * the length of the two vectors should match
+     * @param columns_of_values 
+     * @param weights 
+    */
+    static std::vector<double> weighted_sum(/*I*/ const std::vector<std::vector<double>>& columns_of_values,
+                                            /*I*/ const std::vector<double>& weights);
 
     /**
      * compounds daily returns into periodic return of a longer term.
