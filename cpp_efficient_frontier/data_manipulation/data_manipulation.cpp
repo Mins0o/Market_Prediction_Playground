@@ -123,7 +123,7 @@ namespace data{
 		}
 	}
 
-	size_t Data::match_date_(time_t target, std::vector<time_t>::iterator& match){
+	size_t Data::match_date_(time_t target, std::vector<time_t>::const_iterator& match) const{
 		match = std::lower_bound(date_list_.begin(), date_list_.end(), target);
 		return (match - date_list_.begin());
 	}
@@ -158,8 +158,8 @@ namespace data{
 
 	}
 
-	std::vector<double> Data::trim(const std::vector<double>& full_length_security, time_t start, time_t end){
-		std::vector<time_t>::iterator temp_it;
+	std::vector<double> Data::trim(const std::vector<double>& full_length_security, time_t start, time_t end) const{
+		std::vector<time_t>::const_iterator temp_it;
 		const size_t start_index = match_date_(start, temp_it);
 		const size_t end_index = match_date_(end, temp_it);
 		const size_t max_index = full_length_security.size();

@@ -84,7 +84,7 @@ private: // methods
 				/*I*/const std::vector<double>& data_row, 
 				/*IO*/std::vector<bool>& security_life_tracker);
 
-	size_t match_date_(time_t target, std::vector<time_t>::iterator& match);
+	size_t match_date_(time_t target, std::vector<time_t>::const_iterator& match) const;
 
 	/**
 	 * Parses the whole data into this class instance.
@@ -107,7 +107,7 @@ public: // methods
 	 * @param start locks to the available date of the Data object, in case the market was not available at the date.
 	 * @param end locks to the available date of the Data object, in case the market was not available at the date.
 	 */
-	std::vector<double> trim(/*I*/ const std::vector<double>& full_length_security, /*I*/ time_t start, /*I*/ time_t end);
+	std::vector<double> trim(/*I*/ const std::vector<double>& full_length_security, /*I*/ time_t start, /*I*/ time_t end) const;
 
 	std::time_t get_date(size_t date_index) const;
 	size_t search_security_by_name(const std::string& security_name) const;

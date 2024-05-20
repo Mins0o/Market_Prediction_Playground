@@ -13,6 +13,7 @@ typedef struct{
 	std::vector<double> security_returns;
 	time_t start_date;
 	time_t end_date;
+	size_t index;
 } security_column;
 
 typedef struct {
@@ -32,14 +33,46 @@ void choose_securities(/*I*/ data::Data security_data,
 				<< " for " << choice << std::endl;
 			selections.emplace_back(security_column({security_data.select_security(index),
 						security_data.get_start_date(index),
-						security_data.get_end_date(index)}));
+						security_data.get_end_date(index),
+						index}));
 		}
 	}
 }
 
-void match_security_length(/*I*/ const std::vector<security_column>& selections,
+void match_security_length(/*I*/ const data::Data& security_data,
+			/*I*/ const std::vector<security_column>& selections,
 			/*O*/ std::vector<security_column>& processed){
-	;
+	time_t max_start_date = 0;
+	size_t start_date_id = -1;
+	time_t min_end_date = 999'999'999'999;
+	size_t end_date_id = -1;
+
+	for (auto security: selections){
+		time_t start_date = security_data.get_start_date(security.index);
+		time_t end_date = security_data.get_end_date(security.index);
+		if (max_start_date < start_date){
+			max_start_date = start_date;
+			start_date_id = security.index;
+		}
+		if (min_end_date > end_date){
+			min_end_date = end_date;
+			end_date_id = security.index;
+		}
+	}
+	std::cout << "using start date of: " << security_data.get_security_name(start_date_id)
+		<< " " << ctime(&max_start_date);
+	std::cout << "using end date of: " << security_data.get_security_name(end_date_id)
+		<< " " << ctime(&min_end_date);
+
+	processed = std::vector<security_column>{};
+	for (auto security: selections){
+		processed.emplace_back(security_column({
+			security_data.trim(security.security_returns, max_start_date, min_end_date),
+			max_start_date,
+			min_end_date,
+			security.index
+		}));
+	}
 }
 
 void compound_returns_to_values(/*I*/ const std::vector<security_column>& processed,
@@ -101,7 +134,7 @@ void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 		auto weights = make_random_weights(number_of_securities);
 		mix_securities(selections, weights, mixed);
 		std::cout << "w0: " << weights[0] << " w1: " << weights[1] << std::endl;
-		for(int ii=3000;ii<selections[0].security_returns.size()/200+3000;ii++){
+		for(int ii=0;ii<selections[0].security_returns.size()/200;ii++){
 			std::cout << "s0: " << selections[0].security_returns[ii] 
 				<< " s1: " << selections[1].security_returns[ii] 
 				<< " m: " << mixed[ii] << std::endl;
