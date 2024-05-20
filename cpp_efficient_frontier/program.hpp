@@ -18,25 +18,25 @@ typedef struct {
 } portfolio_data;
 
 void choose_securities(/*I*/ data::Data security_data,
-                        /*I*/ const std::vector<std::string>& security_choices,
+			/*I*/ const std::vector<std::string>& security_choices,
 			/*O*/ std::vector<security_column>& selections){
 	for(const auto& choice: security_choices){
 		size_t index = security_data.search_security_by_name(choice);
 		if (index != -1){
 			std::cout << "Choosing " << security_data.get_security_name(index)
-				  << " for " << choice << std::endl;
+				<< " for " << choice << std::endl;
 			selections.emplace_back(security_data.select_security(index));
 		}
 	}
 }
 
 void preprocess_securities(/*I*/ const std::vector<security_column>& selections,
-                           /*O*/ std::vector<security_column>& processed){
+			/*O*/ std::vector<security_column>& processed){
 	;
 }
 
 void compound_returns_to_values(/*I*/ const std::vector<security_column>& processed,
-                                /*O*/ std::vector<security_column>& columns_of_values){
+				/*O*/ std::vector<security_column>& columns_of_values){
 	;
 }
 
@@ -53,7 +53,7 @@ std::vector<double> make_random_weights(size_t number_of_securities){
 
 	// Sort the random numbers
 	std::sort(random_numbers.begin(), random_numbers.end());
-	
+
 	// Calculate segment sizes
 	std::vector<double> segments;
 	double sum = 0.0;
@@ -68,8 +68,8 @@ std::vector<double> make_random_weights(size_t number_of_securities){
 }
 
 void mix_securities(/*I*/ const std::vector<security_column>& selections,
-                    /*I*/ const std::vector<double>& weights,
-		    /*O*/ std::vector<double>& mixed){
+			/*I*/ const std::vector<double>& weights,
+		/*O*/ std::vector<double>& mixed){
 	mixed = calculations::Calculations::weighted_sum(selections,weights);
 }
 
@@ -91,7 +91,7 @@ void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 		mix_securities(selections, weights, mixed);
 		std::cout << "w0: " << weights[0] << " w1: " << weights[1] << std::endl;
 		for(int ii=3000;ii<selections[0].size()/200+3000;ii++){
-		     std::cout << "s0: " << selections[0][ii] << " s1: " << selections[1][ii] << " m: " << mixed[ii] << std::endl;
+			std::cout << "s0: " << selections[0][ii] << " s1: " << selections[1][ii] << " m: " << mixed[ii] << std::endl;
 		}
 		std::cin.get();
 	}

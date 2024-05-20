@@ -5,15 +5,15 @@
 
 class ArithmeticMeanStrategy:  public ExpectedReturnStrategy{
 public:
-    double get_expected_return(const std::vector<double>& returns_list);
+	double get_expected_return(const std::vector<double>& returns_list);
 };
 
 class DiscountedMeanStrategy: public ExpectedReturnStrategy{
 private:
-    double discount_rate_ = 0;
+	double discount_rate_ = 0;
 public:
-    DiscountedMeanStrategy();
-    DiscountedMeanStrategy(double decay_rate);
-    double get_expected_return(const std::vector<double>& returns_list);
+	DiscountedMeanStrategy();
+	DiscountedMeanStrategy(double decay_rate);
+	double get_expected_return(const std::vector<double>& returns_list);
 };
 
