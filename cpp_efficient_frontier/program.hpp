@@ -4,11 +4,16 @@
 #include <vector>
 #include <random>
 #include <algorithm>
+#include <ctime>
 
 #include "data_manipulation/data_manipulation.hpp"
 #include "calculations/calculations.hpp"
 
-typedef std::vector<double> security_column;
+typedef struct{
+	std::vector<double> security_returns;
+	time_t start_date;
+	time_t end_date;
+} security_column;
 
 typedef struct {
 	double sharpe_ratio;
@@ -25,12 +30,14 @@ void choose_securities(/*I*/ data::Data security_data,
 		if (index != -1){
 			std::cout << "Choosing " << security_data.get_security_name(index)
 				<< " for " << choice << std::endl;
-			selections.emplace_back(security_data.select_security(index));
+			selections.emplace_back(security_column({security_data.select_security(index),
+						security_data.get_start_date(index),
+						security_data.get_end_date(index)}));
 		}
 	}
 }
 
-void preprocess_securities(/*I*/ const std::vector<security_column>& selections,
+void match_security_length(/*I*/ const std::vector<security_column>& selections,
 			/*O*/ std::vector<security_column>& processed){
 	;
 }
@@ -69,8 +76,12 @@ std::vector<double> make_random_weights(size_t number_of_securities){
 
 void mix_securities(/*I*/ const std::vector<security_column>& selections,
 			/*I*/ const std::vector<double>& weights,
-		/*O*/ std::vector<double>& mixed){
-	mixed = calculations::Calculations::weighted_sum(selections,weights);
+			/*O*/ std::vector<double>& mixed){
+	auto selected_returns = std::vector<std::vector<double>>();
+	for (security_column col: selections){
+		selected_returns.emplace_back(col.security_returns);
+	}
+	mixed = calculations::Calculations::weighted_sum(selected_returns, weights);
 }
 
 void get_portfolio_stats(){
@@ -90,8 +101,10 @@ void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 		auto weights = make_random_weights(number_of_securities);
 		mix_securities(selections, weights, mixed);
 		std::cout << "w0: " << weights[0] << " w1: " << weights[1] << std::endl;
-		for(int ii=3000;ii<selections[0].size()/200+3000;ii++){
-			std::cout << "s0: " << selections[0][ii] << " s1: " << selections[1][ii] << " m: " << mixed[ii] << std::endl;
+		for(int ii=3000;ii<selections[0].security_returns.size()/200+3000;ii++){
+			std::cout << "s0: " << selections[0].security_returns[ii] 
+				<< " s1: " << selections[1].security_returns[ii] 
+				<< " m: " << mixed[ii] << std::endl;
 		}
 		std::cin.get();
 	}
