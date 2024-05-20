@@ -109,36 +109,83 @@ std::vector<double> make_random_weights(size_t number_of_securities){
 
 void mix_securities(/*I*/ const std::vector<security_column>& selections,
 			/*I*/ const std::vector<double>& weights,
-			/*O*/ std::vector<double>& mixed){
-	auto selected_returns = std::vector<std::vector<double>>();
+			/*O*/ std::vector<double>& mixed_returns){
+	auto values = std::vector<std::vector<double>>();
 	for (security_column col: selections){
-		selected_returns.emplace_back(col.security_returns);
+		values.emplace_back(calculations::Calculations::value_series(col.security_returns));
 	}
-	mixed = calculations::Calculations::weighted_sum(selected_returns, weights);
+	auto mixed_values = calculations::Calculations::weighted_sum(values, weights);
+	mixed_returns = calculations::Calculations::values_to_change(mixed_values);
 }
 
-void get_portfolio_stats(){
-	// std::cout << "get_portfolio_stats" << std::endl;
+portfolio_data get_portfolio_stats(std::vector<double> portfolio_returns, double risk_free_rate = 0){
+	double exp_ret = calculations::Calculations::get_expected_return(portfolio_returns);
+	double stdev = calculations::Calculations::standard_deviation(portfolio_returns);
+	double sharpe_r = (exp_ret - risk_free_rate)/stdev;
+	return portfolio_data({sharpe_r, exp_ret, stdev, {}});
 }
 
 void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 			/*O*/ portfolio_data& optimal_mix){
 	size_t number_of_securities = selections.size();
-	const size_t num_simulations = 999;
+	const size_t num_simulations = 49'999;
+	std::vector<portfolio_data> sim_results = {};
 
 	std::vector<security_column> columns_of_values;
 	compound_returns_to_values(selections, columns_of_values);
 
+	DiscountedMeanStrategy discnt_strat(2);
+	calculations::Calculations::set_expected_return_strategy(&discnt_strat);
 	for(int sim_cnt=0; sim_cnt < num_simulations; sim_cnt++){
-		std::vector<double> mixed;	
+		std::vector<double> mixed_returns;	
 		auto weights = make_random_weights(number_of_securities);
-		mix_securities(selections, weights, mixed);
-		std::cout << "w0: " << weights[0] << " w1: " << weights[1] << std::endl;
-		for(int ii=0;ii<selections[0].security_returns.size()/200;ii++){
-			std::cout << "s0: " << selections[0].security_returns[ii] 
-				<< " s1: " << selections[1].security_returns[ii] 
-				<< " m: " << mixed[ii] << std::endl;
-		}
-		std::cin.get();
+		mix_securities(selections, weights, mixed_returns);
+		auto pf_data = get_portfolio_stats(mixed_returns);
+		pf_data.weights=weights;
+		sim_results.emplace_back(pf_data);
+		std::cout << sim_cnt+1 << " / " << num_simulations << "\r";
 	}
+
+	std::cout << std::endl;
+	
+	double max_sharpe = -999'999'999;
+	double max_ret = -999'999'999;
+	double min_risk = 999'999'999;
+
+	std::vector<double> max_sharpe_w = {};
+	std::vector<double> max_ret_w = {};
+	std::vector<double> min_risk_w = {};
+
+	for (portfolio_data sim: sim_results){
+		if(max_sharpe < sim.sharpe_ratio){
+			max_sharpe = sim.sharpe_ratio;
+			max_sharpe_w = sim.weights;
+		}
+		if(max_ret < sim.expected_return){
+			max_ret = sim.expected_return;
+			max_ret_w = sim.weights;
+		}
+		if(min_risk > sim.risk){
+			min_risk = sim.risk;
+			min_risk_w = sim.weights;
+		}
+	}
+
+	std::cout << "max_sharpe :" << max_sharpe;
+	for (auto w : max_sharpe_w){
+		std::cout << " " << w;
+	}
+	std::cout << std::endl;
+
+	std::cout << "max_return :" << max_ret;
+	for (auto w : max_ret_w){
+		std::cout << " " << w;
+	}
+	std::cout << std::endl;
+
+	std::cout << "min_risk :" << min_risk;
+	for (auto w : min_risk_w){
+		std::cout << " " << w;
+	}
+	std::cout << std::endl;
 }
