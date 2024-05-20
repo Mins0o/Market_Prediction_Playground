@@ -134,6 +134,12 @@ void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 	std::vector<security_column> columns_of_values;
 	compound_returns_to_values(selections, columns_of_values);
 
+	std::ofstream outfile("simulation_results.tsv");
+	if (!outfile) {
+		std::cerr << "Error opening file for writing!" << std::endl;
+		return ;
+	}
+
 	DiscountedMeanStrategy discnt_strat(2);
 	calculations::Calculations::set_expected_return_strategy(&discnt_strat);
 	for(int sim_cnt=0; sim_cnt < num_simulations; sim_cnt++){
@@ -141,10 +147,17 @@ void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 		auto weights = make_random_weights(number_of_securities);
 		mix_securities(selections, weights, mixed_returns);
 		auto pf_data = get_portfolio_stats(mixed_returns);
-		pf_data.weights=weights;
+		pf_data.weights = weights;
 		sim_results.emplace_back(pf_data);
+
 		std::cout << sim_cnt+1 << " / " << num_simulations << "\r";
 	}
+
+	// Write data to TSV file
+	for (const auto& pf_data : sim_results) {
+		outfile << pf_data.expected_return << '\t' << pf_data.risk << '\n';
+	}
+    
 
 	std::cout << std::endl;
 	
