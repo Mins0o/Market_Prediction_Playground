@@ -128,7 +128,7 @@ portfolio_data get_portfolio_stats(std::vector<double> portfolio_returns, double
 void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 			/*O*/ portfolio_data& optimal_mix){
 	size_t number_of_securities = selections.size();
-	const size_t num_simulations = 49'999;
+	const size_t num_simulations = 99'999;
 	std::vector<portfolio_data> sim_results = {};
 
 	std::vector<security_column> columns_of_values;
@@ -146,7 +146,7 @@ void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 		std::vector<double> mixed_returns;	
 		auto weights = make_random_weights(number_of_securities);
 		mix_securities(selections, weights, mixed_returns);
-		auto pf_data = get_portfolio_stats(mixed_returns);
+		auto pf_data = get_portfolio_stats(mixed_returns, 0.01);
 		pf_data.weights = weights;
 		sim_results.emplace_back(pf_data);
 
@@ -162,8 +162,14 @@ void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 	std::cout << std::endl;
 	
 	double max_sharpe = -999'999'999;
+	double mxs_ret = 0;
+	double mxs_risk = 0;
 	double max_ret = -999'999'999;
+	double mxr_sharpe = 0;
+	double mxr_risk = 0;
 	double min_risk = 999'999'999;
+	double mnr_ret = 0;
+	double mnr_sharpe = 0;
 
 	std::vector<double> max_sharpe_w = {};
 	std::vector<double> max_ret_w = {};
@@ -172,31 +178,46 @@ void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 	for (portfolio_data sim: sim_results){
 		if(max_sharpe < sim.sharpe_ratio){
 			max_sharpe = sim.sharpe_ratio;
+			mxs_ret = sim.expected_return;
+			mxs_risk = sim.risk;
 			max_sharpe_w = sim.weights;
 		}
 		if(max_ret < sim.expected_return){
 			max_ret = sim.expected_return;
+			mxr_sharpe = sim.sharpe_ratio;
+			mxr_risk = sim.risk;
 			max_ret_w = sim.weights;
 		}
 		if(min_risk > sim.risk){
 			min_risk = sim.risk;
+			mnr_ret = sim.expected_return;
+			mnr_sharpe = sim.sharpe_ratio;
 			min_risk_w = sim.weights;
 		}
 	}
 
-	std::cout << "max_sharpe :" << max_sharpe;
+	std::cout << "max_sharpe :" << max_sharpe 
+		<< "| ret: " << mxs_ret
+		<< "| risk: " << mxs_risk
+		<< " |weights: ";
 	for (auto w : max_sharpe_w){
 		std::cout << " " << w;
 	}
 	std::cout << std::endl;
 
-	std::cout << "max_return :" << max_ret;
+	std::cout << "max_return :" << max_ret  
+		<< "| sharpe: " << mxr_sharpe
+		<< "| risk: " << mxr_risk
+		<< " |weights: ";
 	for (auto w : max_ret_w){
 		std::cout << " " << w;
 	}
 	std::cout << std::endl;
 
-	std::cout << "min_risk :" << min_risk;
+	std::cout << "min_risk :" << min_risk   
+		<< "| ret: " << mnr_ret
+		<< "| sharpe: " << mnr_sharpe
+	<< " |weights: ";
 	for (auto w : min_risk_w){
 		std::cout << " " << w;
 	}
