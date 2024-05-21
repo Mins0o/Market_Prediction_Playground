@@ -9,6 +9,16 @@
 #include "data_manipulation/data_manipulation.hpp"
 #include "calculations/calculations.hpp"
 
+#include <chrono>
+#include <iostream>
+
+#define measureTime(name, func) \
+	auto pre##name = std::chrono::steady_clock::now(); \
+	func; \
+	auto post##name = std::chrono::steady_clock::now(); \
+	std::chrono::duration<double, std::milli> name##Time = post##name - pre##name; \
+	std::cout << "time used in" ##name << name##Time << std::endl;
+
 typedef struct{
 	std::vector<double> security_returns;
 	time_t start_date;
