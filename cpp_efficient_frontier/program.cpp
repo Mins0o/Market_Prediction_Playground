@@ -17,13 +17,13 @@ int main(int argc, char* argv[]){
 	std::vector<std::string> security_choices = {"삼성전자", "대양제지", "하이브", "대웅제약"};
 	std::vector<security_column> selections;
 	choose_securities(security_data, security_choices, selections);
-	std::cin.get();
+	// std::cin.get();
 
 	std::vector<security_column> processed;
 	match_security_length(security_data, selections, processed);
 
-	portfolio_data optimal_mix;
-	optimize_portfolio(processed, optimal_mix);
+	portfolio_data optimal_mixes[3] = {};
+	optimize_portfolio(processed, optimal_mixes);
 	
 	
 	// read file
