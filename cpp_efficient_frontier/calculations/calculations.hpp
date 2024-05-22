@@ -22,6 +22,8 @@ public:
 	 */
 	static std::vector<double> value_series(/*I*/ const std::vector<double>& returns);
 
+	static std::vector<double> periodic rebalancing();
+
 	/**
 	 * creates a vector of change rates from a vector of compounded values.
 	 * @param stripped_value timeseries of values of a security. assumes there are no 0 value

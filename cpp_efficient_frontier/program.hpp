@@ -257,7 +257,7 @@ void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 		return ;
 	}
 	for (const auto& pf_data : sim_results) {
-		outfile << pf_data.expected_return << '\t' << pf_data.risk << '\n';
+		outfile << pf_data.risk << '\t' << pf_data.expected_return << '\n';
 	}
 	
 	get_optimal(sim_results, optimal_mixes);
