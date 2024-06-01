@@ -90,9 +90,8 @@ void match_security_length(/*I*/ const data::Data& security_data,
 }
 
 void compound_returns_to_values(/*I*/ const std::vector<security_column>& processed,
-				/*O*/ std::vector<security_column>& columns_of_values){
+				/*O*/ std::vector<std::vector<double>>& rebalanced){
 	std::vector<std::vector<double>> returns = {};
-	std::vector<std::vector<double>> rebalanced = {};
 	std::vector<std::vector<double>> surpluses = {};
 
 	for (const auto& security: processed){
@@ -101,7 +100,8 @@ void compound_returns_to_values(/*I*/ const std::vector<security_column>& proces
 
 	for (const auto& ret: returns){
 		std::vector<double> temp_rebalanced;
-		calculations::Calculations::rebalance_compound(ret, 20, temp_rebalanced);
+		surpluses.emplace_back(calculations::Calculations::rebalance_compound(ret, 20, temp_rebalanced));
+		rebalanced.emplace_back(temp_rebalanced);
 	}
 }
 
@@ -134,16 +134,11 @@ std::vector<double> make_random_weights(size_t number_of_securities){
 }
 
 /*2*/
-void mix_securities(/*I*/ const std::vector<security_column>& selections,
+void mix_securities(/*I*/ const std::vector<std::vector<double>>& compounded_values,
 			/*I*/ const std::vector<double>& weights,
 			/*O*/ std::vector<double>& mixed_returns){
-	auto values = std::vector<std::vector<double>>();
 	
-	for (security_column col: selections){
-		values.emplace_back(calculations::Calculations::value_series(col.security_returns));
-	}
-	
-	auto mixed_values = calculations::Calculations::weighted_sum(values, weights);
+	auto mixed_values = calculations::Calculations::weighted_sum(compounded_values, weights);
 	
 	mixed_returns = calculations::Calculations::values_to_change(mixed_values);
 }
@@ -157,14 +152,14 @@ portfolio_data get_portfolio_stats(std::vector<double> portfolio_returns, double
 }
 
 /*1*/
-void run_simulation(/*I*/ const std::vector<security_column>& selections,
+void run_simulation(/*I*/ const std::vector<std::vector<double>>& compounded_values,
 			/*O*/ std::vector<portfolio_data>& sim_results,
 			/*I*/ double risk_free_rate=0.01){
 	std::vector<double> mixed_returns;
-	size_t number_of_securities = selections.size();
+	size_t number_of_securities = compounded_values.size();
 	auto weights = make_random_weights(number_of_securities);
 	
-	mix_securities(selections, weights, mixed_returns);
+	mix_securities(compounded_values, weights, mixed_returns);
 	
 	auto pf_data = get_portfolio_stats(mixed_returns, risk_free_rate);
 
@@ -247,14 +242,14 @@ void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 	const size_t num_simulations = 99'999;
 	std::vector<portfolio_data> sim_results = {};
 
-	std::vector<security_column> columns_of_values;
+	std::vector<std::vector<double>> columns_of_values;
 	compound_returns_to_values(selections, columns_of_values);
 
 	DiscountedMeanStrategy discnt_strat(2);
 	calculations::Calculations::set_expected_return_strategy(&discnt_strat);
 	measureTime(run_simulation,
 	for(int sim_cnt=0; sim_cnt < num_simulations; sim_cnt++){
-		run_simulation(selections, sim_results);
+		run_simulation(columns_of_values, sim_results);
 
 		std::cout << sim_cnt+1 << " / " << num_simulations << "\r";
 	}
@@ -268,7 +263,7 @@ void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 		return ;
 	}
 	for (const auto& pf_data : sim_results) {
-		outfile << pf_data.expected_return << "\t" << pf_data.risk << '\t' << '\n';
+		outfile << pf_data.risk << "\t" << pf_data.expected_return << '\t' << '\n';
 	}
 	
 	get_optimal(sim_results, optimal_mixes);
