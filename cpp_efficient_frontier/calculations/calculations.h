@@ -1,4 +1,6 @@
 #pragma once
+#ifndef EFFICIENTFRONTIER_CALCULATIONS_CALCULATIONS_H_
+#define EFFICIENTFRONTIER_CALCULATIONS_CALCULATIONS_H_
 
 #include <iostream>
 #include <vector>
@@ -96,3 +98,5 @@ public:
 };
 
 }
+
+#endif // EFFICIENTFRONTIER_CALCULATIONS_CALCULATIONS_H_

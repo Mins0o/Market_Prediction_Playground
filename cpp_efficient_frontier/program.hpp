@@ -1,4 +1,6 @@
 #pragma once
+#ifndef EFFICIENTFRONTIER_MAIN_PROGRAM_H_
+#define EFFICIENTFRONTIER_MAIN_PROGRAM_H_
 
 #include <fstream>
 #include <vector>
@@ -315,3 +317,5 @@ void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 	get_optimal(daily_sim_results, optimal_mixes);
 	get_optimal(long_term_sim_results, optimal_mixes);
 }
+
+#endif // EFFICIENTFRONTIER_MAIN_PROGRAM_H_
