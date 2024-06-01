@@ -1,1 +1,1 @@
-add_library(lib_expected_returns expected_returns.cpp expected_returns_strategy.hpp expected_returns.hpp)
+add_library(lib_expected_returns expected_returns.cpp expected_returns_strategy.h expected_returns.h)

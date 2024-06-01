@@ -1,6 +1,6 @@
-#include "calculations/calculations.hpp"
-#include "data_manipulation/data_manipulation.hpp"
-#include "calculations/expected_returns/expected_returns.hpp"
+#include "calculations/calculations.h"
+#include "data_manipulation/data_manipulation.h"
+#include "calculations/expected_returns/expected_returns.h"
 
 #include <fstream>
 #include <iostream>

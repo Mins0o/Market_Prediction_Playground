@@ -1,7 +1,7 @@
 #pragma once
 
 #include<vector>
-#include "expected_returns_strategy.hpp"
+#include "expected_returns_strategy.h"
 
 class ArithmeticMeanStrategy:  public ExpectedReturnStrategy{
 public:

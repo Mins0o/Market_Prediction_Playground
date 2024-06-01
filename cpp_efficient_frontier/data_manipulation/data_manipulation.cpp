@@ -9,7 +9,7 @@
 
 #include <rapidfuzz/fuzz.hpp>
 
-#include "data_manipulation.hpp"
+#include "data_manipulation.h"
 
 #define DEBUG_TIME(x,name) auto __start_time__ = std::chrono::high_resolution_clock::now();\
 						 x;\

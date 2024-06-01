@@ -1,4 +1,4 @@
 add_subdirectory(expected_returns)
 
-add_library(lib_calculations calculations.hpp calculations.cpp)
+add_library(lib_calculations calculations.h calculations.cpp)
 target_link_libraries(lib_calculations lib_expected_returns)

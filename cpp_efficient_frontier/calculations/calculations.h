@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <vector>
-#include "expected_returns/expected_returns_strategy.hpp"
+#include "expected_returns/expected_returns_strategy.h"
 
 namespace calculations{
 

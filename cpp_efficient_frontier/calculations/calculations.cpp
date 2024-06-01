@@ -1,9 +1,9 @@
-#include "calculations.hpp"
+#include "calculations.h"
 #include <vector>
 #include <numeric>
 #include <cmath>
 #include <algorithm>
-#include "expected_returns/expected_returns_strategy.hpp"
+#include "expected_returns/expected_returns_strategy.h"
 
 namespace calculations {
 

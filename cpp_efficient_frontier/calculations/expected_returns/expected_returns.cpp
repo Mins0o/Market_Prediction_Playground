@@ -1,7 +1,7 @@
 #include <numeric>
 #include <vector>
 #include <cmath>
-#include "expected_returns.hpp"
+#include "expected_returns.h"
 
 double ArithmeticMeanStrategy::get_expected_return(/*I*/ const std::vector<double>& returns_list){
 	if (returns_list.empty()){

@@ -6,8 +6,8 @@
 #include <algorithm>
 #include <ctime>
 
-#include "data_manipulation/data_manipulation.hpp"
-#include "calculations/calculations.hpp"
+#include "data_manipulation/data_manipulation.h"
+#include "calculations/calculations.h"
 
 #include <chrono>
 #include <iostream>
