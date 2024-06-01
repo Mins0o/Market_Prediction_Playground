@@ -7,4 +7,4 @@ _build
 build/*
 pye_fin
 cscope*
-simulation_results.tsv
+simulation_results*
