@@ -20,7 +20,19 @@ public:
 	 * @param returns vector of periodic returns on the security
 	 * @return compounded value of the returns, assuming the starting value is 1
 	 */
-	static std::vector<double> value_series(/*I*/ const std::vector<double>& returns, /*I*/ size_t rebalancing_term);
+	static std::vector<double> value_series(/*I*/ const std::vector<double>& returns);
+
+	/**
+	* with daily returns and rebalancing period, compound the returns into values.
+	* the return/loss during rebalancing is returned
+	* @param returns periodic return, most likely daily
+	* @param rebalancing_term once in `rebalancing_term` the returns are rebalanced
+	* @param compounded_values compounded value of the returns
+	* @return the surplus return/loss is returned in vector<double>
+	*/
+	static std::vector<double> rebalance_compound(/*I*/ const std::vector<double>& returns,
+							/*I*/ const size_t rebalancing_term,
+							/*O*/ std::vector<double>& compounded_values);
 
 	/**
 	 * creates a vector of change rates from a vector of compounded values.

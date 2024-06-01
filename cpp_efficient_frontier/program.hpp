@@ -91,7 +91,18 @@ void match_security_length(/*I*/ const data::Data& security_data,
 
 void compound_returns_to_values(/*I*/ const std::vector<security_column>& processed,
 				/*O*/ std::vector<security_column>& columns_of_values){
-	;
+	std::vector<std::vector<double>> returns = {};
+	std::vector<std::vector<double>> rebalanced = {};
+	std::vector<std::vector<double>> surpluses = {};
+
+	for (const auto& security: processed){
+		returns.emplace_back(security.security_returns);
+	}
+
+	for (const auto& ret: returns){
+		std::vector<double> temp_rebalanced;
+		calculations::Calculations::rebalance_compound(ret, 20, temp_rebalanced);
+	}
 }
 
 /*2*/
@@ -257,7 +268,7 @@ void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 		return ;
 	}
 	for (const auto& pf_data : sim_results) {
-		outfile << pf_data.risk << '\t' << pf_data.expected_return << '\n';
+		outfile << pf_data.expected_return << "\t" << pf_data.risk << '\t' << '\n';
 	}
 	
 	get_optimal(sim_results, optimal_mixes);

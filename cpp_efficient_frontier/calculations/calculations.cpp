@@ -29,6 +29,25 @@ namespace calculations {
 		return values;
 	}
 
+	std::vector<double> Calculations::rebalance_compound(/*I*/ const std::vector<double>& returns,
+						/*I*/ const size_t rebalancing_term,
+						/*O*/ std::vector<double>& compounded_values){
+		double net_value = 1.0;
+		std::vector<double> rebalanced_surplus = {};
+		compounded_values = {};
+		compounded_values.reserve(returns.size());
+		compounded_values.emplace_back(net_value);
+		for(int ii=0; ii<returns.size(); ii++){
+			if(ii%rebalancing_term == 0){
+				rebalanced_surplus.emplace_back(net_value-1);
+				net_value = 1;
+			}
+			net_value *= 1 + (returns[ii]/100);
+			compounded_values.emplace_back(net_value);
+		}
+		return rebalanced_surplus;
+	}
+
 	std::vector<double> Calculations::values_to_change(/*I*/ const std::vector<double>& stripped_values){
 		double prev = stripped_values[0];
 		std::vector<double> change_rates = {};
