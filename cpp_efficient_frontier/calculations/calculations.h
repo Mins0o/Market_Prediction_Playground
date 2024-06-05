@@ -85,6 +85,18 @@ public:
 						/*I*/ const std::vector<double>& weights);
 
 	/**
+	 * Calculates the rebalanced weighted sum of returns based on the given weights and rebalancing term.
+	 *
+	 * @param returns The vector of vectors representing the returns of different assets over time.
+	 * @param weights The vector of weights assigned to each asset.
+	 * @param rebalancing_term The size of the rebalancing term.
+	 * @return The rebalanced weighted sum of returns.
+	 */
+	std::vector<double> rebalanced_weighted_sum(/*I*/ const std::vector<std::vector<double>>& returns,
+								/*I*/ const std::vector<double>& weights,
+								/*I*/ const size_t rebalancing_term);
+
+	/**
 	 * compounds daily returns into periodic return of a longer term.
 	 * For now, trimmed daily return is given and intended period is applied simply by the number of entries.
 	 * 

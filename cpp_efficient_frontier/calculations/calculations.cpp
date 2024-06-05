@@ -111,6 +111,37 @@ namespace calculations {
 		return results;
 	}
 
+	std::vector<double> Calculations::rebalanced_weighted_sum(/*I*/ const std::vector<std::vector<double>>& returns,
+								/*I*/ const std::vector<double>& weights,
+								/*I*/ const size_t rebalancing_term){
+		if(weights.empty() || returns.empty()){
+			std::cout << "Calculations::rebalanced_weighted_sum: empty vectors" << std::endl;
+		}
+
+		size_t number_of_securities = returns.size();
+		std::vector<double> results(returns[0].size(), 0);
+		std::vector<std::vector<double>> compounded = {};
+
+		for (int mm=0; mm<weights.size(); mm++){
+			compounded[mm].emplace_back(weights[mm]);
+		}
+
+		for(int ii=0; ii<returns[0].size(); ii++){
+			double rebalanced_total = 0;
+			for (int jj=0; jj<returns.size(); jj++){
+				compounded[jj].emplace_back(compounded[jj][ii] * (1+returns[jj][ii]/100.0));
+				rebalanced_total += compounded[jj][ii+1];
+			}
+			if (ii%rebalancing_term==0){
+				for (int ll=0; ll<returns.size(); ll ++){
+					compounded[ll][ii+1] = rebalanced_total * weights[ll];
+				}
+			}
+			results.emplace_back(rebalanced_total);
+		}
+		return results;
+	}
+
 	std::vector<double> Calculations::aggregate_returns_by_period(/*I*/ const std::vector<double>& trimmed_daily_returns,
 									/*I*/ size_t intended_period){
 		double current_value = 1.0;
