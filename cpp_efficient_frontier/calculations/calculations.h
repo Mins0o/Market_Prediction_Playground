@@ -89,10 +89,10 @@ public:
 	 *
 	 * @param returns The vector of vectors representing the returns of different assets over time.
 	 * @param weights The vector of weights assigned to each asset.
-	 * @param rebalancing_term The size of the rebalancing term.
+	 * @param rebalancing_term How often should it be rebalanced.
 	 * @return The rebalanced weighted sum of returns.
 	 */
-	std::vector<double> rebalanced_weighted_sum(/*I*/ const std::vector<std::vector<double>>& returns,
+	static std::vector<double> rebalanced_weighted_sum_of_values(/*I*/ const std::vector<std::vector<double>>& returns,
 								/*I*/ const std::vector<double>& weights,
 								/*I*/ const size_t rebalancing_term);
 

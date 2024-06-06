@@ -91,31 +91,6 @@ void match_security_length(/*I*/ const data::Data& security_data,
 	}
 }
 
-void compound_returns_to_values(/*I*/ const std::vector<security_column>& processed,
-				/*O*/ std::vector<std::vector<double>>& rebalanced,
-				/*O*/ std::vector<std::vector<double>>& daily,
-				/*O*/ std::vector<std::vector<double>>& long_term){
-
-	std::vector<std::vector<double>> returns = {};
-	std::vector<std::vector<double>> surpluses = {};
-
-	for (const auto& security: processed){
-		returns.emplace_back(security.security_returns);
-	}
-
-	for (const auto& ret: returns){
-		std::vector<double> temp_rebalanced;
-		std::vector<double> temp_longterm;
-
-		surpluses.emplace_back(calculations::Calculations::rebalance_compound(ret, 20, temp_rebalanced));
-		rebalanced.emplace_back(temp_rebalanced);
-
-		temp_longterm = calculations::Calculations::value_series(ret);
-		long_term.emplace_back(temp_longterm);
-	}
-	daily = returns;
-}
-
 /*2*/
 std::vector<double> make_random_weights(size_t number_of_securities){
 	std::random_device rd;
@@ -163,23 +138,19 @@ portfolio_data get_portfolio_stats(std::vector<double> portfolio_returns, double
 }
 
 /*1*/
-void simulate_by_value(/*I*/ const std::vector<std::vector<double>>& compounded_values,
-			/*O*/ std::vector<portfolio_data>& sim_results,
-			/*I*/ const double risk_free_rate=0.01){
-	std::vector<double> mixed_returns;
-	size_t number_of_securities = compounded_values.size();
-	auto weights = make_random_weights(number_of_securities);
-	
-	mix_securities(compounded_values, weights, mixed_returns);
-	
-	auto pf_data = get_portfolio_stats(mixed_returns, risk_free_rate);
+std::vector<std::vector<double>> get_returns(/*I*/ const std::vector<security_column>& processed){
 
-	pf_data.weights = weights;
-	sim_results.emplace_back(pf_data);
+	std::vector<std::vector<double>> returns = {};
+
+	for (const auto& security: processed){
+		returns.emplace_back(security.security_returns);
+	}
+	
+	return returns;
 }
 
 /*1*/
-void simulate_by_returns(/*I*/ const std::vector<std::vector<double>>& returns,
+void simulate_daily_rebalance(/*I*/ const std::vector<std::vector<double>>& returns,
 			/*O*/ std::vector<portfolio_data>& sim_results,
 			/*I*/ const double risk_free_rate=0.01){
 	std::vector<double> mixed_returns;
@@ -193,6 +164,63 @@ void simulate_by_returns(/*I*/ const std::vector<std::vector<double>>& returns,
 
 	pf_data.weights = weights;
 	sim_results.emplace_back(pf_data);
+}
+
+/*1*/
+void simulate_monthly_rebalance(/*I*/ const std::vector<std::vector<double>>& returns,
+			/*O*/ std::vector<portfolio_data>& sim_results,
+			/*I*/ const double risk_free_rate=0.01){
+	std::vector<double> mixed_values;
+	std::vector<double> mixed_returns;
+	size_t number_of_securities = returns.size();
+
+	auto weights = make_random_weights(number_of_securities);
+
+	mixed_values = calculations::Calculations::rebalanced_weighted_sum_of_values(returns, weights, 20);
+	mixed_returns = calculations::Calculations::values_to_change(mixed_values);
+
+	auto pf_data = get_portfolio_stats(mixed_returns, risk_free_rate);
+
+	pf_data.weights = weights;
+	sim_results.emplace_back(pf_data);
+}
+
+/*1*/
+void simulate_longterm_hold(/*I*/ const std::vector<std::vector<double>>& returns,
+			/*O*/ std::vector<portfolio_data>& sim_results,
+			/*I*/ const double risk_free_rate=0.01){
+	std::vector<double> mixed_values;
+	std::vector<double> mixed_returns;
+	size_t number_of_securities = returns.size();
+
+	auto weights = make_random_weights(number_of_securities);
+
+	std::vector<std::vector<double>> unmixed_values = {};
+	for (const auto& ret: returns){
+		unmixed_values.emplace_back(calculations::Calculations::value_series(ret));
+	}
+	mixed_values = calculations::Calculations::weighted_sum(unmixed_values, weights);
+	mixed_returns = calculations::Calculations::values_to_change(mixed_values);
+
+	auto pf_data = get_portfolio_stats(mixed_returns, risk_free_rate);
+
+	pf_data.weights = weights;
+	sim_results.emplace_back(pf_data);
+}
+
+/*1*/
+void write_data(/*I*/ const std::string file_name,
+				/*I*/ std::vector<portfolio_data> sim_results){
+	
+	// Write data to TSV file
+	std::ofstream outfile(file_name);
+	if (!outfile) {
+		std::cerr << "Error opening file for writing!" << std::endl;
+		return ;
+	}
+	for (const auto& pf_data : sim_results) {
+		outfile << pf_data.risk << "\t" << pf_data.expected_return << '\t' << '\n';
+	}	
 }
 
 /*1*/
@@ -264,53 +292,31 @@ void get_optimal(/*I*/ const std::vector<portfolio_data>& sim_results,
 	std::cout << std::endl; 
 }
 
-/*1*/
-void write_data(/*I*/ const std::string file_name,
-				/*I*/ std::vector<portfolio_data> sim_results){
-	
-	// Write data to TSV file
-	std::ofstream outfile(file_name);
-	if (!outfile) {
-		std::cerr << "Error opening file for writing!" << std::endl;
-		return ;
-	}
-	for (const auto& pf_data : sim_results) {
-		outfile << pf_data.risk << "\t" << pf_data.expected_return << '\t' << '\n';
-	}	
-}
-
 /*0*/
 void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 			/*O*/ portfolio_data (&optimal_mixes)[3]){
 	const size_t num_simulations = 99'999;
+
+	std::vector<portfolio_data> daily_sim_results = {};
 	std::vector<portfolio_data> monthly_sim_results = {};
 	std::vector<portfolio_data> long_term_sim_results = {};
-	std::vector<portfolio_data> daily_sim_results = {};
 
-	std::vector<std::vector<double>> monthly_rebalanced;
-	std::vector<std::vector<double>> daily_rebalanced;
-	std::vector<std::vector<double>> long_term_value;
-
-
-	compound_returns_to_values(selections, 
-				monthly_rebalanced, 
-				daily_rebalanced, 
-				long_term_value);
+	std::vector<std::vector<double>> returns = get_returns(selections);
 
 	DiscountedMeanStrategy discnt_strat(2);
 	calculations::Calculations::set_expected_return_strategy(&discnt_strat);
 	
 	for(int sim_cnt=0; sim_cnt < num_simulations; sim_cnt++){
-		simulate_by_value(monthly_rebalanced, monthly_sim_results);
-		simulate_by_value(long_term_value, long_term_sim_results);
-		simulate_by_returns(daily_rebalanced, daily_sim_results);
+		simulate_daily_rebalance(returns, daily_sim_results);
+		simulate_monthly_rebalance(returns, monthly_sim_results);
+		simulate_longterm_hold(returns, long_term_sim_results);
 		std::cout << sim_cnt+1 << " / " << num_simulations << "\r";
 	}
 
 	std::cout << std::endl;
 
-	write_data("simulation_results_monthly.tsv", monthly_sim_results);
 	write_data("simulation_results_daily.tsv", daily_sim_results);
+	write_data("simulation_results_monthly.tsv", monthly_sim_results);
 	write_data("simulation_results_long_term.tsv", long_term_sim_results);
 	
 	get_optimal(monthly_sim_results, optimal_mixes);

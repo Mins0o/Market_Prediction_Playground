@@ -111,7 +111,7 @@ namespace calculations {
 		return results;
 	}
 
-	std::vector<double> Calculations::rebalanced_weighted_sum(/*I*/ const std::vector<std::vector<double>>& returns,
+	std::vector<double> Calculations::rebalanced_weighted_sum_of_values(/*I*/ const std::vector<std::vector<double>>& returns,
 								/*I*/ const std::vector<double>& weights,
 								/*I*/ const size_t rebalancing_term){
 		if(weights.empty() || returns.empty()){
@@ -119,8 +119,8 @@ namespace calculations {
 		}
 
 		size_t number_of_securities = returns.size();
-		std::vector<double> results(returns[0].size(), 0);
-		std::vector<std::vector<double>> compounded = {};
+		std::vector<double> result_values = {1};
+		std::vector<std::vector<double>> compounded(weights.size(),std::vector<double>());
 
 		for (int mm=0; mm<weights.size(); mm++){
 			compounded[mm].emplace_back(weights[mm]);
@@ -128,8 +128,8 @@ namespace calculations {
 
 		for(int ii=0; ii<returns[0].size(); ii++){
 			double rebalanced_total = 0;
-			for (int jj=0; jj<returns.size(); jj++){
-				compounded[jj].emplace_back(compounded[jj][ii] * (1+returns[jj][ii]/100.0));
+			for (int jj=0; jj<weights.size(); jj++){
+				compounded[jj].emplace_back(compounded[jj][ii] * (1 + returns[jj][ii]/100.0));
 				rebalanced_total += compounded[jj][ii+1];
 			}
 			if (ii%rebalancing_term==0){
@@ -137,9 +137,9 @@ namespace calculations {
 					compounded[ll][ii+1] = rebalanced_total * weights[ll];
 				}
 			}
-			results.emplace_back(rebalanced_total);
+			result_values.emplace_back(rebalanced_total);
 		}
-		return results;
+		return result_values;
 	}
 
 	std::vector<double> Calculations::aggregate_returns_by_period(/*I*/ const std::vector<double>& trimmed_daily_returns,
