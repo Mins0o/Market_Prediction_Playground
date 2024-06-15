@@ -109,7 +109,7 @@ class DataFetcher():
                 time.sleep(10)
                 try:
                     fetched = self._ohlcv_fetcherf(ticker)
-                except e:
+                except Exception as e:
                     print(e)
                     fetched = pd.DataFrame()
                 trial_count += 1
