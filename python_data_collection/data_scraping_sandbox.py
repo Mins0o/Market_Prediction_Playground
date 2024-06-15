@@ -96,6 +96,59 @@ class DataFetcher():
             name_list.append(name)
         return name_list
 
+    def _get_ohlcvs_list_non_threaded(self, ticker_list, name_list):
+        ohlcv_list=[]
+        list_size = len(ticker_list)
+        get_name = (lambda ii: name_list[ii]) if name_list else (lambda ii: "")
+        TRIAL_CNT=0
+        for ii, ticker in enumerate(ticker_list):
+            fetched = pd.DataFrame()
+            trial_count=0
+            fetched = self._ohlcv_fetcherf(ticker)
+            while fetched.empty and trial_count<=TRIAL_CNT:
+                time.sleep(10)
+                try:
+                    fetched = self._ohlcv_fetcherf(ticker)
+                except e:
+                    print(e)
+                    fetched = pd.DataFrame()
+                trial_count += 1
+            if trial_count > TRIAL_CNT:
+                print(f"\n{ticker} failed")
+            fetched = self._ohlcv_fetcherf(ticker)
+            fetched = fetched.rename(columns=OHLCV_REPLACE_NAMINGS)
+            fetched.index.name = "data"
+            print(f" {ii+1:5d}/{list_size} {ticker_list[ii]} {get_name(ii)} finished", end = "                       \r")
+            ohlcv_list.append(fetched)
+        return ohlcv_list
+
+    def _get_ohlcvs_list_threaded(self, ticker_list, name_list):
+        ohlcv_list=[]
+        thread_list = []
+        list_size = len(ticker_list)
+        get_name = (lambda ii: name_list[ii]) if name_list else (lambda ii: "")
+        for ticker in ticker_list:
+            new_thread = OhlcvThread({
+                                    "ticker": ticker,
+                                    "fetcherf": self._ohlcv_fetcherf
+                                    })
+            thread_list.append(new_thread)
+        OUTPUT_LOCK.acquire()
+        for ii, thread in enumerate(thread_list):
+            thread.start()
+            print(f" {ii+1:5d}/{list_size} started", end = "              \r")
+        OUTPUT_LOCK.release()
+        
+        print("\nJoining Threads                  ")
+        for ii, thread in enumerate(thread_list):
+            thread.join()
+            OUTPUT_LOCK.acquire()
+            print(f" {ii+1:5d}/{list_size} {ticker_list[ii]} {thread.ticker} {get_name(ii)} finished", end = "                       \r")
+            OUTPUT_LOCK.release()
+            ohlcv_list.append(thread.result)
+        print("Data scraping complete.                        ")
+        return ohlcv_list
+
     def _get_ohlcvs_list(self, ticker_list, name_list, thread_mode=False):
         ohlcv_list=[]
         thread_list = []
@@ -103,48 +156,9 @@ class DataFetcher():
         get_name = (lambda ii: name_list[ii]) if name_list else (lambda ii: "")
         
         if thread_mode:
-            for ticker in ticker_list:
-                new_thread = OhlcvThread({
-                                        "ticker": ticker,
-                                        "fetcherf": self._ohlcv_fetcherf
-                                        })
-                thread_list.append(new_thread)
-            OUTPUT_LOCK.acquire()
-            for ii, thread in enumerate(thread_list):
-                thread.start()
-                print(f" {ii+1:5d}/{list_size} started", end = "              \r")
-            OUTPUT_LOCK.release()
-            
-            print("\nJoining Threads                  ")
-            for ii, thread in enumerate(thread_list):
-                thread.join()
-                OUTPUT_LOCK.acquire()
-                print(f" {ii+1:5d}/{list_size} {ticker_list[ii]} {thread.ticker} {get_name(ii)} finished", end = "                       \r")
-                OUTPUT_LOCK.release()
-                ohlcv_list.append(thread.result)
-            print("Data scraping complete.                        ")
-            return ohlcv_list
+            return self._get_ohlcvs_list_threaded(ticker_list, name_list)
         else:
-            for ii, ticker in enumerate(ticker_list):
-                fetched = pd.DataFrame()
-                trial_count=0
-                fetched = self._ohlcv_fetcherf(ticker)
-                while fetched.empty and trial_count<=2:
-                    time.sleep(10)
-                    try:
-                        fetched = self._ohlcv_fetcherf(ticker)
-                    except e:
-                        print(e)
-                        fetched = pd.DataFrame()
-                    trial_count += 1
-                if trial_count > 2:
-                    print(f"\n{self.ticker} failed")
-                fetched = self._ohlcv_fetcherf(ticker)
-                fetched = fetched.rename(columns=OHLCV_REPLACE_NAMINGS)
-                fetched.index.name = "data"
-                print(f" {ii+1:5d}/{list_size} {ticker_list[ii]} {get_name(ii)} finished", end = "                       \r")
-                ohlcv_list.append(fetched)
-            return ohlcv_list
+            return self._get_ohlcvs_list_non_threaded(ticker_list, name_list)
 
     def get_all_data(self):
         print(f"Getting {self._mode}")
@@ -161,12 +175,11 @@ class DataFetcher():
     
     def save_all_data(self):
         all_data = self.get_all_data()
-        with open(f"../data_pkl/KRX_{self._mode}_{datetime.now().__str__()[:10]}.pkl", "wb") as file:
+        with open(f"../data_pkl/KRX__copilot_test_{self._mode}_{datetime.now().__str__()[:10]}.pkl", "wb") as file:
             pickle.dump(all_data, file)
         return all_data
 
 if __name__ == "__main__":
-    # save_all_data()
     data_fetcher = DataFetcher()
 
     stocks_data = data_fetcher.save_all_data()
