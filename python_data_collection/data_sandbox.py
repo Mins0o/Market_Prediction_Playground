@@ -80,7 +80,7 @@ def search_security(data, indices, symbol):
     else:
         return None
 
-def merge_data(old_data, new_data):
+def merge_data(old_data, new_data, throw_away_old=True):
     """
     Merge two sets of data.
     
@@ -111,9 +111,66 @@ def merge_data(old_data, new_data):
         entry = search_security(new_data, new_indices, symbol)
         exclusive_data.append(entry)
     
+    if throw_away_old:
+        return overlapping_data + exclusive_data
     for symbol in exclusive_old_symbols:
         entry = search_security(old_data, old_indices, symbol)
         exclusive_data.append(entry)
     
     merged_data = overlapping_data + exclusive_data
     return merged_data
+
+def combine_etf_stock(data_dir="data_pkl"):
+    etf_files = [file for file in os.listdir(data_dir) if "ETF" in file and "stock" not in file]
+    stock_files = [file for file in os.listdir(data_dir) if "stock" in file and "ETF" not in file]
+    etf_file = sorted(etf_files, reverse=True)[0]
+    stock_file = sorted(stock_files, reverse=True)[0]
+
+    etf_all_data = load_data(data_dir, etf_file)
+    stock_all_data = load_data(data_dir, stock_file)
+
+    etf_all_data = process_etf_data(etf_all_data)
+    all_data = merge_data(stock_all_data, etf_all_data, throw_away_old=False)
+    return all_data
+
+def diff_data(old_data, new_data):
+    """
+    Find the data that were changed by comparing the symbols of the data.
+    Each data is a list of dictionaries with keys "symbol", "name", and "data".
+    When getting the diff, specify which row with index (date) is changed.
+    Also return the data of, not the symbols only, that have been deleted or added.
+    """
+    overlapping_symbols, exclusive_old_symbols, exclusive_new_symbols = overlap_deleted_added_data(old_data, new_data)
+
+    old_indices = index_data(old_data)
+    new_indices = index_data(new_data)
+
+    changed = []
+    deleted = []
+    added = []
+
+    for symbol in overlapping_symbols:
+        old_entry = search_security(old_data, old_indices, symbol)
+        new_entry = search_security(new_data, new_indices, symbol)
+        old_data_df = old_entry["data"]
+        new_data_df = new_entry["data"]
+        # Concatenate the dataframes
+        combined_df = pd.concat([old_data_df, new_data_df])
+        # Drop duplicates
+        combined_df = combined_df.drop_duplicates(keep=False)
+        # Find rows that only exist in one dataframe or the other
+        diff_df = combined_df.loc[~combined_df.index.isin(old_data_df.index) | ~combined_df.index.isin(new_data_df.index)]
+        if not diff_df.empty:
+            changed.append({"symbol": symbol, "name": old_entry["name"], "data": diff_df})
+
+    for symbol in exclusive_old_symbols:
+        entry = search_security(old_data, old_indices, symbol)
+        deleted.append(entry)
+
+    for symbol in exclusive_new_symbols:
+        entry = search_security(new_data, new_indices, symbol)
+        added.append(entry)
+
+    return changed, deleted, added
+
+
