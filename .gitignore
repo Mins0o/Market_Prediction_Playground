@@ -1,5 +1,6 @@
 *.pkl
 data_csv*
+data_pkl*
 logs/fit
 training_checkpoints
 _build

@@ -63,6 +63,20 @@ def index_data(data):
         indices[entry["symbol"]] = i
     return indices
 
+def index_data_by_name(data):
+    """
+    Index the data by the names of the securities.
+    The return indices will be used in the `search_security` function.
+    Args:
+        data (list): A list of dictionaries containing the symbol, name, and data for each security.
+    Returns:
+        indices (dict): A dictionary with the names of the securities as keys and the corresponding index as values.
+    """
+    indices = {}
+    for i, entry in enumerate(data):
+        indices[entry["name"]] = i
+    return indices
+
 def search_security(data, indices, symbol):
     """
     Search for the data of a security by its symbol.
@@ -75,6 +89,23 @@ def search_security(data, indices, symbol):
         security_data (dict): A dictionary containing the symbol, name, and data for the specified security.
     """
     index = indices.get(symbol)
+    if index is not None:
+        return data[index]
+    else:
+        return None
+
+def search_security_by_name(data, indices, name):
+    """
+    Search for the data of a security by its name.
+    Optimized by using the indices obtained from the `index_data_by_name` function.
+    Args:
+        data (list): A list of dictionaries containing the symbol, name, and data for each security.
+        indices (dict): A dictionary with the names of the securities as keys and the corresponding index as values.
+        name (str): The name of the security to search for.
+    Returns:
+        security_data (dict): A dictionary containing the symbol, name, and data for the specified security.
+    """
+    index = indices.get(name)
     if index is not None:
         return data[index]
     else:
@@ -133,6 +164,15 @@ def combine_etf_stock(data_dir="data_pkl"):
     all_data = merge_data(stock_all_data, etf_all_data, throw_away_old=False)
     return all_data
 
+def diff_entry(old_entry, new_entry):
+    old_data_df = old_entry["data"]
+    new_data_df = new_entry["data"]
+    # Concatenate the dataframes
+    combined_df = new_data_df.combine_first(old_data_df)
+    # Find rows that only exist in one dataframe or the other
+    diff_df = combined_df.loc[~combined_df.index.isin(old_data_df.index) | ~combined_df.index.isin(new_data_df.index)]
+    return diff_df
+
 def diff_data(old_data, new_data):
     """
     Find the data that were changed by comparing the symbols of the data.
@@ -152,14 +192,7 @@ def diff_data(old_data, new_data):
     for symbol in overlapping_symbols:
         old_entry = search_security(old_data, old_indices, symbol)
         new_entry = search_security(new_data, new_indices, symbol)
-        old_data_df = old_entry["data"]
-        new_data_df = new_entry["data"]
-        # Concatenate the dataframes
-        combined_df = pd.concat([old_data_df, new_data_df])
-        # Drop duplicates
-        combined_df = combined_df.drop_duplicates(keep=False)
-        # Find rows that only exist in one dataframe or the other
-        diff_df = combined_df.loc[~combined_df.index.isin(old_data_df.index) | ~combined_df.index.isin(new_data_df.index)]
+        diff_df = diff_entry(old_entry, new_entry)
         if not diff_df.empty:
             changed.append({"symbol": symbol, "name": old_entry["name"], "data": diff_df})
 
@@ -173,4 +206,145 @@ def diff_data(old_data, new_data):
 
     return changed, deleted, added
 
+def get_stock_filenames(data_dir="data_pkl"):
+    """
+    Get the filenames of the stock data.
+    Args:
+        data_dir (str): The directory where the stock data is saved.
+    Returns:
+        filenames (str): A list of the filenames of the stock data.
+    """
+    stock_files = [filename for filename in os.listdir(data_dir) if "stock" in filename and "ETF" not in filename]
+    stock_files.sort()
+    return stock_files
 
+def get_etf_filenames(data_dir="data_pkl"):
+    """
+    Get the filenames of the ETF data.
+    Args:
+        data_dir (str): The directory where the ETF data is saved.
+    Returns:
+        filenames (str): A list of the filenames of the ETF data.
+    """
+    etf_files = [filename for filename in os.listdir(data_dir) if "ETF" in filename and "stock" not in filename]
+    etf_files.sort()
+    return etf_files
+
+def analyze_changes(current_data, merged_data):
+    changed, deleted, added = diff_data(current_data, merged_data)
+    change_length_analysis = analyze_change_length(changed)
+    return changed, deleted, added, change_length_analysis
+
+def analyze_change_length(changed):
+    change_length = [len(entry["data"]) for entry in changed]
+    change_length_count = {length: change_length.count(length) for length in set(change_length)}
+    outlier_analysis = []
+    if change_length_count:
+        outlier_analysis = identify_outliers(changed, change_length, change_length_count)
+    return change_length_count, outlier_analysis
+
+def identify_outliers(changed, change_length, change_length_count):
+    most_often_length = max(change_length_count, key=change_length_count.get)
+    outlier_indices = [i for i, length in enumerate(change_length) if length != most_often_length]
+    outlier_names = [changed[i]["name"] + f"({change_length[i]})" for i in outlier_indices]
+    return outlier_names
+
+def interactive_data_merge(data_dir="data_pkl", current_merge_data=None, current_index=None):
+    """
+    Iteratively merges stock and ETF data files in reverse chronological order from a specified directory.
+
+    This function processes stock and ETF data files by merging them in reverse order, starting with the two most recent files. 
+    After each merge, it provides a concise overview of the differences compared to the previous iteration, including changes, deletions, and additions. 
+    It specifically highlights any outliers in the change lengths of the data, suggesting potential inconsistencies or anomalies in the data changes. 
+    These outliers are flagged for manual review. The function aims to give a clear picture of how the merged data evolves with each file processed.
+
+    Parameters:
+    - data_dir (str): The directory where the stock and ETF data files are located. Defaults to "data_pkl".
+
+    Outputs:
+    - Console output that includes:
+        - The name of the current file being processed.
+        - The length of the data before and after merging.
+        - Detailed information on the differences after each merge, including:
+            - The number of changed, deleted, and added data entries.
+            - A count of the lengths of changed data entries to identify outliers.
+            - The names of securities with outlier changes, deletions, and additions.
+
+    The function is designed for interactive use, providing insights into the data merging process and highlighting areas that may require further investigation.
+    """
+    files = get_stock_filenames(data_dir)
+    data_merged = load_data(data_dir, files[-1])
+    if current_merge_data is not None and current_index is not None:
+        data_merged = current_merge_data
+        files = files[:-current_index+1]
+    print(files[-1], len(data_merged))
+    for ii in range(-2, -len(files)-1, -1):
+        file_ = files[ii]
+        data_ = load_data(data_dir, file_)
+        print(file_, len(data_))
+        previous_data_merged = data_merged
+        data_merged = merge_data(data_, data_merged, throw_away_old=True)
+
+        changed, deleted, added = diff_data(data_, data_merged)
+        change_length_count, outlier_names = analyze_change_length(changed)
+
+        print("Changed:", len(changed), change_length_count, outlier_names)
+        print("deleted", len(deleted), [entry["name"] for entry in deleted])
+        print("added", len(added), [entry["name"] for entry in added])
+
+        # interactive part
+        print("Review the changes.")
+        print("1. Keep the merge")
+        print("2. Revert the current merge")
+        print("3. Stop here (cancels current merge)")
+        print("4. Save and stop here")
+        print("5. Abort everything (Don't save anything and quit)")
+        print("""If you want to review in detail, 
+              stop here by entering 3 and run the function with the current data.
+              use the return of the function as the current_merge_data and current_index.""")
+        choice = input("Enter your choice: ")
+        if choice == "1":
+            pass
+        elif choice == "2":
+            data_merged = previous_data_merged
+        elif choice == "3":
+            return previous_data_merged, ii
+        elif choice == "4":
+            return data_merged, ii-1
+        elif choice == "5":
+            return None, None
+    return data_merged, ii
+
+def investigate_with_result(current_merge, file_index, stock_name, dir_name="data_pkl"):
+    files = get_stock_filenames(dir_name)
+    old_data=load_data(dir_name, files[file_index])
+    new_data=load_data(dir_name, files[-1])
+    old_indices = index_data_by_name(old_data)
+    new_indices = index_data_by_name(new_data)
+
+    print("Old data")
+    old_entry = search_security_by_name(old_data, old_indices, stock_name)
+    if old_entry:
+        print(old_entry["data"])
+
+    print("New data")
+    new_entry = search_security_by_name(new_data, new_indices, stock_name)
+    if new_entry:
+        print(new_entry["data"])
+    else:
+        print(f"The name {stock_name} is not found in the new data.")
+
+    print("Merged data")
+    merged_entry = search_security_by_name(current_merge, index_data_by_name(current_merge), stock_name)
+    if merged_entry:
+        print(merged_entry["data"])
+    else:
+        print(f"The name {stock_name} is not found in the merged data.")
+
+    print("Diff data")
+    if new_entry and old_entry:
+        diff_df = diff_entry(old_entry, new_entry)
+        if diff_df:
+            print(diff_df)
+    else:
+        print("Cannot find the data to compare.")
