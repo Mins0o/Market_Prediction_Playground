@@ -15,13 +15,12 @@
 #include <iostream>
 
 #define measureTime(name, func)                                 \
-    do {                                                        \
         auto pre##name = std::chrono::steady_clock::now();      \
         func;                                                   \
         auto post##name = std::chrono::steady_clock::now();     \
         std::chrono::duration<double, std::milli> name##Time = post##name - pre##name; \
-        std::cout << "time used in " #name ": " << name##Time.count() << " ms" << std::endl; \
-    } while(0)
+        std::cout << "time used in " #name ": " << name##Time.count() << " ms" << std::endl;
+
 
 typedef struct{
 	std::vector<double> security_returns;
