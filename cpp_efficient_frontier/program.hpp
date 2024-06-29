@@ -318,8 +318,11 @@ void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 	write_data("simulation_results_monthly.tsv", monthly_sim_results);
 	write_data("simulation_results_long_term.tsv", long_term_sim_results);
 	
+	std::cout << "monthly" << std::endl;
 	get_optimal(monthly_sim_results, optimal_mixes);
+	std::cout << "daily" << std::endl;
 	get_optimal(daily_sim_results, optimal_mixes);
+	std::cout << "long term" << std::endl;
 	get_optimal(long_term_sim_results, optimal_mixes);
 }
 
