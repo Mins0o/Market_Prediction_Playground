@@ -1,13 +1,21 @@
+import argparse
+from datetime import datetime
+import re
 import pandas as pd
 import pickle
 import os.path
 import numpy as np
 
+Change = "Change"
 
 def load_data(dir_name="data_pkl", file_name="KRX_stocks.pkl"):
     with open(os.path.join(dir_name,file_name), "rb") as data_file:
         all_data = pickle.load(data_file)
     return all_data
+
+def save_data(all_data, dir_name="data_pkl", file_name="KRX_stocks.pkl"):
+    with open(os.path.join(dir_name,file_name), "wb") as save_file:
+        pickle.dump(all_data, save_file)
 
 def combine_single_column(all_data, column_name):
     columns_collected = [df["data"][column_name] for df in all_data]
@@ -21,9 +29,9 @@ def save_combined_data(all_data, column_name, dir_name="data_pkl"):
     with open(os.path.join(dir_name,column_name)+".pkl", "wb") as save_file:
         pickle.dump(combined, save_file)
 
-def save_combined_data_as_csv(all_data, column_name, dir_name="data_csv", delimitter=","):
+def save_combined_data_as_csv(all_data, column_name, dir_name="data_csv", delimitter=",", file_name_suffix=""):
     combined = combine_single_column(all_data, column_name)
-    csv_filename = os.path.join(dir_name,f'{column_name}.csv')
+    csv_filename = os.path.join(dir_name,f'{column_name}_{file_name_suffix}.csv')
     combined.to_csv(csv_filename, sep = delimitter)
 
 def process_etf_data(etf_all_data):
@@ -206,7 +214,7 @@ def diff_data(old_data, new_data):
 
     return changed, deleted, added
 
-def get_stock_filenames(data_dir="data_pkl"):
+def get_stock_filenames(data_dir="data_pkl", ETF=False):
     """
     Get the filenames of the stock data.
     Args:
@@ -214,7 +222,11 @@ def get_stock_filenames(data_dir="data_pkl"):
     Returns:
         filenames (str): A list of the filenames of the stock data.
     """
-    stock_files = [filename for filename in os.listdir(data_dir) if "stock" in filename and "ETF" not in filename]
+    target_phrase = "stock" if not ETF else "etf"
+    nontarget_phrase = "etf" if not ETF else "stock"
+    stock_files = [filename for filename in os.listdir(data_dir) 
+                   if target_phrase in filename.lower() 
+                   and nontarget_phrase not in filename.lower()]
     stock_files.sort()
     return stock_files
 
@@ -249,7 +261,7 @@ def identify_outliers(changed, change_length, change_length_count):
     outlier_names = [changed[i]["name"] + f"({change_length[i]})" for i in outlier_indices]
     return outlier_names
 
-def interactive_data_merge(data_dir="data_pkl", current_merge_data=None, current_index=None):
+def interactive_data_merge(data_dir="data_pkl", current_merge_data=None, current_index=None, ETF=False):
     """
     Iteratively merges stock and ETF data files in reverse chronological order from a specified directory.
 
@@ -272,16 +284,17 @@ def interactive_data_merge(data_dir="data_pkl", current_merge_data=None, current
 
     The function is designed for interactive use, providing insights into the data merging process and highlighting areas that may require further investigation.
     """
-    files = get_stock_filenames(data_dir)
+    files = get_stock_filenames(data_dir, ETF)
     data_merged = load_data(data_dir, files[-1])
     if current_merge_data is not None and current_index is not None:
         data_merged = current_merge_data
         files = files[:-current_index+1]
-    print(files[-1], len(data_merged))
+    print("new", files[-1], len(data_merged))
+    ii=-1
     for ii in range(-2, -len(files)-1, -1):
         file_ = files[ii]
         data_ = load_data(data_dir, file_)
-        print(file_, len(data_))
+        print("old", file_, len(data_))
         previous_data_merged = data_merged
         data_merged = merge_data(data_, data_merged, throw_away_old=True)
 
@@ -315,19 +328,19 @@ def interactive_data_merge(data_dir="data_pkl", current_merge_data=None, current
             return None, None
     return data_merged, ii
 
-def investigate_with_result(current_merge, file_index, stock_name, dir_name="data_pkl"):
-    files = get_stock_filenames(dir_name)
+def investigate_with_result(current_merge, file_index, stock_name, dir_name="data_pkl", ETF=False):
+    files = get_stock_filenames(dir_name, ETF)
     old_data=load_data(dir_name, files[file_index])
     new_data=load_data(dir_name, files[-1])
     old_indices = index_data_by_name(old_data)
     new_indices = index_data_by_name(new_data)
 
-    print("Old data")
+    print("Old data", files[file_index])
     old_entry = search_security_by_name(old_data, old_indices, stock_name)
     if old_entry:
         print(old_entry["data"])
 
-    print("New data")
+    print("New data", files[-1])
     new_entry = search_security_by_name(new_data, new_indices, stock_name)
     if new_entry:
         print(new_entry["data"])
@@ -344,7 +357,23 @@ def investigate_with_result(current_merge, file_index, stock_name, dir_name="dat
     print("Diff data")
     if new_entry and old_entry:
         diff_df = diff_entry(old_entry, new_entry)
-        if diff_df:
+        if diff_df is not None:
             print(diff_df)
     else:
         print("Cannot find the data to compare.")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Merge stock and ETF data files interactively.")
+    parser.add_argument("--auto", action="store_true", help="Automatically merge stock and ETF data files.")
+    if parser.parse_args().auto:
+        stocks_merged, index = interactive_data_merge("../data_pkl")
+        etf_merged, index = interactive_data_merge("../data_pkl", ETF=True)
+        etf_merged = process_etf_data(etf_merged)
+        print("len stocks, len etfs", len(stocks_merged), len(etf_merged))
+        combined = merge_data(stocks_merged, etf_merged, throw_away_old=False)
+        print("combined_length", len(combined))
+        combined.sort(key=lambda x: x["name"])
+        date_string = re.sub(r'[\W-]','_',datetime.now().__str__()[:19])
+        save_data(combined, "../data_pkl", 
+                  f"KRX_stocks_etf_combined_{date_string}.pkl")
+        save_combined_data_as_csv(combined, "Change", "../data_csv", delimitter="\t", file_name_suffix=date_string)

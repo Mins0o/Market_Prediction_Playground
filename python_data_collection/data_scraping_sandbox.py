@@ -5,6 +5,7 @@ from tqdm import tqdm
 import threading
 from datetime import datetime
 import time
+import argparse
 
 OHLCV_REPLACE_NAMINGS = {"날짜": "date", 
                          "시가": "Open", 
@@ -34,11 +35,14 @@ class OhlcvThread(threading.Thread):
             print(f"\n{self.security} failed")
             OUTPUT_LOCK.release()
         fetched = fetched.rename(columns=OHLCV_REPLACE_NAMINGS)
-        fetched.index.name = "data"
+        fetched.index.name = "date"
         self.result = fetched
 
 class DataFetcher():
-    def __init__(self):
+    def __init__(self, starting_date=None):
+        self.starting_date="19700101"
+        if starting_date:
+            self.starting_date = starting_date
         self._security_fetcherf = None
         self._name_fetcherf = None
         self._ohlcv_fetcherf = None
@@ -54,21 +58,21 @@ class DataFetcher():
 
     def set_mode(self, mode = "stocks"):
         if mode.lower() in ["stocks", "stock"]:
-            self._set_stock_mode()
+            self._set_stock_mode(starting_date=self.starting_date)
         elif mode.lower() in ["etfs", "etf"]:
-            self._set_etf_mode()
+            self._set_etf_mode(starting_date=self.starting_date)
 
-    def _set_stock_mode(self):
+    def _set_stock_mode(self, starting_date="19700101"):
         self._mode = "stocks"
         self._security_fetcherf = lambda date: stock.get_market_ticker_list(date, market="ALL")
         self._name_fetcherf = stock.get_market_ticker_name
-        self._ohlcv_fetcherf = lambda security: stock.get_market_ohlcv("19700101","20301231", str(security))
+        self._ohlcv_fetcherf = lambda security: stock.get_market_ohlcv(fromdate=starting_date, todate="20301231", ticker=str(security))
 
-    def _set_etf_mode(self):
+    def _set_etf_mode(self, starting_date="19700101"):
         self._mode = "ETFs"
         self._security_fetcherf = stock.get_etf_ticker_list
         self._name_fetcherf = stock.get_etf_ticker_name
-        self._ohlcv_fetcherf = lambda security: stock.get_etf_ohlcv_by_date("19700101","20301231", str(security))
+        self._ohlcv_fetcherf = lambda security: stock.get_etf_ohlcv_by_date(fromdate=starting_date, todate="20301231", ticker=str(security))
 
     def _get_security_list(self, year_range = 0):
         """
@@ -127,7 +131,7 @@ class DataFetcher():
                 print(f"\n{security} failed")
             fetched = self._ohlcv_fetcherf(security)
             fetched = fetched.rename(columns=OHLCV_REPLACE_NAMINGS)
-            fetched.index.name = "data"
+            fetched.index.name = "date"
             print(f" {ii+1:5d}/{list_size} {security_list[ii]} {get_name(ii)} finished", end = "                       \r")
             ohlcv_list.append(fetched)
         return ohlcv_list
@@ -205,15 +209,23 @@ class DataFetcher():
             list: The list of all data obtained.
         """
         all_data = self.get_all_data()
-        with open(f"../data_pkl/KRX_{self._mode}_{datetime.now().__str__()[:10]}.pkl", "wb") as file:
+        with open(f"../data_pkl/KRX_{self._mode}_from_{self.starting_date}_{datetime.now().__str__()[:10]}.pkl", "wb") as file:
             pickle.dump(all_data, file)
         return all_data
 
 if __name__ == "__main__":
+    """
+    If user inputs a date, it will be processed as an argument setting the modes.
+    """
+    parser = argparse.ArgumentParser(description="Data Fetcher")
+    parser.add_argument("--date", type=str, help="Starting date for data collection.\nFormat: YYYYMMDD")
+    args = parser.parse_args()
+
     data_fetcher = DataFetcher()
+    if args.date:
+        data_fetcher = DataFetcher(args.date)
 
     stocks_data = data_fetcher.save_all_data()
 
     data_fetcher.set_mode("etf")
     etf_data = data_fetcher.save_all_data()
-    pass
