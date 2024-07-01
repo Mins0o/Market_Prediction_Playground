@@ -14,16 +14,42 @@ int main(int argc, char* argv[]){
 	reading_file.open(argv[1]);
 	data::Data security_data = data::Data(reading_file);
 	
-	std::vector<std::string> security_choices = {"삼성전자", "대양제지", "하이브", "대웅제약"};
+	std::vector<std::string> security_choices = {"ACE중국본토CSI300", "하이브", "NAVER", "Kodex 한국대만IT프리미어", "KOSEF 인도 Nifty50", "ACE 미국S&P 500", "ACE 일본Nikkei255", "TIGER 글로벌리튬&2차전지SOLACTIVE합성)()", "현대차", "종근당"};
 	std::vector<security_column> selections;
 	choose_securities(security_data, security_choices, selections);
 
 	std::vector<security_column> processed;
 	match_security_length(security_data, selections, processed);
 
-	portfolio_data optimal_mixes[3] = {};
+	// [0][] daily rebalanced
+	// [1][] monthly rebalanced
+	// [2][] long term
+	// [][0] max sharpe ratio
+	// [][1] max return
+	// [][2] min risk
+	portfolio_data optimal_mixes[3][3] = {};
+	for (std::string security_name: security_choices){
+		std::cout << security_name << " | ";
+	}
+	std::cout << std::endl;
 	optimize_portfolio(processed, optimal_mixes);
-	
+
+	std::cout << "Newest on the top" << std::endl;
+	simulate_timelapse(processed, 1,50);
+
+	std::cout << "Current Max Sharpe Ratio Portfolio for Long Term" << std::endl;
+	std::cout << "Expected Return: " << optimal_mixes[2][0].expected_return << std::endl;
+	std::cout << "Risk: " << optimal_mixes[2][0].risk << std::endl;
+	std::cout << "Sharpe Ratio: " << optimal_mixes[2][0].sharpe_ratio << std::endl;
+	std::cout << "Weights: ";
+	for (double weight: optimal_mixes[2][0].weights){
+		std::cout << std::fixed << std::setprecision(4) << weight << " | ";
+	}
+	std::cout << std::endl;
+	for (std::string security_name: security_choices){
+		std::cout << security_name << "\t";
+	}
+
 	/**
 	 *TODO
 	 * choose investment term

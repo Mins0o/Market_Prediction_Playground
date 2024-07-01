@@ -252,19 +252,19 @@ void get_optimal(/*I*/ const std::vector<portfolio_data>& sim_results,
 			mxr_sharpe = sim.sharpe_ratio;
 			mxr_risk = sim.risk;
 			max_ret_w = sim.weights;
-			optimal_mixes[0] = sim;
+			optimal_mixes[1] = sim;
 		}
 		if(min_risk > sim.risk){
 			min_risk = sim.risk;
 			mnr_ret = sim.expected_return;
 			mnr_sharpe = sim.sharpe_ratio;
 			min_risk_w = sim.weights;
-			optimal_mixes[0] = sim;
+			optimal_mixes[2] = sim;
 		}
 	}
 
-	std::cout << "max_sharpe :" << max_sharpe 
-		<< "| ret: " << mxs_ret
+	std::cout << std::fixed << std::setprecision(4) << "max_sharpe :" << max_sharpe 
+		<< "| return: " << mxs_ret
 		<< "| risk: " << mxs_risk
 		<< " |weights: ";
 	for (auto w : max_sharpe_w){
@@ -272,7 +272,7 @@ void get_optimal(/*I*/ const std::vector<portfolio_data>& sim_results,
 	}
 	std::cout << std::endl;
 
-	std::cout << "max_return :" << max_ret  
+	std::cout << std::fixed << std::setprecision(4) << "max_return :" << max_ret  
 		<< "| sharpe: " << mxr_sharpe
 		<< "| risk: " << mxr_risk
 		<< " |weights: ";
@@ -281,8 +281,8 @@ void get_optimal(/*I*/ const std::vector<portfolio_data>& sim_results,
 	}
 	std::cout << std::endl;
 
-	std::cout << "min_risk :" << min_risk   
-		<< "| ret: " << mnr_ret
+	std::cout << std::fixed << std::setprecision(4) << "min_risk :" << min_risk   
+		<< "| return: " << mnr_ret
 		<< "| sharpe: " << mnr_sharpe
 	<< " |weights: ";
 	for (auto w : min_risk_w){
@@ -293,7 +293,7 @@ void get_optimal(/*I*/ const std::vector<portfolio_data>& sim_results,
 
 /*0*/
 void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
-			/*O*/ portfolio_data (&optimal_mixes)[3]){
+			/*O*/ portfolio_data (&optimal_mixes)[3][3]){
 	const size_t num_simulations = 99'999;
 
 	std::vector<portfolio_data> daily_sim_results = {};
@@ -302,7 +302,7 @@ void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 
 	std::vector<std::vector<double>> returns = get_returns(selections);
 
-	DiscountedMeanStrategy discnt_strat(2);
+	DiscountedMeanStrategy discnt_strat(1);
 	calculations::Calculations::set_expected_return_strategy(&discnt_strat);
 	
 	for(int sim_cnt=0; sim_cnt < num_simulations; sim_cnt++){
@@ -318,12 +318,39 @@ void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 	write_data("simulation_results_monthly.tsv", monthly_sim_results);
 	write_data("simulation_results_long_term.tsv", long_term_sim_results);
 	
-	std::cout << "monthly" << std::endl;
-	get_optimal(monthly_sim_results, optimal_mixes);
 	std::cout << "daily" << std::endl;
-	get_optimal(daily_sim_results, optimal_mixes);
+	get_optimal(daily_sim_results, optimal_mixes[1]);
+	std::cout << "monthly" << std::endl;
+	get_optimal(monthly_sim_results, optimal_mixes[0]);
 	std::cout << "long term" << std::endl;
-	get_optimal(long_term_sim_results, optimal_mixes);
+	get_optimal(long_term_sim_results, optimal_mixes[2]);
+}
+
+/*0*/
+void simulate_timelapse(/*I*/ std::vector<security_column> processed,
+			/*I*/ size_t interval=5,
+			/*I*/ size_t num_simulations=10){
+	std::vector<portfolio_data> by_days = {};
+	portfolio_data optimal_mixes[3][3] = {};
+
+	for(int sim_number=0; sim_number < num_simulations; sim_number++){
+		std::cout << "Go back " << interval << "(" << sim_number << ") business days" << std::endl;
+		for (security_column& column: processed){
+			for (size_t day=0; day<interval; ++day)
+				column.security_returns.erase(column.security_returns.end() - 1);
+		}
+		optimize_portfolio(processed, optimal_mixes);
+		by_days.emplace_back(optimal_mixes[2][0]);
+	}
+
+	std::cout << "Expected Return | Risk | Sharpe Ratio" << std::endl;
+	for (const auto& sim_result: by_days){
+		std::cout << std::fixed << std::setprecision(4) << sim_result.expected_return << " | " << sim_result.risk << " | " << sim_result.sharpe_ratio << " | weights: ";
+		for (double weight: sim_result.weights){
+			std::cout << weight << " ";
+		}
+		std::cout << std::endl;
+	}
 }
 
 #endif // EFFICIENTFRONTIER_MAIN_PROGRAM_H_

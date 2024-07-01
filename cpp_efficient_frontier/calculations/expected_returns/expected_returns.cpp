@@ -34,7 +34,7 @@ double DiscountedMeanStrategy::get_expected_return(const std::vector<double>& re
 	double weighted_sum = 0;
 
 	for (int ii = 0; ii<array_size; ii++){
-		double power_value = -(ii+0.0)/(array_size-1);
+		double power_value = -(ii)/(array_size-1.0);
 		double weight_value = std::pow(10, power_value * discount_rate_);
 		weighted_sum += returns_list[array_size-ii-1]*weight_value;
 		weight_sum += weight_value;
