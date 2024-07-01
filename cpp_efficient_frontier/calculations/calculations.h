@@ -106,7 +106,7 @@ public:
 
 
 	static void set_expected_return_strategy(/*I*/ ExpectedReturnStrategy*);
-	static double get_expected_return(/*I*/ const std::vector<double>& returns);
+	static double GetExpectedReturn(/*I*/ const std::vector<double>& returns);
 };
 
 }

@@ -6,7 +6,7 @@
 
 class ExpectedReturnStrategy{
 public:
-	virtual double get_expected_return(const std::vector<double>& returns_list) = 0;
+	virtual double GetExpectedReturn(const std::vector<double>& returns_list) = 0;
 };
 
 #endif // EFFICIENTFRONTIER_CALCULATIONS_EXPECTEDRETURNSTRATEGY_H_

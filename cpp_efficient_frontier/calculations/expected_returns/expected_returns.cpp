@@ -3,25 +3,14 @@
 #include <cmath>
 #include "expected_returns.h"
 
-double ArithmeticMeanStrategy::get_expected_return(/*I*/ const std::vector<double>& returns_list){
+double ArithmeticMeanStrategy::GetExpectedReturn(/*I*/ const std::vector<double>& returns_list){
 	if (returns_list.empty()){
 		return 0.0;
 	}
 	return std::reduce(returns_list.begin(), returns_list.end())/returns_list.size();
 }
 
-DiscountedMeanStrategy::DiscountedMeanStrategy(){
-	discount_rate_ = 0;
-}
-
-/**
- * @discount_rate bigger rate ignores the past values more strongly. value x means the last element is weighted 10^-x
- */
-DiscountedMeanStrategy::DiscountedMeanStrategy(double dicount_rate){
-						discount_rate_ = discount_rate_;
-}
-
-double DiscountedMeanStrategy::get_expected_return(const std::vector<double>& returns_list){
+double DiscountedMeanStrategy::GetExpectedReturn(/*I*/ const std::vector<double>& returns_list){
 	if (returns_list.empty()){
 		return 0.0;
 	}

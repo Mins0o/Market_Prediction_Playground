@@ -130,7 +130,7 @@ void mix_securities(/*I*/ const std::vector<std::vector<double>>& compounded_val
 
 /*2*/
 portfolio_data get_portfolio_stats(std::vector<double> portfolio_returns, double risk_free_rate = 0){
-	double exp_ret = calculations::Calculations::get_expected_return(portfolio_returns);
+	double exp_ret = calculations::Calculations::GetExpectedReturn(portfolio_returns);
 	double stdev = calculations::Calculations::standard_deviation(portfolio_returns);
 	double sharpe_r = (exp_ret - risk_free_rate)/stdev;
 	return portfolio_data({sharpe_r, exp_ret, stdev, {}});
