@@ -374,6 +374,8 @@ if __name__ == "__main__":
         print("combined_length", len(combined))
         combined.sort(key=lambda x: x["name"])
         date_string = re.sub(r'[\W-]','_',datetime.now().__str__()[:19])
+        save_data(etf_merged, "../data_pkl", f"KRX_etfs_{date_string}.pkl")
+        save_data(stocks_merged, "../data_pkl", f"KRX_stocks_{date_string}.pkl")
         save_data(combined, "../data_pkl", 
                   f"KRX_stocks_etf_combined_{date_string}.pkl")
         save_combined_data_as_csv(combined, "Change", "../data_csv", delimitter="\t", file_name_suffix=date_string)
