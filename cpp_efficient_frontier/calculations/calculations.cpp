@@ -9,7 +9,7 @@ namespace calculations {
 
 	ExpectedReturnStrategy* Calculations::expected_return_strategy=nullptr;
 
-	double Calculations::net_value(const std::vector<double>& returns){
+	double Calculations::CompoundReturnToValue(const std::vector<double>& returns){
 		double net_value = 1.0;
 		for(double return_value: returns){
 			net_value *= 1 + (return_value/100);
@@ -17,7 +17,7 @@ namespace calculations {
 		return net_value;
 	}
 
-	std::vector<double> Calculations::value_series(/*I*/ const std::vector<double>& returns){
+	std::vector<double> Calculations::CompoundReturnToValueSeries(/*I*/ const std::vector<double>& returns){
 		double net_value = 1.0;
 		std::vector<double> values={};
 		values.reserve(returns.size());
@@ -29,7 +29,7 @@ namespace calculations {
 		return values;
 	}
 
-	std::vector<double> Calculations::rebalance_compound(/*I*/ const std::vector<double>& returns,
+	std::vector<double> Calculations::CompoundPeriodicRebalancedSeries(/*I*/ const std::vector<double>& returns,
 						/*I*/ const size_t rebalancing_term,
 						/*O*/ std::vector<double>& compounded_values){
 		double net_value = 1.0;
@@ -48,7 +48,7 @@ namespace calculations {
 		return rebalanced_surplus;
 	}
 
-	std::vector<double> Calculations::values_to_change(/*I*/ const std::vector<double>& stripped_values){
+	std::vector<double> Calculations::CalculateReturnsFromValueSeries(/*I*/ const std::vector<double>& stripped_values){
 		double prev = stripped_values[0];
 		std::vector<double> change_rates = {};
 		change_rates.reserve(stripped_values.size());
@@ -59,15 +59,15 @@ namespace calculations {
 		return change_rates;
 	}
 
-	double Calculations::average(const std::vector<double>& returns){
+	double Calculations::Average(const std::vector<double>& returns){
 		if (returns.empty()){
 			return 0;
 		}
 		return std::reduce(returns.begin(), returns.end())/returns.size();
 	}
 
-	double Calculations::standard_deviation(const std::vector<double>& returns){
-		double average_return = Calculations::average(returns);
+	double Calculations::StandardDeviation(const std::vector<double>& returns){
+		double average_return = Calculations::Average(returns);
 		double accumulate = 0;
 		for(double return_v : returns){
 			accumulate += (return_v-average_return) * (return_v-average_return);
@@ -75,7 +75,7 @@ namespace calculations {
 		return std::sqrt(accumulate / returns.size());
 	}
 
-	std::vector<double> Calculations::weighted_sum(/*I*/ const std::vector<double>& values_a, 
+	std::vector<double> Calculations::WeightedSumOfTwoSeries(/*I*/ const std::vector<double>& values_a, 
 							/*I*/ const double weight_a,
 							/*I*/ const std::vector<double>& values_b,
 							/*I*/ const double weight_b){
@@ -92,7 +92,7 @@ namespace calculations {
 		return result;
 	}
 
-	std::vector<double> Calculations::weighted_sum(/*I*/ const std::vector<std::vector<double>>& columns_of_values,
+	std::vector<double> Calculations::WeightedSumOfSeries(/*I*/ const std::vector<std::vector<double>>& columns_of_values,
 							/*I*/ const std::vector<double>& weights){
 		if(weights.empty() || columns_of_values.empty()){
 			std::cout << "Calculations::weighted_sum2: empty vectors" << std::endl;
@@ -111,7 +111,7 @@ namespace calculations {
 		return results;
 	}
 
-	std::vector<double> Calculations::rebalanced_weighted_sum_of_values(/*I*/ const std::vector<std::vector<double>>& returns,
+	std::vector<double> Calculations::WeightedSumOfValuesWithRebalancing(/*I*/ const std::vector<std::vector<double>>& returns,
 								/*I*/ const std::vector<double>& weights,
 								/*I*/ const size_t rebalancing_term){
 		if(weights.empty() || returns.empty()){
@@ -142,17 +142,17 @@ namespace calculations {
 		return result_values;
 	}
 
-	std::vector<double> Calculations::aggregate_returns_by_period(/*I*/ const std::vector<double>& trimmed_daily_returns,
+	std::vector<double> Calculations::ChunkReturns(/*I*/ const std::vector<double>& trimmed_daily_returns,
 									/*I*/ size_t intended_period){
 		double current_value = 1.0;
 		auto current_return_it = trimmed_daily_returns.begin();
-		std::vector<double> aggregated ={};
-		size_t aggregated_length = trimmed_daily_returns.size()/intended_period;
-		aggregated.reserve(aggregated_length);
+		std::vector<double> chunked ={};
+		size_t chunked_array_length = trimmed_daily_returns.size()/intended_period;
+		chunked.reserve(chunked_array_length);
 
 		bool is_end_reached = false;
 		while(not is_end_reached){
-			aggregated.emplace_back(current_value);
+			chunked.emplace_back((current_value-1)*100);
 			current_value = 1.0;
 
 			for (int ii=0; ii<intended_period; ii++){
@@ -165,10 +165,10 @@ namespace calculations {
 			}
 		}
 
-		return aggregated;
+		return chunked;
 	}
 
-	void Calculations::set_expected_return_strategy(/*I*/ ExpectedReturnStrategy* strategy){
+	void Calculations::SetExpectedReturnStrategy(/*I*/ ExpectedReturnStrategy* strategy){
 		Calculations::expected_return_strategy = strategy;
 	}
 

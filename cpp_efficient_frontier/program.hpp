@@ -123,15 +123,15 @@ void mix_securities(/*I*/ const std::vector<std::vector<double>>& compounded_val
 			/*I*/ const std::vector<double>& weights,
 			/*O*/ std::vector<double>& mixed_returns){
 	
-	auto mixed_values = calculations::Calculations::weighted_sum(compounded_values, weights);
+	auto mixed_values = calculations::Calculations::WeightedSumOfSeries(compounded_values, weights);
 	
-	mixed_returns = calculations::Calculations::values_to_change(mixed_values);
+	mixed_returns = calculations::Calculations::CalculateReturnsFromValueSeries(mixed_values);
 }
 
 /*2*/
 portfolio_data get_portfolio_stats(std::vector<double> portfolio_returns, double risk_free_rate = 0){
 	double exp_ret = calculations::Calculations::GetExpectedReturn(portfolio_returns);
-	double stdev = calculations::Calculations::standard_deviation(portfolio_returns);
+	double stdev = calculations::Calculations::StandardDeviation(portfolio_returns);
 	double sharpe_r = (exp_ret - risk_free_rate)/stdev;
 	return portfolio_data({sharpe_r, exp_ret, stdev, {}});
 }
@@ -157,7 +157,7 @@ void simulate_daily_rebalance(/*I*/ const std::vector<std::vector<double>>& retu
 
 	auto weights = make_random_weights(number_of_securities);
 
-	mixed_returns = calculations::Calculations::weighted_sum(returns, weights);
+	mixed_returns = calculations::Calculations::WeightedSumOfSeries(returns, weights);
 
 	auto pf_data = get_portfolio_stats(mixed_returns, risk_free_rate);
 
@@ -175,8 +175,8 @@ void simulate_monthly_rebalance(/*I*/ const std::vector<std::vector<double>>& re
 
 	auto weights = make_random_weights(number_of_securities);
 
-	mixed_values = calculations::Calculations::rebalanced_weighted_sum_of_values(returns, weights, 20);
-	mixed_returns = calculations::Calculations::values_to_change(mixed_values);
+	mixed_values = calculations::Calculations::WeightedSumOfValuesWithRebalancing(returns, weights, 20);
+	mixed_returns = calculations::Calculations::CalculateReturnsFromValueSeries(mixed_values);
 
 	auto pf_data = get_portfolio_stats(mixed_returns, risk_free_rate);
 
@@ -196,10 +196,10 @@ void simulate_longterm_hold(/*I*/ const std::vector<std::vector<double>>& return
 
 	std::vector<std::vector<double>> unmixed_values = {};
 	for (const auto& ret: returns){
-		unmixed_values.emplace_back(calculations::Calculations::value_series(ret));
+		unmixed_values.emplace_back(calculations::Calculations::CompoundReturnToValueSeries(ret));
 	}
-	mixed_values = calculations::Calculations::weighted_sum(unmixed_values, weights);
-	mixed_returns = calculations::Calculations::values_to_change(mixed_values);
+	mixed_values = calculations::Calculations::WeightedSumOfSeries(unmixed_values, weights);
+	mixed_returns = calculations::Calculations::CalculateReturnsFromValueSeries(mixed_values);
 
 	auto pf_data = get_portfolio_stats(mixed_returns, risk_free_rate);
 
@@ -303,7 +303,7 @@ void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 	std::vector<std::vector<double>> returns = get_returns(selections);
 
 	DiscountedMeanStrategy discnt_strat(1);
-	calculations::Calculations::set_expected_return_strategy(&discnt_strat);
+	calculations::Calculations::SetExpectedReturnStrategy(&discnt_strat);
 	
 	for(int sim_cnt=0; sim_cnt < num_simulations; sim_cnt++){
 		simulate_daily_rebalance(returns, daily_sim_results);
