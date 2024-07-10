@@ -209,7 +209,7 @@ class DataFetcher():
             list: The list of all data obtained.
         """
         all_data = self.get_all_data()
-        with open(f"../data_pkl/KRX_{self._mode}_from_{self.starting_date}_{datetime.now().__str__()[:10]}.pkl", "wb") as file:
+        with open(f"../data_pkl/KRX_{self._mode}_{datetime.now().__str__()[:10]}_from_{self.starting_date}.pkl", "wb") as file:
             pickle.dump(all_data, file)
         return all_data
 
