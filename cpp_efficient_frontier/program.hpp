@@ -14,7 +14,7 @@
 #include <chrono>
 #include <iostream>
 
-#define measureTime(name, func)                                 \
+#define MEASURE_TIME(name, func)                                 \
         auto pre##name = std::chrono::steady_clock::now();      \
         func;                                                   \
         auto post##name = std::chrono::steady_clock::now();     \
@@ -41,13 +41,13 @@ void choose_securities(/*I*/ data::Data security_data,
 			/*I*/ const std::vector<std::string>& security_choices,
 			/*O*/ std::vector<security_column>& selections){
 	for(const auto& choice: security_choices){
-		size_t index = security_data.search_security_by_name(choice);
+		size_t index = security_data.FindIndexBySecurityName(choice);
 		if (index != -1){
-			std::cout << "Choosing " << security_data.get_security_name(index)
+			std::cout << "Choosing " << security_data.GetSecurityNameByIndex(index)
 				<< " for " << choice << std::endl;
-			selections.emplace_back(security_column({security_data.select_security(index),
-						security_data.get_start_date(index),
-						security_data.get_end_date(index),
+			selections.emplace_back(security_column({security_data.GetSecurityByIndex(index),
+						security_data.GetStartDate(index),
+						security_data.GetEndDate(index),
 						index}));
 		}
 	}
@@ -63,8 +63,8 @@ void match_security_length(/*I*/ const data::Data& security_data,
 	size_t end_date_id = -1;
 
 	for (auto security: selections){
-		time_t start_date = security_data.get_start_date(security.index);
-		time_t end_date = security_data.get_end_date(security.index);
+		time_t start_date = security_data.GetStartDate(security.index);
+		time_t end_date = security_data.GetEndDate(security.index);
 		if (max_start_date < start_date){
 			max_start_date = start_date;
 			start_date_id = security.index;
@@ -74,15 +74,15 @@ void match_security_length(/*I*/ const data::Data& security_data,
 			end_date_id = security.index;
 		}
 	}
-	std::cout << "using start date of: " << security_data.get_security_name(start_date_id)
+	std::cout << "using start date of: " << security_data.GetSecurityNameByIndex(start_date_id)
 		<< " " << ctime(&max_start_date);
-	std::cout << "using end date of: " << security_data.get_security_name(end_date_id)
+	std::cout << "using end date of: " << security_data.GetSecurityNameByIndex(end_date_id)
 		<< " " << ctime(&min_end_date);
 
 	processed = std::vector<security_column>{};
 	for (auto security: selections){
 		processed.emplace_back(security_column({
-			security_data.trim(security.security_returns, max_start_date, min_end_date),
+			security_data.TrimSecurityByDate(security.security_returns, max_start_date, min_end_date),
 			max_start_date,
 			min_end_date,
 			security.index
