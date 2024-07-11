@@ -1,4 +1,3 @@
-#pragma once
 #ifndef EFFICIENTFRONTIER_DATAMANIPULATION_DATAMANIPULATION_H_
 #define EFFICIENTFRONTIER_DATAMANIPULATION_DATAMANIPULATION_H_
 
@@ -7,6 +6,8 @@
 #include <vector>
 #include <map>
 #include <ctime>
+
+#include "date_line/date_line.h"
 
 typedef std::vector<std::vector<double>> FloatArray;
 typedef std::vector<std::string> Tokens_t;
@@ -17,7 +18,7 @@ class Data{
 private: // fields
 	size_t row_count_ = 0;
 	size_t column_count_ = 0;
-	std::vector<std::time_t> date_list_;
+	DateLine date_line_;
 	FloatArray return_table_;
 	Tokens_t security_names_;
 	std::vector<std::time_t> security_start_date_list_;
@@ -80,7 +81,6 @@ private: // methods
 				/*I*/const std::vector<double>& data_row, 
 				/*IO*/std::vector<bool>& security_life_tracker);
 
-	size_t MatchDate(time_t target, std::vector<time_t>::const_iterator& match) const;
 
 	/**
 	 * Parses the whole data into this class instance.
@@ -105,15 +105,12 @@ public: // methods
 	 */
 	std::vector<double> TrimSecurityByDate(/*I*/ const std::vector<double>& full_length_security, /*I*/ time_t start, /*I*/ time_t end) const;
 
-	std::time_t GetDate(size_t date_index) const;
 	size_t FindIndexBySecurityName(const std::string& security_name) const;
 	std::vector<double> GetSecurityByIndex(size_t security_index) const;
 	std::string GetSecurityNameByIndex(size_t security_index) const;
 	std::time_t GetStartDate(size_t security_index) const;
 	std::time_t GetEndDate(size_t security_index) const;
 	size_t GetSecuritiesCount() const;
-	size_t TimePointCount() const;
-
 };
 }
 #endif // EFFICIENTFRONTIER_DATAMANIPULATION_DATAMANIPULATION_H_

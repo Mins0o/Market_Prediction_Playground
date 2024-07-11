@@ -10,6 +10,7 @@
 #include <rapidfuzz/fuzz.hpp>
 
 #include "data_manipulation.h"
+#include "date_line/date_line.h"
 
 namespace data{
 	/**
@@ -37,8 +38,6 @@ namespace data{
 
 	Data::Data(std::ifstream& data_file_stream){
 		std::cout << "file stream constructor" << std::endl;
-		date_list_.reserve(9000);
-
 		ParseStream(data_file_stream);
 	}
 
@@ -114,11 +113,6 @@ namespace data{
 		}
 	}
 
-	size_t Data::MatchDate(time_t target, std::vector<time_t>::const_iterator& match) const{
-		match = std::lower_bound(date_list_.begin(), date_list_.end(), target);
-		return (match - date_list_.begin());
-	}
-
 	void Data::ParseStream(std::ifstream& parsing_stream){
 		parsing_stream.clear();
 		parsing_stream.seekg(0);
@@ -138,6 +132,7 @@ namespace data{
 		security_start_date_list_ = std::vector<time_t>(column_count_, 0);
 		security_end_date_list_ = std::vector<time_t>(column_count_, 9'999'999);
 
+		std::vector<time_t> date_list_;
 		while(std::getline(parsing_stream, data_line)){
 			std::vector<double> data_row;
 
@@ -146,13 +141,12 @@ namespace data{
 
 			ProcessDataRow(date, data_row, is_security_alive_list);
 		}
-
+		date_line_.AddDatesToList(date_list_);
 	}
 
 	std::vector<double> Data::TrimSecurityByDate(const std::vector<double>& full_length_security, time_t start, time_t end) const{
-		std::vector<time_t>::const_iterator temp_it;
-		const size_t start_index = MatchDate(start, temp_it);
-		const size_t end_index = MatchDate(end, temp_it);
+		const size_t start_index = date_line_.MatchDateIndex(start);
+		const size_t end_index = date_line_.MatchDateIndex(end);
 		const size_t max_index = full_length_security.size();
 		auto start_it = full_length_security.begin();
 		return std::vector<double>(start_it + start_index, start_it + std::min(end_index + 1, max_index));
@@ -180,10 +174,6 @@ namespace data{
 		return match;
 	}
 
-	std::time_t Data::GetDate(size_t date_index) const{
-		return date_list_[date_index];
-	}
-
 	std::vector<double> Data::GetSecurityByIndex(size_t security_index) const{
 		return return_table_[security_index];
 	}
@@ -202,9 +192,5 @@ namespace data{
 
 	size_t Data::GetSecuritiesCount() const{
 		return column_count_;
-	}
-
-	size_t Data::TimePointCount() const{
-		return date_list_.size();
 	}
 }
