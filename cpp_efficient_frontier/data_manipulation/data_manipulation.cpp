@@ -174,7 +174,7 @@ namespace data{
 		return match;
 	}
 
-	std::vector<double> Data::GetSecurityByIndex(size_t security_index) const{
+	std::vector<double> Data::GetSecurityDataByIndex(size_t security_index) const{
 		return return_table_[security_index];
 	}
 
@@ -182,11 +182,11 @@ namespace data{
 		return security_names_[security_index];
 	}
 
-	std::time_t Data::GetStartDate(size_t security_index) const{
+	std::time_t Data::GetStartDateByIndex(size_t security_index) const{
 		return security_start_date_list_[security_index];
 	}
 
-	std::time_t Data::GetEndDate(size_t security_index) const{
+	std::time_t Data::GetEndDateByIndex(size_t security_index) const{
 		return security_end_date_list_[security_index];
 	}
 

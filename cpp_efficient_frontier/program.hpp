@@ -45,9 +45,9 @@ void choose_securities(/*I*/ data::Data security_data,
 		if (index != -1){
 			std::cout << "Choosing " << security_data.GetSecurityNameByIndex(index)
 				<< " for " << choice << std::endl;
-			selections.emplace_back(security_column({security_data.GetSecurityByIndex(index),
-						security_data.GetStartDate(index),
-						security_data.GetEndDate(index),
+			selections.emplace_back(security_column({security_data.GetSecurityDataByIndex(index),
+						security_data.GetStartDateByIndex(index),
+						security_data.GetEndDateByIndex(index),
 						index}));
 		}
 	}
@@ -63,8 +63,8 @@ void match_security_length(/*I*/ const data::Data& security_data,
 	size_t end_date_id = -1;
 
 	for (auto security: selections){
-		time_t start_date = security_data.GetStartDate(security.index);
-		time_t end_date = security_data.GetEndDate(security.index);
+		time_t start_date = security_data.GetStartDateByIndex(security.index);
+		time_t end_date = security_data.GetEndDateByIndex(security.index);
 		if (max_start_date < start_date){
 			max_start_date = start_date;
 			start_date_id = security.index;
