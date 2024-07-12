@@ -48,6 +48,27 @@ namespace calculations {
 		return rebalanced_surplus;
 	}
 
+	std::vector<double> Calculations::CompoundPeriodicRebalancedSeries(/*I*/ const std::vector<double>& returns,
+						/*I*/ const std::vector<size_t>& rebalancing_indices,
+						/*O*/ std::vector<double>& compounded_values){
+		double net_value = 1.0;
+		std::vector<double> rebalanced_surplus = {};
+		compounded_values = {};
+		compounded_values.reserve(returns.size());
+		compounded_values.emplace_back(net_value);
+		size_t rebalancing_index = 0;
+		for(int ii=0; ii<returns.size(); ii++){
+			if(rebalancing_index < rebalancing_indices.size() && ii == rebalancing_indices[rebalancing_index]){
+				rebalanced_surplus.emplace_back(net_value-1);
+				net_value = 1;
+				rebalancing_index++;
+			}
+			net_value *= 1 + (returns[ii]/100);
+			compounded_values.emplace_back(net_value);
+		}
+		return rebalanced_surplus;
+	}
+
 	std::vector<double> Calculations::CalculateReturnsFromValueSeries(/*I*/ const std::vector<double>& stripped_values){
 		double prev = stripped_values[0];
 		std::vector<double> change_rates = {};
@@ -136,6 +157,39 @@ namespace calculations {
 				for (int ll=0; ll<returns.size(); ll ++){
 					compounded[ll][ii+1] = rebalanced_total * weights[ll];
 				}
+			}
+			result_values.emplace_back(rebalanced_total);
+		}
+		return result_values;
+	}
+
+	std::vector<double> Calculations::WeightedSumOfValuesWithRebalancing(/*I*/ const std::vector<std::vector<double>>& returns,
+								/*I*/ const std::vector<double>& weights,
+								/*I*/ const std::vector<size_t>& rebalancing_indices){
+		if(weights.empty() || returns.empty()){
+			std::cout << "Calculations::rebalanced_weighted_sum: empty vectors" << std::endl;
+		}
+
+		size_t number_of_securities = returns.size();
+		std::vector<double> result_values = {1};
+		std::vector<std::vector<double>> compounded(weights.size(),std::vector<double>());
+
+		for (int mm=0; mm<weights.size(); mm++){
+			compounded[mm].emplace_back(weights[mm]);
+		}
+
+		size_t rebalancing_index = 0;
+		for(int ii=0; ii<returns[0].size(); ii++){
+			double rebalanced_total = 0;
+			for (int jj=0; jj<weights.size(); jj++){
+				compounded[jj].emplace_back(compounded[jj][ii] * (1 + returns[jj][ii]/100.0));
+				rebalanced_total += compounded[jj][ii+1];
+			}
+			if (rebalancing_index < rebalancing_indices.size() && ii == rebalancing_indices[rebalancing_index]){
+				for (int ll=0; ll<returns.size(); ll ++){
+					compounded[ll][ii+1] = rebalanced_total * weights[ll];
+				}
+				rebalancing_index++;
 			}
 			result_values.emplace_back(rebalanced_total);
 		}

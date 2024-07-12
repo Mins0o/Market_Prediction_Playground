@@ -36,6 +36,10 @@ public:
 							/*I*/ const size_t rebalancing_term,
 							/*O*/ std::vector<double>& compounded_values);
 
+	static std::vector<double> CompoundPeriodicRebalancedSeries(/*I*/ const std::vector<double>& returns,
+							/*I*/ const std::vector<size_t>& rebalancing_indices,
+							/*O*/ std::vector<double>& compounded_values);
+
 	/**
 	 * creates a vector of change rates from a vector of compounded values.
 	 * @param stripped_value timeseries of values of a security. assumes there are no 0 value
@@ -88,6 +92,10 @@ public:
 	static std::vector<double> WeightedSumOfValuesWithRebalancing(/*I*/ const std::vector<std::vector<double>>& returns,
 								/*I*/ const std::vector<double>& weights,
 								/*I*/ const size_t rebalancing_term);
+
+	static std::vector<double> WeightedSumOfValuesWithRebalancing(/*I*/ const std::vector<std::vector<double>>& returns,
+								/*I*/ const std::vector<double>& weights,
+								/*I*/ const std::vector<size_t>& rebalancing_indices);
 
 	/**
 	 * compounds daily returns into periodic return of a longer term.
