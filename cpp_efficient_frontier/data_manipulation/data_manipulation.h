@@ -13,7 +13,7 @@ typedef std::vector<std::vector<double>> FloatArray;
 typedef std::vector<std::string> Tokens_t;
 using SecurityColumn = struct {
 	std::string security_name;
-	std::vector<double> security_data;
+	std::vector<double> security_returns;
 	std::time_t start_date;
 	std::time_t end_date;
 };
@@ -113,6 +113,8 @@ public: // methods
 	std::vector<double> TrimSecurityByDate(/*I*/ const std::vector<double>& full_length_security, /*I*/ time_t start, /*I*/ time_t end) const;
 
 	size_t FindIndexBySecurityName(const std::string& security_name) const;
+	SecurityColumn GetSecurityByName(const std::string& security_name) const;
+	SecurityColumn GetSecurityByIndex(size_t security_index) const;
 	std::vector<double> GetSecurityDataByIndex(size_t security_index) const;
 	std::string GetSecurityNameByIndex(size_t security_index) const;
 	std::time_t GetStartDateByIndex(size_t security_index) const;

@@ -174,6 +174,23 @@ namespace data{
 		return match;
 	}
 
+	SecurityColumn Data::GetSecurityByName(const std::string& security_name) const{
+		size_t index = FindIndexBySecurityName(security_name);
+		if (index == -1){
+			return SecurityColumn();
+		}
+		return GetSecurityByIndex(index);
+	}
+
+	SecurityColumn Data::GetSecurityByIndex(size_t security_index) const{
+		return SecurityColumn({
+			security_names_[security_index],
+			return_table_[security_index],
+			security_start_date_list_[security_index],
+			security_end_date_list_[security_index]
+		});
+	}
+
 	std::vector<double> Data::GetSecurityDataByIndex(size_t security_index) const{
 		return return_table_[security_index];
 	}

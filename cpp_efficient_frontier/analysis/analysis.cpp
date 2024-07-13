@@ -44,16 +44,16 @@ PortfolioData Analysis::GetPortfolioStats(const std::vector<double>& portfolio_r
 }
 
 template<typename T>
-PortfolioData Analysis::RandomRebalancedMix(/*I*/ const std::vector<std::vector<double>>& returns,
+PortfolioData Analysis::MixRandomRebalanceOnce(/*I*/ const std::vector<std::vector<double>>& returns,
 							/*I*/ const double daily_risk_free_rate,
-							/*I*/ T rebalance_parameter){
+							/*I*/ T rebalance_parameter) const{
 	std::vector<double> mixed_values;
 	std::vector<double> mixed_returns;
 	size_t number_of_securities = returns.size();
 
 	auto weights = MakeRandomWeights(number_of_securities);
 
-	if constexper (std::is_same_v<T, size_t> || std::is_same_v<T, std::vector<size_t>>){
+	if constexpr (std::is_same_v<T, size_t> || std::is_same_v<T, std::vector<size_t>>){
 		mixed_values = calculations::Calculations::WeightedSumOfValuesWithRebalancing(returns, weights, rebalance_parameter);
 		mixed_returns = calculations::Calculations::CalculateReturnsFromValueSeries(mixed_values);
 	} else {
@@ -64,6 +64,28 @@ PortfolioData Analysis::RandomRebalancedMix(/*I*/ const std::vector<std::vector<
 	}
 	auto pf_data = GetPortfolioStats(mixed_returns, weights, daily_risk_free_rate);
 	return pf_data;
+}
+
+OptimalSet Analysis::FindOptimalMix(const SimulationResult& simulation_result) const{
+	OptimalSet optimal_set = {};
+	double max_sharpe = 0;
+	double max_return = 0;
+	double min_risk = 0;
+	for (const PortfolioData& simulation_point: simulation_result.simulation_points){
+		if (simulation_point.sharpe_ratio > max_sharpe){
+			max_sharpe = simulation_point.sharpe_ratio;
+			optimal_set[0] = simulation_point;
+		}
+		if (simulation_point.expected_return > max_return){
+			max_return = simulation_point.expected_return;
+			optimal_set[1] = simulation_point;
+		}
+		if (simulation_point.risk < min_risk){
+			min_risk = simulation_point.risk;
+			optimal_set[2] = simulation_point;
+		}
+	}
+	return optimal_set;
 }
 
 // public
@@ -81,16 +103,54 @@ void Analysis::ChooseSecurities(const data::Data& security_data,
     for (const auto& choice: security_choices){
         size_t index = security_data.FindIndexBySecurityName(choice);
         if (index != -1){
-            std::cout << "Choosing " << security_data.GetSecurityNameByIndex(index) << " for " << choice << std::endl;
-            security_selections_.emplace_back(SecurityColumn({
-                security_data.GetSecurityNameByIndex(index),
-                security_data.GetSecurityDataByIndex(index),
-                security_data.GetStartDateByIndex(index),
-                security_data.GetEndDateByIndex(index)
-            }));
-            security_choices_names_.emplace_back(choice);
+			const std::string found_name = security_data.GetSecurityNameByIndex(index);
+            std::cout << "Choosing " << found_name << " for " << choice << std::endl;
+            security_selections_.emplace_back(security_data.GetSecurityByIndex(index));
+            security_choices_names_.emplace_back(found_name);
         }
     }
+}
+
+template <typename T>
+void Analysis::SetRebalancingParameter(T rebalancing_parameter){
+	std::cout << "Setting rebalancing parameter" << std::endl;
+	if constexpr (std::is_same_v<T, size_t>){
+		rebalance_type_ = RebalanceType::kConstantInterval;
+		rebalance_interval_ = rebalancing_parameter;
+	} else if constexpr (std::is_same_v<T, std::vector<size_t>){
+		rebalance_type_ = RebalanceType::kPredefinedIndices;
+		rebalance_indices_ = rebalancing_parameter;
+	} else {
+		std::cout << "Rebalancing parameter is not of type size_t or std::vector<size_t>" << std::endl
+		<< "Setting to long-term hold" << std::enld;
+		rebalance_type_ = RebalanceType::kConstantInterval;
+		rebalance_interval_ = 0;
+	}
+} 
+
+void Analysis::OptimizePortfolio(size_t simulation_count){
+	std::cout << "Optimizing portfolio" << std::endl;
+	std::vector<std::vector<double>> returns;
+	for (const auto& security: security_selections_){
+		returns.emplace_back(security.security_returns);
+	}
+
+	std::vector<PortfolioData> simulation_points;
+	for (size_t ii = 0; ii < simulation_count; ii++){
+		simulation_points.emplace_back(
+			// Unfortunately, the ternary operator cannot be used with defferent return types.
+			rebalance_type_ == RebalanceType::kConstantInterval ?
+			MixRandomRebalanceOnce(
+				returns,
+				0.01,
+				rebalance_interval_) :
+			MixRandomRebalanceOnce(
+				returns,
+				0.01,
+				rebalance_indices_));
+	}
+	std::string simulation_id=std::to_string(simulated_results_.size());
+	simulated_results_.emplace_back(SimulationResult({simulation_id, simulation_points}));
 }
 
 };
