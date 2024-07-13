@@ -11,5 +11,5 @@ add_subdirectory(3rdparty/RapidFuzz)
 
 add_executable(main_program "program.cpp" "program.hpp")
 
-target_link_libraries(main_program lib_calculations)
-target_link_libraries(main_program lib_data)
+target_link_libraries(main_program calculations)
+target_link_libraries(main_program data)
