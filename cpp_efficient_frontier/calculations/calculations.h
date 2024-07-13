@@ -24,6 +24,9 @@ public:
 	 */
 	static std::vector<double> CompoundReturnToValueSeries(/*I*/ const std::vector<double>& returns);
 
+	static std::vector<double> WeightedSumOfValuesFromReturns(/*I*/ const std::vector<std::vector<double>>& returns,
+							/*I*/ const std::vector<double>& weights);
+
 	/**
 	* With daily returns and rebalancing period, compound the returns into values.
 	* the return/loss during rebalancing is returned

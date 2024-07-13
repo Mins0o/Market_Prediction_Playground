@@ -43,18 +43,25 @@ PortfolioData Analysis::GetPortfolioStats(const std::vector<double>& portfolio_r
 	return PortfolioData({sharpe_r, exp_ret, stdev, weights});
 }
 
-PortfolioData Analysis::SimulateRebalancedMix(/*I*/ const std::vector<std::vector<double>>& returns,
+template<typename T>
+PortfolioData Analysis::RandomRebalancedMix(/*I*/ const std::vector<std::vector<double>>& returns,
 							/*I*/ const double daily_risk_free_rate,
-							/*I*/ size_t rebalance_period){
+							/*I*/ T rebalance_parameter){
 	std::vector<double> mixed_values;
 	std::vector<double> mixed_returns;
 	size_t number_of_securities = returns.size();
 
 	auto weights = MakeRandomWeights(number_of_securities);
 
-	mixed_values = calculations::Calculations::WeightedSumOfValuesWithRebalancing(returns, weights, rebalance_period);
-	mixed_returns = calculations::Calculations::CalculateReturnsFromValueSeries(mixed_values);
-
+	if constexper (std::is_same_v<T, size_t> || std::is_same_v<T, std::vector<size_t>>){
+		mixed_values = calculations::Calculations::WeightedSumOfValuesWithRebalancing(returns, weights, rebalance_parameter);
+		mixed_returns = calculations::Calculations::CalculateReturnsFromValueSeries(mixed_values);
+	} else {
+		std::cout << "Rebalancing parameter is not of type size_t or std::vector<size_t>" << std::endl
+		<< "Simulating" ;
+		mixed_values = calculations::Calculations::WeightedSumOfValuesFrom(returns, weights);
+		mixed_returns = calculations::Calculations::CalculateReturnsFromValueSeries(mixed_values);
+	}
 	auto pf_data = GetPortfolioStats(mixed_returns, weights, daily_risk_free_rate);
 	return pf_data;
 }

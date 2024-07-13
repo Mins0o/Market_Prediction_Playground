@@ -132,6 +132,25 @@ namespace calculations {
 		return results;
 	}
 
+	std::vector<double> Calculations::WeightedSumOfValuesFromReturns(/*I*/ const std::vector<std::vector<double>>& returns,
+								/*I*/ const std::vector<double>& weights){
+		if(weights.empty() || returns.empty()){
+			std::cout << "Calculations::weighted_sum: empty vectors" << std::endl;
+		}
+		std::vector<double> mixed_values;
+		std::vector<double> mixed_returns;
+		size_t number_of_securities = returns.size();
+		std::vector<std::vector<double>> compounded = {};
+
+		for (const auto& ret : returns){
+			compounded.emplace_back(CompoundReturnToValueSeries(ret));
+		}
+		mixed_values = WeightedSumOfSeries(compounded, weights);
+		mixed_returns = CalculateReturnsFromValueSeries(mixed_values);
+
+		return mixed_returns;
+	}
+
 	std::vector<double> Calculations::WeightedSumOfValuesWithRebalancing(/*I*/ const std::vector<std::vector<double>>& returns,
 								/*I*/ const std::vector<double>& weights,
 								/*I*/ const size_t rebalancing_term){
