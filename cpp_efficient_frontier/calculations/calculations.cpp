@@ -153,7 +153,7 @@ namespace calculations {
 				compounded[jj].emplace_back(compounded[jj][ii] * (1 + returns[jj][ii]/100.0));
 				rebalanced_total += compounded[jj][ii+1];
 			}
-			if (ii%rebalancing_term==0){
+			if (rebalancing_term!=0 && ii%rebalancing_term==0){
 				for (int ll=0; ll<returns.size(); ll ++){
 					compounded[ll][ii+1] = rebalanced_total * weights[ll];
 				}

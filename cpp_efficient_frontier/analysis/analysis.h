@@ -28,14 +28,26 @@ private:
 public:
     int dummy;
 private:
-
+    std::vector<double> MakeRandomWeights(/*I*/ const size_t count) const;
+    PortfolioData GetPortfolioStats(/*I*/ const std::vector<double>&portfolio_returns,
+                                    /*I*/ const std::vector<double>& weights, 
+                                    /*I*/ double risk_free_rate = 0) const;
+    PortfolioData SimulateRebalancedMix(/*I*/ const std::vector<std::vector<double>>& returns,
+                                /*I*/ const double daily_risk_free_rate = 0.01,
+                                /*I*/ size_t rebalance_period = 1);
+    PortfolioData SimulateRebalancedMix(/*I*/ const std::vector<std::vector<double>>& returns,
+                                /*I*/ const double daily_risk_free_rate = 0.01,
+                                /*I*/ std::vector<size_t> rebalance_indices);
 public:
     Analysis();
-    Analysis(/*I*/ const std::vector<std::string>& security_choices);
-    void ChooseSecurities(/*I*/ const data::Data& security_data, /*I*/ const std::vector<std::string>& security_choices);
+    Analysis(/*I*/ const data::Data& dataset, /*I*/ const std::vector<std::string>& security_choices);
+    void ChooseSecurities(/*I*/ const data::Data& security_data, 
+                        /*I*/ const std::vector<std::string>& security_choices);
     void ConfigureAnalysis();
     void OptimizePortfolio(/*I*/ const std::vector<SecurityColumn>& processed);
-    void SimulateTimelapse(/*I*/ const std::vector<SecurityColumn>& processed, /*I*/ const size_t start, /*I*/ const size_t end);
+    void SimulateTimelapse(/*I*/ const std::vector<SecurityColumn>& processed, 
+                            /*I*/ const size_t start, 
+                            /*I*/ const size_t end);
     void PrintOptimalMixes();
 };
 
