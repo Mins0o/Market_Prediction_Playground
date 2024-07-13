@@ -4,18 +4,18 @@
 #include <string>
 #include <array>
 
-#include "data_manipulation/data_manipulation.h"
+#include "../data_manipulation/data_manipulation.h"
 
 namespace analysis{
     
-using PortfolioData = struct {
+using PortfolioData = struct PortfolioData_t{
     double sharpe_ratio;
     double expected_return;
     double risk;
     std::vector<double> weights;
 };
 
-using SimulationResult = struct {
+using SimulationResult = struct SimulationResult_t{
     std::string simulation_id;
     std::vector<PortfolioData> simulation_points;
 };
@@ -45,8 +45,8 @@ private:
                                     /*I*/ double risk_free_rate = 0) const;
     template<typename T>
     PortfolioData MixRandomRebalanceOnce(/*I*/ const std::vector<std::vector<double>>& returns,
-                                /*I*/ const double daily_risk_free_rate = 0.01,
-                                /*I*/ T rebalancing_parameter) const;
+                                /*I*/ T rebalancing_parameter,
+                                /*I*/ const double daily_risk_free_rate = 0.01) const;
 
     OptimalSet FindOptimalMix(/*I*/ const SimulationResult& simulation_result) const;
 public:

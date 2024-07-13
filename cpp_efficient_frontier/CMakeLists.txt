@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 project(efficient_frontier)
 
 add_subdirectory("calculations")

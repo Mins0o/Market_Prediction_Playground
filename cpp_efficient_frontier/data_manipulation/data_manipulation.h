@@ -11,7 +11,7 @@
 
 typedef std::vector<std::vector<double>> FloatArray;
 typedef std::vector<std::string> Tokens_t;
-using SecurityColumn = struct {
+using SecurityColumn = struct SecurityColumn_t{
 	std::string security_name;
 	std::vector<double> security_returns;
 	std::time_t start_date;

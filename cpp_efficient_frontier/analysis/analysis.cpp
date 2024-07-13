@@ -2,8 +2,8 @@
 #include <algorithm>
 
 #include "analysis.h"
-#include "data_manipulation/data_manipulation.h"
-#include "calculations/calculations.h"
+#include "../data_manipulation/data_manipulation.h"
+#include "../calculations/calculations.h"
 
 namespace analysis{
 //private
@@ -45,8 +45,8 @@ PortfolioData Analysis::GetPortfolioStats(const std::vector<double>& portfolio_r
 
 template<typename T>
 PortfolioData Analysis::MixRandomRebalanceOnce(/*I*/ const std::vector<std::vector<double>>& returns,
-							/*I*/ const double daily_risk_free_rate,
-							/*I*/ T rebalance_parameter) const{
+							/*I*/ T rebalance_parameter,
+							/*I*/ const double daily_risk_free_rate) const{
 	std::vector<double> mixed_values;
 	std::vector<double> mixed_returns;
 	size_t number_of_securities = returns.size();
@@ -59,7 +59,7 @@ PortfolioData Analysis::MixRandomRebalanceOnce(/*I*/ const std::vector<std::vect
 	} else {
 		std::cout << "Rebalancing parameter is not of type size_t or std::vector<size_t>" << std::endl
 		<< "Simulating" ;
-		mixed_values = calculations::Calculations::WeightedSumOfValuesFrom(returns, weights);
+		mixed_values = calculations::Calculations::WeightedSumOfValuesFromReturns(returns, weights);
 		mixed_returns = calculations::Calculations::CalculateReturnsFromValueSeries(mixed_values);
 	}
 	auto pf_data = GetPortfolioStats(mixed_returns, weights, daily_risk_free_rate);
@@ -117,12 +117,12 @@ void Analysis::SetRebalancingParameter(T rebalancing_parameter){
 	if constexpr (std::is_same_v<T, size_t>){
 		rebalance_type_ = RebalanceType::kConstantInterval;
 		rebalance_interval_ = rebalancing_parameter;
-	} else if constexpr (std::is_same_v<T, std::vector<size_t>){
+	} else if constexpr (std::is_same_v<T, std::vector<size_t>>){
 		rebalance_type_ = RebalanceType::kPredefinedIndices;
 		rebalance_indices_ = rebalancing_parameter;
 	} else {
 		std::cout << "Rebalancing parameter is not of type size_t or std::vector<size_t>" << std::endl
-		<< "Setting to long-term hold" << std::enld;
+		<< "Setting to long-term hold" << std::endl;
 		rebalance_type_ = RebalanceType::kConstantInterval;
 		rebalance_interval_ = 0;
 	}
@@ -142,12 +142,12 @@ void Analysis::OptimizePortfolio(size_t simulation_count){
 			rebalance_type_ == RebalanceType::kConstantInterval ?
 			MixRandomRebalanceOnce(
 				returns,
-				0.01,
-				rebalance_interval_) :
+				rebalance_interval_,
+				0.01) :
 			MixRandomRebalanceOnce(
 				returns,
-				0.01,
-				rebalance_indices_));
+				rebalance_indices_,
+				0.01));
 	}
 	std::string simulation_id=std::to_string(simulated_results_.size());
 	simulated_results_.emplace_back(SimulationResult({simulation_id, simulation_points}));
