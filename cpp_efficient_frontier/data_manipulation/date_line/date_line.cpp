@@ -58,7 +58,7 @@ std::vector<size_t> DateLine::GetDatesOfMonthIndices(time_t start, time_t end, s
     }
 
     for(size_t ii = start_value; ii <= end_value; ii++){
-            time_t temp_time = ConstructDate(ii/12 + 1900, ii%12, target_day);
+            time_t temp_time = ConstructDate(ii/12, ii%12, target_day);   
             size_t index = MatchDateIndex(temp_time);
             if (index < date_list_.size()){
                     result.emplace_back(index);
