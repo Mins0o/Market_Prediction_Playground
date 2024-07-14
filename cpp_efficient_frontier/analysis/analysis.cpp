@@ -154,7 +154,7 @@ void Analysis::ChooseSecurities(const data::Data& security_data,
 void Analysis::ShowSecurityChoices() const{
 	std::cout << "Chosen securities are: " << std::endl;
 	for (const auto& security: security_selections_){
-		std::cout << "name: " << security.security_name << "\t"
+		std::cout << "name: " << std::setw(15) << security.security_name.substr(0,15) << "\t"
 				<< "start date: " << std::string(ctime(&security.start_date)).substr(0, 24) << "\t"
 				<< "end date: " << std::string(ctime(&security.end_date)).substr(0,24) << std::endl;
 	}
@@ -205,7 +205,10 @@ void Analysis::PrintOptimalMixes(int index) const{
 	} else if (index < optimal_mixes_.size()){
 		optimal_mixes = optimal_mixes_[index];
 	}
+	std::vector<std::string> mix_names = {"Max Sharpe Ratio", "Max Return", "Min Risk"};
+	std::cout << std::endl;
 	for (int ii=0; ii<3; ii++){
+		std::cout << mix_names[ii] << std::endl;
 		auto optimal_mix = optimal_mixes[ii];
 		std::cout << "Expected Return: " << optimal_mix.expected_return << std::endl;
 		std::cout << "Risk: " << optimal_mix.risk << std::endl;
@@ -214,7 +217,7 @@ void Analysis::PrintOptimalMixes(int index) const{
 		for (double weight: optimal_mix.weights){
 			std::cout << std::fixed << std::setprecision(4) << weight << " | ";
 		}
-		std::cout << std::endl;
+		std::cout << std::endl << std::endl;
 	}
 }
 

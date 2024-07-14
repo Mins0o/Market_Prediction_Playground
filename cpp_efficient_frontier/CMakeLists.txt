@@ -9,7 +9,7 @@ add_subdirectory("data_manipulation")
 add_subdirectory("analysis")
 add_subdirectory(3rdparty/RapidFuzz)
 
-add_executable(main_program "program.cpp" "program.hpp")
+add_executable(main_program "program.cpp")
 
 target_link_libraries(main_program calculations)
 target_link_libraries(main_program data)
