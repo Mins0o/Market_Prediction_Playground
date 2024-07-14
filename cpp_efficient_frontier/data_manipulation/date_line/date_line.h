@@ -13,6 +13,7 @@ public:
 private:
     time_t ConstructDate(size_t year, size_t month, size_t day) const;
 public:
+    static std::time_t ExtractDate(/*I*/ const char* date_string);
     time_t GetDateAtIndex(size_t index) const;
     size_t MatchDateIndex(time_t target) const;
     std::vector<size_t> GetDatesOfMonthIndices(time_t start, time_t end, size_t day) const;

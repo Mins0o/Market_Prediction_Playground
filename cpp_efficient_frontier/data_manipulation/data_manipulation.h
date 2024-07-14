@@ -52,12 +52,6 @@ private: // methods
 				/*O*/ Tokens_t& security_name) const;
 
 	/**
-	 * Extracts time_t date from the cstring in %Y-%m-%d format
-	 * @param date_string date string in %Y-%m-%d . const char* type
-	 */
-	std::time_t ExtractDate(/*I*/ const char* date_string) const;
-
-	/**
 	 * takes in a token and returns double value
 	 * if the token is a empty string, return 0
 	 */

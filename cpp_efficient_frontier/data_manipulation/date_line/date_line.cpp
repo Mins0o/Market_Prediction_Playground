@@ -20,6 +20,14 @@ time_t DateLine::ConstructDate(size_t year, size_t month, size_t day) const{
 
 // end private
 // public
+std::time_t DateLine::ExtractDate(const char* date_string){
+    tm temporary_tm = {0};
+    strptime(date_string, "%Y-%m-%d", &temporary_tm);
+    std:time_t time = mktime(&temporary_tm);
+
+    return time;
+}
+
 time_t DateLine::GetDateAtIndex(size_t index) const{
     return date_list_[index];
 }

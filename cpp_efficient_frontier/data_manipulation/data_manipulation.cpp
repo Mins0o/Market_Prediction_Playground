@@ -58,14 +58,6 @@ namespace data{
 		return security_names;
 	}
 
-	std::time_t Data::ExtractDate(/*I*/ const char* date_string) const{
-		tm temporary_tm = {0};
-		strptime(date_string, "%Y-%m-%d", &temporary_tm);
-		std:time_t time = mktime(&temporary_tm);
-
-		return time;
-	}
-
 	double Data::StofToken(/*I*/ std::string value_string) const{
 		if (value_string == "" || value_string ==" "){
 			return 0;
@@ -78,7 +70,7 @@ namespace data{
 		Tokens_t tokens = {};
 		tokens = TokenizeLine(line, tokens);
 
-		std::time_t time = ExtractDate(tokens.front().c_str());
+		 std::time_t time = DateLine::ExtractDate(tokens.front().c_str());
 
 		for(Tokens_t::iterator ii = tokens.begin()+1; ii != tokens.end(); ii++){
 			data_values.emplace_back(StofToken(*ii));
