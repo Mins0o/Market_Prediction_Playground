@@ -13,3 +13,4 @@ add_executable(main_program "program.cpp" "program.hpp")
 
 target_link_libraries(main_program calculations)
 target_link_libraries(main_program data)
+target_link_libraries(main_program analysis)

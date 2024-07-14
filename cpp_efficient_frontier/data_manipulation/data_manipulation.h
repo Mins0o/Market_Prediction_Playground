@@ -120,6 +120,7 @@ public: // methods
 	std::time_t GetStartDateByIndex(size_t security_index) const;
 	std::time_t GetEndDateByIndex(size_t security_index) const;
 	size_t GetSecuritiesCount() const;
+	data::DateLine GetDateLine() const;
 };
 }
 #endif // EFFICIENTFRONTIER_DATAMANIPULATION_DATAMANIPULATION_H_

@@ -210,4 +210,8 @@ namespace data{
 	size_t Data::GetSecuritiesCount() const{
 		return column_count_;
 	}
+
+	data::DateLine Data::GetDateLine() const{
+		return date_line_;
+	}
 }
