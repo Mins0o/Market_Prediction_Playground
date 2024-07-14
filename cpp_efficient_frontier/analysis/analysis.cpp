@@ -6,6 +6,9 @@
 #include "../calculations/calculations.h"
 #include "../data_manipulation/date_line/date_line.h"
 
+#include <iostream>
+#include <iomanip>
+
 namespace analysis{
 //private
 std::vector<double> Analysis::MakeRandomWeights(const size_t count) const{
@@ -44,10 +47,6 @@ PortfolioData Analysis::GetPortfolioStats(const std::vector<double>& portfolio_r
 	return PortfolioData({sharpe_r, exp_ret, stdev, weights});
 }
 
-size_t Analysis::GetStartingIndex() const{
-	return date_line_.MatchDateIndex(start_date_);
-}
-
 template<typename T>
 PortfolioData Analysis::MixRandomRebalanceOnce(/*I*/ const std::vector<std::vector<double>>& returns,
 							/*I*/ T rebalance_parameter,
@@ -63,7 +62,7 @@ PortfolioData Analysis::MixRandomRebalanceOnce(/*I*/ const std::vector<std::vect
 		mixed_returns = calculations::Calculations::CalculateReturnsFromValueSeries(mixed_values);
 	} else {
 		std::cout << "Rebalancing parameter is not of type size_t or std::vector<size_t>" << std::endl
-		<< "Simulating" ;
+		<< "Simulating longterm strategy" << std::endl;
 		mixed_values = calculations::Calculations::WeightedSumOfValuesFromReturns(returns, weights);
 		mixed_returns = calculations::Calculations::CalculateReturnsFromValueSeries(mixed_values);
 	}
@@ -93,15 +92,35 @@ OptimalSet Analysis::FindOptimalMix(const SimulationResult& simulation_result) c
 	return optimal_set;
 }
 
-void Analysis::UpdateStartDate(const time_t new_date, const DateUpdateMode mode){
+void Analysis::UpdateStartDate(const SecurityColumn& target_security, const DateUpdateMode mode){
+	time_t new_date = target_security.start_date;
 	if (mode == DateUpdateMode::kUpdateToEarliest){
-		start_date_ = std::min(start_date_, new_date);
-	} else {
-		if (start_date_ == 999'999'999){
+		if (new_date < start_date_){
 			start_date_ = new_date;
+			security_name_of_start_date_ = target_security.security_name;
+			start_index_ = date_line_.MatchDateIndex(start_date_);
 		}
-		start_date_ = std::max(start_date_, new_date);
+	} else {
+		if (new_date > start_date_ || start_date_ == 999'999'999){
+			start_date_ = new_date;
+			security_name_of_start_date_ = target_security.security_name;
+			start_index_ = date_line_.MatchDateIndex(start_date_);
+		}
 	}
+}
+
+std::vector<size_t> Analysis::TrimRebalanceIndices(const std::vector<size_t>& rebalance_indices) const{
+	std::vector<size_t> trimmed_indices;
+	for (const auto& index: rebalance_indices){
+		if (index >= start_index_){
+			trimmed_indices.emplace_back(index - start_index_);
+		}
+	}
+	return trimmed_indices;
+}
+
+std::vector<double> Analysis::TrimReturns(const std::vector<double>& returns) const{
+	return std::vector<double>(returns.begin() + start_index_, returns.end());
 }
 
 // public
@@ -125,7 +144,7 @@ void Analysis::ChooseSecurities(const data::Data& security_data,
             std::cout << "Choosing " << found_name << " for " << choice << std::endl;
             security_selections_.emplace_back(security_data.GetSecurityByIndex(index));
             security_choices_names_.emplace_back(found_name);
-			UpdateStartDate(security_data.GetSecurityByIndex(index).start_date, DateUpdateMode::kUpdateToLatest);
+			UpdateStartDate(security_data.GetSecurityByIndex(index), DateUpdateMode::kUpdateToLatest);
 		} else {
 			std::cout << "Security " << choice << " not found" << std::endl;
         }
@@ -139,35 +158,22 @@ void Analysis::ShowSecurityChoices() const{
 				<< "start date: " << std::string(ctime(&security.start_date)).substr(0, 24) << "\t"
 				<< "end date: " << std::string(ctime(&security.end_date)).substr(0,24) << std::endl;
 	}
-	std::cout << "Using start date of :" << ctime(&start_date_) << std::endl;
+	std::cout << "Using start date of :" << std::string(ctime(&start_date_)).substr(0,24) <<
+			" from: " << security_name_of_start_date_ << std::endl;
 }
 
-template <typename T>
-void Analysis::SetRebalancingParameter(T rebalancing_parameter){
-	std::cout << "Setting rebalancing parameter" << std::endl;
-	if constexpr (std::is_same_v<T, size_t>){
-		rebalance_type_ = RebalanceType::kConstantInterval;
-		rebalance_interval_ = rebalancing_parameter;
-	} else if constexpr (std::is_same_v<T, std::vector<size_t>>){
-		rebalance_type_ = RebalanceType::kPredefinedIndices;
-		rebalance_indices_ = rebalancing_parameter;
-	} else {
-		std::cout << "Rebalancing parameter is not of type size_t or std::vector<size_t>" << std::endl
-		<< "Setting to long-term hold" << std::endl;
-		rebalance_type_ = RebalanceType::kConstantInterval;
-		rebalance_interval_ = 0;
-	}
-} 
+time_t Analysis::GetStartDate() const{
+	return start_date_;
+}
 
-OptimalSet Analysis::OptimizePortfolio(size_t simulation_count){
+void Analysis::OptimizePortfolio(size_t simulation_count){
 	std::cout << "Optimizing portfolio" << std::endl;
 	std::vector<std::vector<double>> returns;
 	for (const auto& security: security_selections_){
-		size_t start_index = GetStartingIndex();
-		auto starting_point = security.security_returns.begin() + start_index;
-		returns.emplace_back(std::vector<double>(starting_point, security.security_returns.end()));
+		returns.emplace_back(TrimReturns(security.security_returns));
 	}
 
+	auto rebalance_indices = TrimRebalanceIndices(rebalance_indices_);
 	std::vector<PortfolioData> simulation_points;
 	for (size_t ii = 0; ii < simulation_count; ii++){
 		simulation_points.emplace_back(
@@ -179,16 +185,41 @@ OptimalSet Analysis::OptimizePortfolio(size_t simulation_count){
 				0.01) :
 			MixRandomRebalanceOnce(
 				returns,
-				rebalance_indices_,
+				rebalance_indices,
 				0.01));
 	}
 	std::string simulation_id=std::to_string(simulated_results_.size());
 	SimulationResult current_result({simulation_id, simulation_points});
 	simulated_results_.emplace_back(current_result);
 
-	optimal_mixes_.emplace_back(FindOptimalMix(current_result));
+	auto optimal_set = FindOptimalMix(current_result);
 
-	return optimal_mixes_.back();
+	optimal_mixes_.emplace_back(optimal_set);
+	std::cout << "Simulation id: " << simulation_id << "Simulation index" << optimal_mixes_.size()-1 << std::endl;
 }
 
-};
+void Analysis::PrintOptimalMixes(int index) const{
+	std::array<PortfolioData,3> optimal_mixes;
+	if (index < 0){
+		optimal_mixes = optimal_mixes_.back();
+	} else if (index < optimal_mixes_.size()){
+		optimal_mixes = optimal_mixes_[index];
+	}
+	for (int ii=0; ii<3; ii++){
+		auto optimal_mix = optimal_mixes[ii];
+		std::cout << "Expected Return: " << optimal_mix.expected_return << std::endl;
+		std::cout << "Risk: " << optimal_mix.risk << std::endl;
+		std::cout << "Sharpe Ratio: " << optimal_mix.sharpe_ratio << std::endl;
+		std::cout << "Weights: ";
+		for (double weight: optimal_mix.weights){
+			std::cout << std::fixed << std::setprecision(4) << weight << " | ";
+		}
+		std::cout << std::endl;
+	}
+}
+
+std::vector<OptimalSet> Analysis::GetOptimalMixes() const{
+	return optimal_mixes_;
+}
+
+}; // namespace analysis

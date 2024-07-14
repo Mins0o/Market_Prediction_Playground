@@ -1,5 +1,6 @@
 #include "calculations/calculations.h"
 #include "data_manipulation/data_manipulation.h"
+#include "data_manipulation/date_line/date_line.h"
 #include "calculations/expected_returns/expected_returns.h"
 #include "analysis/analysis.h"
 
@@ -53,24 +54,22 @@ int main(int argc, char* argv[]){
 	for (std::string security_name: security_choices){
 		std::cout << security_name << "\t";
 	}
-	}else {
-		std::cout << "hello" <<std::endl;
-
+	} {
 		DiscountedMeanStrategy discnt_strat(1);
 		calculations::Calculations::SetExpectedReturnStrategy(&discnt_strat);
-		analysis::Analysis test_analysis(security_data, security_choices);
-		test_analysis.ShowSecurityChoices();
-		auto hello_opt = test_analysis.OptimizePortfolio(9999);
 
-		for (auto opt: hello_opt){
-			std::cout << "Expected Return: " << opt.expected_return << std::endl;
-			std::cout << "Risk: " << opt.risk << std::endl;
-			std::cout << "Sharpe Ratio: " << opt.sharpe_ratio << std::endl;
-			std::cout << "Weights: ";
-			for (double weight: opt.weights){
-				std::cout << std::fixed << std::setprecision(4) << weight << " | ";
-			}
-			std::cout << std::endl;
-		}
+		analysis::Analysis test_analysis(security_data, security_choices);
+
+		test_analysis.ShowSecurityChoices();
+
+		auto test_dateline = security_data.GetDateLine();
+		auto start_date = test_analysis.GetStartDate();
+		std::cout<< "start date " << std::string(ctime(&start_date)).substr(0,24) << std::endl;
+		auto first_day_of_months = test_dateline.GetDatesOfMonthIndices(start_date, data::DateLine::ExtractDate("2024-07-31"),1);
+
+		test_analysis.SetRebalancingParameter(first_day_of_months);
+		test_analysis.OptimizePortfolio(9999);
+
+		test_analysis.PrintOptimalMixes(-1);
 	}
 }
