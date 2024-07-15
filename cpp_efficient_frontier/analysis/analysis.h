@@ -59,11 +59,10 @@ public:
     int dummy;
 
 private:
-    void UpdateStartDate(/*I*/ const SecurityColumn& target_security, /*I*/ DateUpdateMode mode = DateUpdateMode::kUpdateToEarliest);
+    void UpdateStartDate(/*I*/ const SecurityColumn& target_security, 
+                        /*I*/ DateUpdateMode mode = DateUpdateMode::kUpdateToEarliest);
     std::vector<size_t> TrimRebalanceIndices(/*I*/ const std::vector<size_t>& rebalance_indices) const;
     std::vector<double> TrimReturns(/*I*/ const std::vector<double>&) const;
-
-    size_t GetStartingIndex() const;
 
     std::vector<double> MakeRandomWeights(/*I*/ const size_t count) const;
     template<typename T> 
