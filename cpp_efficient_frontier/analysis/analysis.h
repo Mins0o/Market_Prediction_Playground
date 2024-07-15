@@ -40,65 +40,86 @@ enum class DateUpdateMode{
 
 class Analysis{
 private:
-    std::vector<OptimalSet> optimal_mixes_ = {};
-    std::vector<std::string> security_choices_names_;
     std::vector<SecurityColumn> security_selections_;
-    std::vector<SimulationResult> simulated_results_;
-    RebalanceType rebalance_type_ = RebalanceType::kConstantInterval;
-    size_t rebalance_interval_ = 0;
-    std::vector<size_t> rebalance_indices_ = {};
+    std::vector<std::string> security_choices_names_;
+    data::DateLine date_line_;
+
     time_t start_date_ = 999'999'999;
     std::string security_name_of_start_date_ = "";
     time_t start_index_ = 0;
-    data::DateLine date_line_;
+
+    RebalanceType rebalance_type_ = RebalanceType::kConstantInterval;
+    size_t rebalance_interval_ = 0;
+    std::vector<size_t> rebalance_indices_ = {};
+
+    std::vector<SimulationResult> simulated_results_;
+    std::vector<OptimalSet> optimal_mixes_ = {};
+
 public:
     int dummy;
-private:
-    std::vector<double> MakeRandomWeights(/*I*/ const size_t count) const;
-    PortfolioData GetPortfolioStats(/*I*/ const std::vector<double>&portfolio_returns,
-                                    /*I*/ const std::vector<double>& weights, 
-                                    /*I*/ double risk_free_rate = 0) const;
-    size_t GetStartingIndex() const;
-    template<typename T>
-    PortfolioData MixRandomRebalanceOnce(/*I*/ const std::vector<std::vector<double>>& returns,
-                                /*I*/ T rebalancing_parameter,
-                                /*I*/ const double daily_risk_free_rate = 0.01) const;
 
-    OptimalSet FindOptimalMix(/*I*/ const SimulationResult& simulation_result) const;
+private:
     void UpdateStartDate(/*I*/ const SecurityColumn& target_security, /*I*/ DateUpdateMode mode = DateUpdateMode::kUpdateToEarliest);
     std::vector<size_t> TrimRebalanceIndices(/*I*/ const std::vector<size_t>& rebalance_indices) const;
     std::vector<double> TrimReturns(/*I*/ const std::vector<double>&) const;
+
+    size_t GetStartingIndex() const;
+
+    std::vector<double> MakeRandomWeights(/*I*/ const size_t count) const;
+    template<typename T> 
+    PortfolioData MixRandomRebalanceOnce(/*I*/ const std::vector<std::vector<double>>& returns,
+                                        /*I*/ T rebalancing_parameter,
+                                        /*I*/ const double daily_risk_free_rate = 0.01) const;
+
+    PortfolioData GetPortfolioStats(/*I*/ const std::vector<double>&portfolio_returns,
+                                    /*I*/ const std::vector<double>& weights, 
+                                    /*I*/ double risk_free_rate = 0) const;
+
+    OptimalSet FindOptimalMix(/*I*/ const SimulationResult& simulation_result) const;
+    
 public:
     Analysis();
     Analysis(/*I*/ const data::Data& dataset, /*I*/ const std::vector<std::string>& security_choices);
     void ChooseSecurities(/*I*/ const data::Data& security_data, 
                         /*I*/ const std::vector<std::string>& security_choices);
-    void ConfigureAnalysis();
+
     void ShowSecurityChoices() const;
+    void PrintOptimalMixes(int index) const;
+
     time_t GetStartDate() const;
+    time_t GetEndDate() const;
+    std::vector<time_t> GetStartDates() const;
+    std::vector<time_t> GetEndDates() const;
+    std::vector<OptimalSet> GetOptimalMixes() const;
+
+    void ConfigureAnalysis();
+
     template <typename RebalancingParam_t>
-    void SetRebalancingParameter(RebalancingParam_t rebalancing_parameter){
-        std::cout << "Setting rebalancing parameter" << std::endl;
-        if constexpr (std::is_same_v<RebalancingParam_t, int>){
-            rebalance_type_ = RebalanceType::kConstantInterval;
-            rebalance_interval_ = rebalancing_parameter;
-        } else if constexpr (std::is_same_v<RebalancingParam_t, std::vector<size_t>>){
-            rebalance_type_ = RebalanceType::kPredefinedIndices;
-            rebalance_indices_ = rebalancing_parameter;
-        } else {
-            std::cout << "Rebalancing parameter is not of type size_t or std::vector<size_t>" << std::endl
-            << "Setting to long-term hold" << std::endl;
-            rebalance_type_ = RebalanceType::kConstantInterval;
-            rebalance_interval_ = 0;
-        }
-    } 
-    void OptimizePortfolio(size_t simulation_count = 999'999);
+    void SetRebalancingParameter(RebalancingParam_t rebalancing_parameter);
+
+    void OptimizePortfolio(size_t simulation_count = 399'999);
     void SimulateTimelapse(/*I*/ const std::vector<SecurityColumn>& processed, 
                             /*I*/ const size_t start, 
                             /*I*/ const size_t end);
-    void PrintOptimalMixes(int index) const;
-    std::vector<OptimalSet> GetOptimalMixes() const;
+
 };
+
+template <typename RebalancingParam_t>
+void Analysis::SetRebalancingParameter(RebalancingParam_t rebalancing_parameter){
+    std::cout << "Setting rebalancing parameter" << std::endl;
+    if constexpr (std::is_same_v<RebalancingParam_t, int>){
+        rebalance_type_ = RebalanceType::kConstantInterval;
+        rebalance_interval_ = rebalancing_parameter;
+    } else if constexpr (std::is_same_v<RebalancingParam_t, std::vector<size_t>>){
+        rebalance_type_ = RebalanceType::kPredefinedIndices;
+        rebalance_indices_ = rebalancing_parameter;
+    } else {
+        std::cout << "Rebalancing parameter is not of type size_t or std::vector<size_t>" << std::endl
+        << "Setting to long-term hold" << std::endl;
+        rebalance_type_ = RebalanceType::kConstantInterval;
+        rebalance_interval_ = 0;
+    }
+}
 
 } // namespace analysis
 
