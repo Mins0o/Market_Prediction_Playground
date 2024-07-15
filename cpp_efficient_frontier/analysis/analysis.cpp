@@ -137,11 +137,13 @@ Analysis::Analysis(const data::Data& dataset, const std::vector<std::string>& se
 void Analysis::ChooseSecurities(const data::Data& security_data, 
                                 const std::vector<std::string>& security_choices){
 	date_line_ = security_data.GetDateLine();
+	size_t ii = 1;
     for (const auto& choice: security_choices){
         size_t index = security_data.FindIndexBySecurityName(choice);
         if (index != -1){
 			const std::string found_name = security_data.GetSecurityNameByIndex(index);
-            std::cout << "Choosing " << found_name << " for " << choice << std::endl;
+            std::cout << std::setw(3) << ii++ ;
+			std::cout << "  Choosing " << found_name << " for " << choice << std::endl;
             security_selections_.emplace_back(security_data.GetSecurityByIndex(index));
             security_choices_names_.emplace_back(found_name);
 			UpdateStartDate(security_data.GetSecurityByIndex(index), DateUpdateMode::kUpdateToLatest);
@@ -207,13 +209,23 @@ void Analysis::PrintOptimalMixes(int index) const{
 	}
 	std::vector<std::string> mix_names = {"Max Sharpe Ratio", "Max Return", "Min Risk"};
 	std::cout << std::endl;
+	const bool kRedPrint[3][3] = {{false,false,true},{true,false,false},{false,true,false}};
+	const std::string kGreen = "\033[32m";
+	const std::string kReset = "\033[0m";
 	for (int ii=0; ii<3; ii++){
 		std::cout << mix_names[ii] << std::endl;
 		auto optimal_mix = optimal_mixes[ii];
-		std::cout << "Expected Return: " << optimal_mix.expected_return << std::endl;
-		std::cout << "Risk: " << optimal_mix.risk << std::endl;
-		std::cout << "Sharpe Ratio: " << optimal_mix.sharpe_ratio << std::endl;
-		std::cout << "Weights: ";
+		std::cout << (kRedPrint[ii][0]?kGreen:"") << "Expected Return: " 
+					<< (kRedPrint[ii][0]?kReset:"") << std::setprecision(4) << optimal_mix.expected_return << std::endl;
+		std::cout << (kRedPrint[ii][1]?kGreen:"") << "Risk: " 
+					<< (kRedPrint[ii][1]?kReset:"") << std::setprecision(4) << optimal_mix.risk << std::endl;
+		std::cout << (kRedPrint[ii][2]?kGreen:"") << "Sharpe Ratio: " 
+					<< (kRedPrint[ii][2]?kReset:"") << std::setprecision(4) << optimal_mix.sharpe_ratio << std::endl;
+		std::cout << "     " ;
+		for (int ii = 0; ii < security_choices_names_.size(); ii++){
+			std::cout << std::setw(9) << ii+1;
+		}
+		std::cout << std::endl << "Weights: ";
 		for (double weight: optimal_mix.weights){
 			std::cout << std::fixed << std::setprecision(4) << weight << " | ";
 		}
