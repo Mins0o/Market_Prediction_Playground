@@ -32,8 +32,11 @@ time_t DateLine::GetDateAtIndex(size_t index) const{
     return date_list_[index];
 }
 
-size_t DateLine::MatchDateIndex(time_t target) const{
+size_t DateLine::MatchDateIndex(time_t target, bool verbose) const{
     std::vector<time_t>::const_iterator match = std::lower_bound(date_list_.begin(), date_list_.end(), target);
+    if (verbose && *match != target){
+        std::cout << "Warning: DateLine::MatchDateIndex: No exact match found. Returning the closest date." << std::endl;
+    }
     return (match - date_list_.begin());
 }
 

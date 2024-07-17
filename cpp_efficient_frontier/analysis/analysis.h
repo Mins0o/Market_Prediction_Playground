@@ -46,7 +46,9 @@ private:
 
     time_t start_date_ = 999'999'999;
     std::string security_name_of_start_date_ = "";
-    time_t start_index_ = 0;
+    size_t start_index_ = 0;
+    time_t end_date_ = 99'999'999'999;
+    size_t end_index_ = 99'999'999'999;
 
     RebalanceType rebalance_type_ = RebalanceType::kConstantInterval;
     size_t rebalance_interval_ = 0;
@@ -59,8 +61,10 @@ public:
     int dummy;
 
 private:
+    void UpdateStartDate(/*I*/ time_t start_date, std::string name);
     void UpdateStartDate(/*I*/ const SecurityColumn& target_security, 
                         /*I*/ DateUpdateMode mode = DateUpdateMode::kUpdateToEarliest);
+    void UpdateEndDate(/*I*/ time_t end_date);
     std::vector<size_t> TrimRebalanceIndices(/*I*/ const std::vector<size_t>& rebalance_indices) const;
     std::vector<double> TrimReturns(/*I*/ const std::vector<double>&) const;
 
@@ -92,6 +96,8 @@ public:
     std::vector<OptimalSet> GetOptimalMixes() const;
 
     void ConfigureAnalysis();
+    void SetStartDate(time_t start_date);
+    void SetEndDate(time_t end_date);
 
     template <typename RebalancingParam_t>
     void SetRebalancingParameter(RebalancingParam_t rebalancing_parameter);

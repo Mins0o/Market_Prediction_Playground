@@ -1,38 +1,48 @@
+
+
+#include <iostream>
+#include <iomanip>
+#include <vector>
 #include <random>
 #include <algorithm>
+#include <ctime>
 
 #include "analysis.h"
 #include "../data_manipulation/data_manipulation.h"
 #include "../calculations/calculations.h"
 #include "../data_manipulation/date_line/date_line.h"
 
-#include <iostream>
-#include <iomanip>
-
 namespace analysis{
 
 //private
+void Analysis::UpdateStartDate(/*I*/ time_t start_date, std::string name = "manual"){
+	security_name_of_start_date_ = name;
+	start_index_ = date_line_.MatchDateIndex(start_date);
+	start_date_ = date_line_.GetDateAtIndex(start_index_);
+}
+
 void Analysis::UpdateStartDate(const SecurityColumn& target_security, const DateUpdateMode mode){
 	time_t new_date = target_security.start_date;
 	if (mode == DateUpdateMode::kUpdateToEarliest){
 		if (new_date < start_date_){
-			start_date_ = new_date;
-			security_name_of_start_date_ = target_security.security_name;
-			start_index_ = date_line_.MatchDateIndex(start_date_);
+			UpdateStartDate(new_date, target_security.security_name);
 		}
 	} else {
 		if (new_date > start_date_ || start_date_ == 999'999'999){
-			start_date_ = new_date;
-			security_name_of_start_date_ = target_security.security_name;
-			start_index_ = date_line_.MatchDateIndex(start_date_);
+			UpdateStartDate(new_date, target_security.security_name);
 		}
 	}
+}
+
+void Analysis::UpdateEndDate(time_t end_date){
+	end_index_ = date_line_.MatchDateIndex(end_date);
+	end_date_ = date_line_.GetDateAtIndex(end_index_);
 }
 
 std::vector<size_t> Analysis::TrimRebalanceIndices(const std::vector<size_t>& rebalance_indices) const{
 	std::vector<size_t> trimmed_indices;
 	for (const auto& index: rebalance_indices){
-		if (index >= start_index_){
+		if (index >= start_index_ && index <= end_index_){
 			trimmed_indices.emplace_back(index - start_index_);
 		}
 	}
@@ -40,7 +50,7 @@ std::vector<size_t> Analysis::TrimRebalanceIndices(const std::vector<size_t>& re
 }
 
 std::vector<double> Analysis::TrimReturns(const std::vector<double>& returns) const{
-	return std::vector<double>(returns.begin() + start_index_, returns.end());
+	return std::vector<double>(returns.begin() + start_index_, returns.begin() + std::min(end_index_,returns.size()-1));
 }
 
 // ---
@@ -206,21 +216,52 @@ time_t Analysis::GetStartDate() const{
 	return start_date_;
 }
 
+time_t Analysis::GetEndDate() const{
+	return end_date_;
+}
+
+std::vector<time_t> Analysis::GetStartDates() const{
+	std::vector<time_t> start_dates;
+	for (const auto& security: security_selections_){
+		start_dates.emplace_back(security.start_date);
+	}
+	return start_dates;
+}
+
+std::vector<time_t> Analysis::GetEndDates() const{
+	std::vector<time_t> end_dates;
+	for (const auto& security: security_selections_){
+		end_dates.emplace_back(security.end_date);
+	}
+	return end_dates;
+}
+
 std::vector<OptimalSet> Analysis::GetOptimalMixes() const{
 	return optimal_mixes_;
 }
 
 // ---
+// ConfigureAnalysis
+void Analysis::SetStartDate(time_t start_date){
+	UpdateStartDate(start_date, "manual");
+}
+
+void Analysis::SetEndDate(time_t end_date){
+	UpdateEndDate(end_date);
+}
+
+//---
+// template <typename T> void SetRebalancingParameter(T rebalancing_parameter)
 
 // ---
 void Analysis::OptimizePortfolio(size_t simulation_count){
 	std::cout << "Optimizing portfolio" << std::endl;
+	auto rebalance_indices = TrimRebalanceIndices(rebalance_indices_);
 	std::vector<std::vector<double>> returns;
 	for (const auto& security: security_selections_){
 		returns.emplace_back(TrimReturns(security.security_returns));
 	}
 
-	auto rebalance_indices = TrimRebalanceIndices(rebalance_indices_);
 	std::vector<PortfolioData> simulation_points;
 	for (size_t ii = 0; ii < simulation_count; ii++){
 		simulation_points.emplace_back(
@@ -238,7 +279,7 @@ void Analysis::OptimizePortfolio(size_t simulation_count){
 	auto optimal_set = FindOptimalMix(current_result);
 
 	optimal_mixes_.emplace_back(optimal_set);
-	std::cout << "Simulation id: " << simulation_id << "Simulation index" << optimal_mixes_.size()-1 << std::endl;
+	std::cout << "Simulation id: " << simulation_id << " Simulation index: " << optimal_mixes_.size()-1 << std::endl;
 }
 
 }; // namespace analysis
