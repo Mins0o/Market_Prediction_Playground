@@ -182,8 +182,13 @@ void Analysis::PrintOptimalMixes(int index) const{
 	std::array<PortfolioData,3> optimal_mixes;
 	if (index < 0){
 		optimal_mixes = optimal_mixes_.back();
-	} else if (index < optimal_mixes_.size()){
+	} 
+	else if (index < optimal_mixes_.size()){
 		optimal_mixes = optimal_mixes_[index];
+	}
+	else {
+		std::cout << "Index out of range" << std::endl;
+		return;
 	}
 	std::vector<std::string> mix_names = {"Max Sharpe Ratio", "Max Return", "Min Risk"};
 	std::cout << std::endl;
@@ -244,6 +249,10 @@ std::vector<OptimalSet> Analysis::GetOptimalMixes() const{
 // ConfigureAnalysis
 void Analysis::SetStartDate(time_t start_date){
 	UpdateStartDate(start_date, "manual");
+}
+
+void Analysis::SetEndDate(std::string end_date_string){
+	UpdateEndDate(data::DateLine::ExtractDate(end_date_string.c_str()));
 }
 
 void Analysis::SetEndDate(time_t end_date){

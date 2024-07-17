@@ -84,6 +84,8 @@ public:
 	static std::vector<double> WeightedSumOfSeries(/*I*/ const std::vector<std::vector<double>>& columns_of_values,
 						/*I*/ const std::vector<double>& weights);
 
+	static std::vector<double> EqualWeightedAverage(/*I*/ const std::vector<std::vector<double>>& serieses);
+
 	/**
 	 * Calculates the rebalanced weighted sum of returns based on the given weights and rebalancing term.
 	 *

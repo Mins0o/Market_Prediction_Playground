@@ -77,9 +77,9 @@ size_t DateLine::CountBusinessDays(time_t start, time_t end) const{
     return end_index - start_index;
 }
 
-time_t DateLine::AddBusinessDays(time_t start, size_t days) const{
+time_t DateLine::AddBusinessDays(time_t start, int days) const{
     size_t start_index = MatchDateIndex(start);
-    size_t end_index = start_index + days;
+    long end_index = static_cast<long>(start_index) + days;
     if (end_index >= date_list_.size()){
         std::cout << "Warning: DateLine::AddBusinessDays: end_index is out of range. Returning the last date in the list." << std::endl;
         return date_list_[date_list_.size()-1];

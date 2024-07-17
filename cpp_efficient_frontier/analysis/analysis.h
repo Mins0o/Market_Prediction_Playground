@@ -27,6 +27,12 @@ using SimulationResult = struct SimulationResult_t{
  * 2 min risk
  */
 using OptimalSet = std::array<PortfolioData,3>;
+enum class OptimalOption{
+    kMaxSharpeRatio = 0,
+    kMaxReturn,
+    kMinRisk
+};
+
 
 enum class RebalanceType{
     kConstantInterval = 0,
@@ -97,6 +103,7 @@ public:
 
     void ConfigureAnalysis();
     void SetStartDate(time_t start_date);
+    void SetEndDate(std::string end_date_string);
     void SetEndDate(time_t end_date);
 
     template <typename RebalancingParam_t>

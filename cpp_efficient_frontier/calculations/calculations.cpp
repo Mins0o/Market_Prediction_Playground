@@ -132,6 +132,25 @@ namespace calculations {
 		return results;
 	}
 
+	std::vector<double> Calculations::EqualWeightedAverage(/*I*/ const std::vector<std::vector<double>>& serieses){
+		if (serieses.empty()){
+			std::cout << "Calculations::equal_weighted_average: empty vectors" << std::endl;
+			return {};
+		}
+		size_t number_of_serieses = serieses.size();
+		std::vector<double> mixed = {};
+
+		for (int ii=0; ii<serieses[0].size(); ii++){
+			double sum = 0;
+			for (int jj=0; jj<serieses.size(); jj++){
+				sum += serieses[jj][ii];
+			}
+			mixed.emplace_back(sum/number_of_serieses);
+		}
+
+		return mixed;
+	}
+
 	std::vector<double> Calculations::WeightedSumOfValuesFromReturns(/*I*/ const std::vector<std::vector<double>>& returns,
 								/*I*/ const std::vector<double>& weights){
 		if(weights.empty() || returns.empty()){

@@ -18,7 +18,7 @@ public:
     size_t MatchDateIndex(time_t target, bool verbose=false) const;
     std::vector<size_t> GetDatesOfMonthIndices(time_t start, time_t end, size_t day) const;
     size_t CountBusinessDays(time_t start, time_t end) const;
-    time_t AddBusinessDays(time_t start, size_t days) const;
+    time_t AddBusinessDays(time_t start, int days) const;
     void AddDateToList(time_t date);
     void AddDatesToList(const std::vector<time_t>& dates);
 };
