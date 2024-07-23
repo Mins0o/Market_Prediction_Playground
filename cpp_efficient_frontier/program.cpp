@@ -48,16 +48,16 @@ int wrapper(int argc, char* argv[]){
 
 	test_analysis.SetRebalancingParameter(first_day_of_months);
 	MEASURE_TIME(optimize,
-	test_analysis.OptimizePortfolio(999'999);
+	test_analysis.OptimizePortfolio(199'999);
 	);
 	test_analysis.PrintOptimalMixes(-1);
 
 	time_t end_date = initial_end_date;
-	for (int ii=1; ii<=20; ii++){
-		end_date = test_dateline.AddBusinessDays(end_date, -5);
+	for (int ii=1; ii<=100; ii++){
+		end_date = test_dateline.AddBusinessDays(end_date, -1);
 		test_analysis.SetEndDate(end_date);
-		test_analysis.OptimizePortfolio(999'999);
-		test_analysis.PrintOptimalMixes(-1);
+		test_analysis.OptimizePortfolio(99'999);
+		//test_analysis.PrintOptimalMixes(-1);
 	}
 	std::cout << test_analysis.GetOptimalMixes().size() << std::endl;
 	std::vector<std::vector<double>> optimal_weights;

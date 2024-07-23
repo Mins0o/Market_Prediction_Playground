@@ -156,7 +156,7 @@ void Analysis::ChooseSecurities(const data::Data& security_data,
         if (index != -1){
 			const std::string found_name = security_data.GetSecurityNameByIndex(index);
             std::cout << std::setw(3) << ii++ ;
-			std::cout << "  Choosing " << found_name << " for " << choice << std::endl;
+			std::cout << "  Chose " << found_name << " for " << choice << std::endl;
             security_selections_.emplace_back(security_data.GetSecurityByIndex(index));
             security_choices_names_.emplace_back(found_name);
 			UpdateStartDate(security_data.GetSecurityByIndex(index), DateUpdateMode::kUpdateToLatest);
