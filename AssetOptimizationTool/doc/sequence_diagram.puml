@@ -1,0 +1,80 @@
+@startuml name
+participant user as U
+participant "ProgramInterface(MainLogic)" as I
+participant Data as D
+participant Optimizer as O
+participant Configurations as C
+participant DataManipulator as DM
+participant "PortfolioAnalyzer(Evaluator)" as PA
+participant "MathLibrary(?)" as M
+participant "PortfolioMixer(?Should it be a part of the optimizer)" as PM
+participant Visualizer as V
+
+==User Switches the program on==
+U -> I : On
+I -> D : Load
+==User Selects the stocks==
+U -> I : Select (How? Interactive?)
+I -> D : Match and validate user selections
+I <-- D : Match and validation result (Should the interface keeps the selection information?)
+U <-- I : Notify user about the result. Maybe user needs to adjust selection input.
+==User asks for optimized mixture==
+U -> I : Optimize
+I -> D : Retrieves selection stock data
+I <-- D : stock data of choice (Most probably does not align with each other)
+I -> DM : Align the data
+I <-- DM : Aligned data
+U <-- I : inform about the alignment
+I -> O : Optimize(aligned_data)
+group simulation
+loop N times (who decides N?)
+O -> O : get random mixture weights
+O -> PM : mix
+PM -> M : calculate
+PM <-- M : calculations
+O <-- PM : mixed portfolio (aligned)
+O -> PA : evaluate(mixed_portfolio)
+O <-- PM : evaluation(does optimizer keep the result?)
+end
+end
+O -> O : get_optimal(max, min, etc.) from simulation results (who has the results?, are they grouped?)
+I <-- O : returns the optimal results
+U <- I : inform about the optimal results
+==Visualize Simulation==
+U -> I : visualize simulation (which simulation? How does the user choose?)
+note left
+This reqiures storage of the simulations(portfolio).
+- weights
+- expected return
+- risk
+end note
+I -> WhoeverHasSimResults : RetreiveSimResult
+I <-- WhoeverHasSimResults : sim_results
+I -> V : Visualize(sim_results)
+V -> M : OptimizeDataForVisual (maybe do some contour)
+U <-- V : visual
+==Test Portfolio==
+U -> I : Test
+note left
+Here, my idea is that user can test a chosen weights of selected stocks.
+The tests include:
+- How good the potfolio does at a given point (I guess maybe this means sharpe ratio)
+  - Would be nice to see visually
+  - Get an evaluation number
+- How good does the portfolio does along a time period 
+  - (basically the previous test done on several points)
+  - what should be the evaluation?
+  - get an evaluation number
+- How giid does the portfolio keep its place to disturbance in weights
+  - 1. try giving standardized variation to the mix,
+  - 2. test as first test
+  - 3. measure how much it deviates from the position
+  - get an evaluaton number
+end note
+I -> PA : evaluate(portfolio) (? Is it PA's responsibility?)
+note right
+This action may need simulations.
+end note
+I <-- PA : evaluation
+U <-- I : notified
+@enduml
