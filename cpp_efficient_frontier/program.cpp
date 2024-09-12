@@ -56,7 +56,7 @@ int wrapper(int argc, char* argv[]){
 	for (int ii=1; ii<=100; ii++){
 		end_date = test_dateline.AddBusinessDays(end_date, -1);
 		test_analysis.SetEndDate(end_date);
-		test_analysis.OptimizePortfolio(99'999);
+		test_analysis.OptimizePortfolio(999'999);
 		//test_analysis.PrintOptimalMixes(-1);
 	}
 	std::cout << test_analysis.GetOptimalMixes().size() << std::endl;
