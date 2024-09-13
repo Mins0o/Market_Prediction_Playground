@@ -1,0 +1,1 @@
+add_library(asset_mixer asset_mixer.cpp)

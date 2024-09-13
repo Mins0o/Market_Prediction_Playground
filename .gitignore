@@ -5,7 +5,7 @@ logs/fit
 training_checkpoints
 _build
 .vscode
-build/*
+build
 pye_fin
 cscope*
 simulation_results*

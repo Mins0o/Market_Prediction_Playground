@@ -1,0 +1,1 @@
+add_library(simulation_data_manager simulation_data_manager.cpp)
