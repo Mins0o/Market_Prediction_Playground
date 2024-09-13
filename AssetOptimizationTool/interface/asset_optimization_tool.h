@@ -1,28 +1,19 @@
 #pragma once
 
 #include <map>
-#include <set>
-#include <string>
-#include <vector>
 #include <memory>
+#include <set>
+#include <vector>
+
+#include "types.h"
 
 namespace asset_optimization_tool {
-
-using SimulationId = size_t;
-using SimulationOptions = std::map<std::string, std::string>;
-using OptimizationOptions = std::map<std::string, std::string>;
-using AssetId = size_t;
-
-enum class ErrorCode {
-  kSuccess,
-  kFailure,
-};
 
 class AssetOptimizationTool {
  public:
   virtual ~AssetOptimizationTool() = default;
 
-  virtual ErrorCode Initialize() = 0;
+  virtual ErrorCode Initialize(const std::string& data_path) = 0;
   virtual ErrorCode GetAssetList(
       /*O*/ std::map<AssetId, std::string>& asset_list) = 0;
   virtual ErrorCode SelectAssets(/*I*/ const std::set<AssetId>& asset_ids) = 0;
