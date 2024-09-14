@@ -1,9 +1,9 @@
 #pragma once
 
-#include "analyzer_interface.h"
+#include "_interfaces/analyzer_interface.h"
 
 namespace asset_optimization_tool::modules {
-class Analyzer : public AnalyzerInterface {
+class Analyzer : public IAnalyzer {
  public:
   void analyze() override;
 };

@@ -1,4 +1,4 @@
-#include "analyzer.h"  // testing class
+#include "analyzer/analyzer.h"  // testing class
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

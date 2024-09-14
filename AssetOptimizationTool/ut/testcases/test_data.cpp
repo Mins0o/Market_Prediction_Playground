@@ -1,7 +1,9 @@
-#include "data.h"  // testing class
+#include "data/data.h"  // testing class
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "types.h"
 
+using ::asset_optimization_tool::ErrorCode;
 using ::asset_optimization_tool::modules::Data;
 using ::testing::Return;
 
@@ -9,5 +11,6 @@ using ::testing::Return;
 TEST(DataTest, LoadMethod) {
   Data data;
 
-  EXPECT_NO_THROW(data.LoadData());  // Test if it doesn't throw exceptions
+  ASSERT_EQ(data.LoadData("data_example.tsv"),
+            ErrorCode::kSuccess);  // Test if it doesn't throw exceptions
 }

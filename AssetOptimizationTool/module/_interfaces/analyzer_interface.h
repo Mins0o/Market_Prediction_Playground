@@ -1,7 +1,7 @@
 #pragma once
 
 namespace asset_optimization_tool::modules {
-class AnalyzerInterface {
+class IAnalyzer {
  public:
   virtual void analyze() = 0;
 };
