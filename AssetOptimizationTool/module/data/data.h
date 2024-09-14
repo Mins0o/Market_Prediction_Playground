@@ -1,11 +1,14 @@
 #pragma once
 
-#include "data_interface.h"
+#include <string>
+
+#include "_interfaces/data_interface.h"
+#include "types.h"
 
 namespace asset_optimization_tool::modules {
-class Data : public DataInterface {
+class Data : public IData {
  public:
-  void LoadData() override;
+  ErrorCode LoadData(const std::string& data_path) override;
   void GetAssetList() override;
   void GetAssetData() override;
 };

@@ -1,4 +1,4 @@
-include_directories(${CMAKE_SOURCE_DIR}/module/_interfaces)
+include_directories(${CMAKE_SOURCE_DIR}/module)
 
 add_subdirectory("analyzer")
 add_subdirectory("asset_mixer")

@@ -1,8 +1,13 @@
 #include "asset_optimization_tool_impl.h"
 
+#include "_interfaces/module_factory_interface.h"
+#include "module_factory.h"
+
 namespace asset_optimization_tool {
-ErrorCode AssetOptimizationToolImpl::Initialize() {
+
+ErrorCode AssetOptimizationToolImpl::Initialize(const std::string& data_path) {
   // Initialize the asset optimization tool
+  auto data_load_passed = data_interface_->LoadData(data_path);
   return ErrorCode::kSuccess;
 }
 
@@ -66,7 +71,11 @@ ErrorCode AssetOptimizationToolImpl::Evaluate(
   return ErrorCode::kSuccess;
 }
 
-std::unique_ptr<AssetOptimizationTool> AssetOptimizationToolImpl::Create() {
-  return std::make_unique<AssetOptimizationToolImpl>();
-}
+AssetOptimizationToolImpl::AssetOptimizationToolImpl(
+    std::unique_ptr<IModuleFactory> module_factory)
+    : data_interface_(module_factory->CreateDataInterface()) {}
+
+// static std::unique_ptr<AssetOptimizationTool> Create()
+// is implemented in module_factory.h
+
 }  // namespace asset_optimization_tool
