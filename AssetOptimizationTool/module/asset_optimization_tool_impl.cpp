@@ -1,7 +1,7 @@
 #include "asset_optimization_tool_impl.h"
 
 #include "_interfaces/module_factory_interface.h"
-#include "module_factory.h"
+#include "module_factory_impl.h"
 
 namespace asset_optimization_tool {
 
@@ -76,6 +76,6 @@ AssetOptimizationToolImpl::AssetOptimizationToolImpl(
     : data_interface_(module_factory->CreateDataInterface()) {}
 
 // static std::unique_ptr<AssetOptimizationTool> Create()
-// is implemented in module_factory.h
+// is implemented in module_factory_impl.h
 
 }  // namespace asset_optimization_tool
