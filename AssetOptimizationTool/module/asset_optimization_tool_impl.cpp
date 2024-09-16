@@ -72,8 +72,8 @@ ErrorCode AssetOptimizationToolImpl::Evaluate(
 }
 
 AssetOptimizationToolImpl::AssetOptimizationToolImpl(
-    std::unique_ptr<IModuleFactory> module_factory)
-    : data_interface_(module_factory->CreateDataInterface()) {}
+    modules::IData* data_interface)
+    : data_interface_(std::unique_ptr<modules::IData>(data_interface)) {}
 
 // static std::unique_ptr<AssetOptimizationTool> Create()
 // is implemented in module_factory_impl.h

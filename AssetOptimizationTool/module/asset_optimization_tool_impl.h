@@ -28,8 +28,7 @@ class AssetOptimizationToolImpl : public AssetOptimizationTool {
                      const OptimizationOptions& evaluation_method,
                      double result) override;
 
-  explicit AssetOptimizationToolImpl(
-      std::unique_ptr<IModuleFactory> module_factory);
+  explicit AssetOptimizationToolImpl(modules::IData* data_interface);
 
  private:  // methods
  public:   // data members

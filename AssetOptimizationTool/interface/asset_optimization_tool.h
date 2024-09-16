@@ -35,6 +35,6 @@ class AssetOptimizationTool {
                              /*I*/ const OptimizationOptions& evaluation_method,
                              /*O*/ double result) = 0;
 
-  static std::unique_ptr<AssetOptimizationTool> Create();
+  static AssetOptimizationTool* Create();
 };
 }  // namespace asset_optimization_tool

@@ -6,7 +6,7 @@ include_directories(${GTEST_INCLUDE_DIRS})
 set(TEST_SOURCES
     testcases/test_analyzer.cpp
     testcases/test_data.cpp
-    testcases/test_tool_interface.cpp
+    testcases/test_tool_integrated.cpp
     testcases/test_tool_logic.cpp
 )
 

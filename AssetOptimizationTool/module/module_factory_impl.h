@@ -1,17 +1,20 @@
 #pragma once
 
 #include "_interfaces/module_factory_interface.h"
+#include "asset_optimization_tool_impl.h"
 #include "data/data.h"
 
 namespace asset_optimization_tool {
 class ProductionModuleFactory : public IModuleFactory {
+public:
   modules::IData* CreateDataInterface() override { return new modules::Data(); }
 };
 
-std::unique_ptr<AssetOptimizationTool> AssetOptimizationTool::Create() {
-  std::unique_ptr<IModuleFactory> factory =
-      std::make_unique<ProductionModuleFactory>();
-  return std::make_unique<AssetOptimizationToolImpl>(std::move(factory));
+AssetOptimizationTool* AssetOptimizationTool::Create() {
+  ProductionModuleFactory factory = ProductionModuleFactory();
+  modules::IData* concrete_data_interface = factory.CreateDataInterface();
+  AssetOptimizationToolImpl* tool_p = new AssetOptimizationToolImpl(concrete_data_interface);
+  return tool_p;
 }
 
 }  // namespace asset_optimization_tool
