@@ -27,14 +27,24 @@ int wrapper(int argc, char* argv[]){
 	data::Data security_data = data::Data(reading_file);
 	);
 
-	std::vector<std::string> security_choices = {"ACE중국본토CSI300", "하이브", "NAVER", "Kodex 한국대만IT프리미어", "KOSEF 인도 Nifty50", "ACE 미국S&P 500", "ACE 일본Nikkei255", "TIGER 글로벌리튬&2차전지SOLACTIVE합성)()", "현대차", "종근당"};
+        std::vector<std::string> security_choices = {
+            "ACE 미국S&P 500",
+            "KOSEF 인도 Nifty50",
+            "Kodex 한국대만IT프리미어",
+            "현대차",
+            "종근당",
+            "ACE중국본토CSI300",
+            "ACE 일본Nikkei255",
+            "하이브",
+            "NAVER",
+            "TIGER 글로벌리튬&2차전지SOLACTIVE합성)()"};
 
-	DiscountedMeanStrategy discnt_strat(1);
-	calculations::Calculations::SetExpectedReturnStrategy(&discnt_strat);
+        DiscountedMeanStrategy discnt_strat(1);
+        calculations::Calculations::SetExpectedReturnStrategy(&discnt_strat);
 
-	analysis::Analysis test_analysis(security_data, security_choices);
+        analysis::Analysis test_analysis(security_data, security_choices);
 
-	// test_analysis.ShowSecurityChoices();
+        // test_analysis.ShowSecurityChoices();
 
 	auto test_dateline = security_data.GetDateLine();
 	auto start_date = test_analysis.GetStartDate();
