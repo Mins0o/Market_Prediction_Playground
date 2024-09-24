@@ -12,10 +12,12 @@
 using asset_optimization_tool::AssetOptimizationTool;
 using asset_optimization_tool::ErrorCode;
 
-namespace {}  // namespace
+namespace {
+std::string kDataPath = "./build/ut/data_example.tsv";
+}  // namespace
 
-TEST(ToolInterfaceTest, InitializeMethod) {
+TEST(ToolIntegrationTest, InitializeMethod) {
   std::unique_ptr<AssetOptimizationTool> tool(
       asset_optimization_tool::AssetOptimizationTool::Create());
-  EXPECT_NO_THROW(tool->Initialize("data_path"));
+  EXPECT_NO_THROW(tool->Initialize(kDataPath));
 }

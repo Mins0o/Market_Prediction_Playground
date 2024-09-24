@@ -1,3 +1,4 @@
+#include <map>
 #include <memory>
 #include <string>
 
@@ -6,7 +7,9 @@
 #include "asset_optimization_tool_impl.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "types.h"
 
+using ::asset_optimization_tool::AssetId;
 using ::asset_optimization_tool::AssetOptimizationToolImpl;
 using ::asset_optimization_tool::ErrorCode;
 using ::asset_optimization_tool::IModuleFactory;
@@ -16,7 +19,8 @@ namespace {
 class MockData : public IData {
  public:
   MOCK_METHOD(ErrorCode, LoadData, (const std::string& data_path), (override));
-  MOCK_METHOD(void, GetAssetList, (), (override));
+  MOCK_METHOD(ErrorCode, GetAssetList,
+              ((std::map<AssetId, std::string> & asset_name_list)), (override));
   MOCK_METHOD(void, GetAssetData, (), (override));
 };
 }  // namespace
