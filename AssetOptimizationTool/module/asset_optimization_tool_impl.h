@@ -11,7 +11,7 @@ namespace asset_optimization_tool {
 class AssetOptimizationToolImpl : public AssetOptimizationTool {
  public:
   ErrorCode Initialize(const std::string& data_path) override;
-  ErrorCode GetAssetList(std::map<AssetId, std::string>& asset_list) override;
+  ErrorCode GetAssetList(std::map<AssetId, std::string>& asset_name_list) override;
   ErrorCode SelectAssets(const std::set<AssetId>& asset_ids) override;
   ErrorCode SetSimulationOption(const std::string& key,
                                 const std::string& value) override;

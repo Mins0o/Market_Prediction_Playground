@@ -12,7 +12,7 @@ ErrorCode AssetOptimizationToolImpl::Initialize(const std::string& data_path) {
 }
 
 ErrorCode AssetOptimizationToolImpl::GetAssetList(
-    std::map<AssetId, std::string>& asset_list) {
+    std::map<AssetId, std::string>& asset_name_list) {
   // Get the list of assets
   return ErrorCode::kSuccess;
 }
