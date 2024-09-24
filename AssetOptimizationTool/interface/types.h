@@ -11,8 +11,13 @@ using OptimizationOptions = std::map<std::string, std::string>;
 using AssetId = size_t;
 
 enum class ErrorCode {
-  kSuccess,
+  kSuccess=0,
   kFailure,
+  kUnknownError,
+  kInvalidFileType,
+  kCannotReadFile,
+  kFileNotFound,
+  kInvalidDelimiter,
 };
 
 inline ErrorCode operator&&(ErrorCode lhs, ErrorCode rhs) {
