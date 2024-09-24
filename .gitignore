@@ -9,3 +9,4 @@ build
 pye_fin
 cscope*
 simulation_results*
+.cache
