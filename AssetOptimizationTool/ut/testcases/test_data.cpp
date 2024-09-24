@@ -11,6 +11,6 @@ using ::testing::Return;
 TEST(DataTest, LoadMethod) {
   Data data;
 
-  ASSERT_EQ(data.LoadData("data_example.tsv"),
+  ASSERT_EQ(data.LoadData("./build/ut/data_example.tsv"),
             ErrorCode::kSuccess);  // Test if it doesn't throw exceptions
 }

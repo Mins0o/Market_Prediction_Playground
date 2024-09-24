@@ -5,6 +5,11 @@
 #include "types.h"
 
 namespace asset_optimization_tool::modules {
+class IAsset {
+ public:
+  virtual ~IAsset() = default;
+};
+
 class IData {
  public:
   virtual ~IData() = default;
