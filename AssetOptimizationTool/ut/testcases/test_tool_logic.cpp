@@ -13,15 +13,32 @@ using ::asset_optimization_tool::AssetId;
 using ::asset_optimization_tool::AssetOptimizationToolImpl;
 using ::asset_optimization_tool::ErrorCode;
 using ::asset_optimization_tool::IModuleFactory;
+using ::asset_optimization_tool::modules::IAsset;
 using ::asset_optimization_tool::modules::IData;
 
 namespace {
 class MockData : public IData {
  public:
   MOCK_METHOD(ErrorCode, LoadData, (const std::string& data_path), (override));
-  MOCK_METHOD(ErrorCode, GetAssetList,
-              ((std::map<AssetId, std::string> & asset_name_list)), (override));
-  MOCK_METHOD(void, GetAssetData, (), (override));
+  MOCK_METHOD(ErrorCode, GetAssetTable,
+              ((std::map<std::string, AssetId> & asset_name_table)),
+              (const, override));
+  MOCK_METHOD(ErrorCode, GetAssetDataByIds,
+              ((const std::set<AssetId>& asset_ids),
+               (std::vector<std::unique_ptr<IAsset>> & asset_data)),
+              (const, override));
+
+  const IAsset& operator[](AssetId id) const override { return asset_; }
+
+ private:
+  class TestAsset : public IAsset {
+   public:
+    TestAsset() = default;
+    std::string GetName() const override { return ""; }
+    std::vector<double> GetChangeRates() const override { return {}; }
+  } asset_;
+  std::set<std::string> seen_asset_names_;
+  AssetId uuid_tracker_ = 0;
 };
 }  // namespace
 

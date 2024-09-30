@@ -4,6 +4,7 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -26,11 +27,13 @@ class DateLine {
 class Asset : public IAsset {
   // methods
  public:
+  Asset() = default;
   Asset(const std::string& asset_name,
         std::shared_ptr<const DateLine> date_line_p)
       : asset_name_(asset_name), date_line_p_(date_line_p) {};
   ErrorCode ParseAndAddChangeRate(const std::string& change_rate);
   std::string GetName() const { return asset_name_; }
+  std::vector<double> GetChangeRates() const { return change_rates_; }
 
  private:
   // data members
@@ -45,9 +48,12 @@ class Data : public IData {
   // methods
  public:
   ErrorCode LoadData(const std::string& data_path) override;
-  ErrorCode GetAssetList(
-      std::map<AssetId, std::string>& asset_name_list) override;
-  void GetAssetData() override;
+  ErrorCode GetAssetTable(
+      std::map<std::string, AssetId>& asset_name_id_table) const override;
+  ErrorCode GetAssetDataByIds(
+      const std::set<AssetId>& asset_ids,
+      std::vector<std::unique_ptr<IAsset>>& asset_data) const override;
+  const IAsset& operator[](AssetId id) const override;
 
  private:
   ErrorCode ValidateData(const std::string& data_path) const;
@@ -55,17 +61,20 @@ class Data : public IData {
   ErrorCode ParseDataHeaderRow(
       /*I*/ const std::string& first_line,
       /*I*/ std::shared_ptr<const DateLine> date_line_p,
-      /*O*/ std::vector<Asset>& assets) const;
+      /*O*/ std::map<AssetId, Asset>& assets);
   ErrorCode ParseDataContentRow(/*I*/ const std::string& line,
+                                /*I*/ const std::set<AssetId>& added_ids,
                                 /*O*/ std::shared_ptr<DateLine> date_line_p,
-                                /*O*/ std::vector<Asset>& assets) const;
+                                /*O*/ std::map<AssetId, Asset>& assets) const;
   ErrorCode TokenizeLine(const std::string& line,
                          std::vector<std::string>& tokens) const;
 
  public:
  private:
   // data members
-  std::vector<Asset> assets_;
+  size_t uuid_tracker_ = 1;
+  std::set<std::string> seen_asset_names_;
+  std::map<AssetId, Asset> assets_;
   std::list<std::shared_ptr<DateLine>> date_lines_;
 };
 }  // namespace asset_optimization_tool::modules

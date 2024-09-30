@@ -3,6 +3,8 @@
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <map>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -45,15 +47,49 @@ ErrorCode Data::LoadData(const std::string& data_path) {
 
   return ErrorCode::kSuccess;
 }
-ErrorCode Data::GetAssetList(std::map<AssetId, std::string>& asset_name_list) {
-  asset_name_list.clear();
-  for (size_t i = 0; i < assets_.size(); ++i) {
-    asset_name_list.emplace(i, assets_[i].GetName());
+ErrorCode Data::GetAssetTable(
+    std::map<std::string, AssetId>& asset_name_id_table) const {
+  asset_name_id_table.clear();
+  bool error_encountered = false;
+  for (const auto& asset : assets_) {
+    const auto& name = asset.second.GetName();
+    asset_name_id_table[name] = asset.first;
+  }
+  if (error_encountered) {
+    return ErrorCode::kInvalidData;
   }
   return ErrorCode::kSuccess;
 }
 
-void Data::GetAssetData() { std::cout << "Data::GetAssetData()" << std::endl; }
+ErrorCode Data::GetAssetDataByIds(
+    const std::set<AssetId>& asset_ids,
+    std::vector<std::unique_ptr<IAsset>>& asset_data) const {
+  asset_data.clear();
+  bool error_encountered = false;
+  for (const auto& asset_id : asset_ids) {
+    const auto& asset = assets_.find(asset_id);
+    if (asset == assets_.end()) {
+      std::cerr << "Data::GetAssetDataByIds: Invalid asset id - " << asset_id
+                << std::endl;
+      error_encountered = true;
+      continue;
+    }
+    asset_data.emplace_back(std::make_unique<Asset>(asset->second));
+  }
+  if (error_encountered) {
+    return ErrorCode::kInvalidAssetId;
+  }
+  return ErrorCode::kSuccess;
+}
+
+const IAsset& Data::operator[](AssetId id) const {
+  const auto& asset = assets_.find(id);
+  if (asset == assets_.end()) {
+    std::cerr << "Data::operator[]: Invalid asset id - " << id << std::endl;
+    throw ErrorCode::kInvalidAssetId;
+  }
+  return asset->second;
+}
 
 // private methods
 ErrorCode Data::ValidateData(const std::string& data_path) const {
@@ -91,7 +127,8 @@ ErrorCode Data::ParseDataFile(const std::string& data_path) {
     return ErrorCode::kFileNotFound;
   }
 
-  std::vector<Asset> assets;
+  std::map<AssetId, Asset> assets;
+  std::set<AssetId> added_ids;
   auto date_line = std::make_shared<DateLine>();
 
   std::string first_line;
@@ -102,10 +139,14 @@ ErrorCode Data::ParseDataFile(const std::string& data_path) {
     std::cerr << "ParseDataFile: Error parsing header" << std::endl;
     return header_parse_error;
   }
+  // added_ids are collection of first item from assets
+  for (const auto& [id, asset] : assets) {
+    added_ids.insert(id);
+  }
 
   for (std::string line; std::getline(data_file, line);) {
     ErrorCode content_parse_error =
-        ParseDataContentRow(line, date_line, assets);
+        ParseDataContentRow(line, added_ids, date_line, assets);
     if (content_parse_error != ErrorCode::kSuccess) {
       std::cerr << "ParseDataFile: Error parsing content" << std::endl;
       return content_parse_error;
@@ -114,29 +155,34 @@ ErrorCode Data::ParseDataFile(const std::string& data_path) {
 
   data_file.close();
   date_lines_.emplace_back(std::move(date_line));
-  assets_.insert(assets_.end(), std::make_move_iterator(assets.begin()),
-                 std::make_move_iterator(assets.end()));
+  assets_.insert(assets.begin(), assets.end());
 
   return ErrorCode::kSuccess;
 }
 
 ErrorCode Data::ParseDataHeaderRow(const std::string& first_line,
                                    std::shared_ptr<const DateLine> date_line,
-                                   std::vector<Asset>& assets) const {
+                                   std::map<AssetId, Asset>& assets) {
   std::vector<std::string> tokens;
   TokenizeLine(first_line, tokens);
 
   tokens.erase(tokens.begin());  // Remove the first token which is "Date"
   for (const auto& token : tokens) {
-    assets.emplace_back(Asset(token, date_line));
+    auto asset_name = token;
+    if (seen_asset_names_.find(token) != seen_asset_names_.end()) {
+      asset_name += "_" + std::to_string(uuid_tracker_);
+    } else {
+      seen_asset_names_.insert(token);
+    }
+    assets[uuid_tracker_++] = Asset(std::move(asset_name), date_line);
   }
-
   return ErrorCode::kSuccess;
 }
 
 ErrorCode Data::ParseDataContentRow(const std::string& line,
+                                    const std::set<AssetId>& added_ids,
                                     std::shared_ptr<DateLine> date_line,
-                                    std::vector<Asset>& assets) const {
+                                    std::map<AssetId, Asset>& assets) const {
   std::vector<std::string> tokens;
   TokenizeLine(line, tokens);
 
@@ -146,16 +192,15 @@ ErrorCode Data::ParseDataContentRow(const std::string& line,
               << std::endl;
     return date_parse_error;
   }
-
-  for (size_t i = 1; i < tokens.size(); ++i) {
+  auto it = added_ids.begin();
+  for (size_t i = 0; i < added_ids.size(); ++i, ++it) {
     ErrorCode change_rate_parse_error =
-        assets[i - 1].ParseAndAddChangeRate(tokens[i]);
+        assets[*it].ParseAndAddChangeRate(tokens[i + 1]);
     if (change_rate_parse_error != ErrorCode::kSuccess) {
       std::cerr << "ParseDataFile: Error parsing change rate" << std::endl;
       return change_rate_parse_error;
     }
   }
-
   return ErrorCode::kSuccess;
 }
 
@@ -165,6 +210,9 @@ ErrorCode Data::TokenizeLine(const std::string& line,
   std::string token;
   while (std::getline(ss, token, '\t')) {
     tokens.emplace_back(std::move(token));
+  }
+  if (!line.empty() && line.back() == '\t') {
+    tokens.emplace_back("");
   }
   return ErrorCode::kSuccess;
 }

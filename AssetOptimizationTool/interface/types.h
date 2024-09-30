@@ -19,6 +19,8 @@ enum class ErrorCode {
   kFileNotFound,
   kInvalidDelimiter,
   kInvalidArgument,
+  kInvalidAssetId,
+  kInvalidData,
 };
 
 inline ErrorCode operator&&(ErrorCode lhs, ErrorCode rhs) {
