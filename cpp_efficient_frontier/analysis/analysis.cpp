@@ -264,7 +264,6 @@ void Analysis::SetEndDate(time_t end_date){
 
 // ---
 void Analysis::OptimizePortfolio(size_t simulation_count){
-	std::cout << "Optimizing portfolio" << std::endl;
 	auto rebalance_indices = TrimRebalanceIndices(rebalance_indices_);
 	std::vector<std::vector<double>> returns;
 	for (const auto& security: security_selections_){
