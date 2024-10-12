@@ -14,8 +14,8 @@ class AssetOptimizationTool {
   virtual ~AssetOptimizationTool() = default;
 
   virtual ErrorCode Initialize(const std::string& data_path) = 0;
-  virtual ErrorCode GetAssetList(
-      /*O*/ std::map<AssetId, std::string>& asset_name_list) = 0;
+  virtual ErrorCode GetAssetTable(
+      /*O*/ std::map<std::string, AssetId>& asset_name_id_table) const = 0;
   virtual ErrorCode SelectAssets(/*I*/ const std::set<AssetId>& asset_ids) = 0;
   virtual ErrorCode SetSimulationOption(/*I*/ const std::string& key,
                                         /*I*/ const std::string& value) = 0;
