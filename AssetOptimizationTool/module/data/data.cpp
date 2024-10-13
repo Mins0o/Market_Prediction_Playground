@@ -127,8 +127,10 @@ ErrorCode Data::ValidateData(const std::string& data_path) const {
   std::string line;
   if (!std::getline(data_file, line)) {
     std::cerr << "ValidateData: Cannot read file - " << data_path << std::endl;
+    data_file.close();
     return ErrorCode::kCannotReadFile;
   }
+  data_file.close();
 
   // For now, only tab delimitted is supported.
   if (line.find('\t') == std::string::npos) {
@@ -136,7 +138,6 @@ ErrorCode Data::ValidateData(const std::string& data_path) const {
               << std::endl;
     return ErrorCode::kInvalidDelimiter;
   }
-  data_file.close();
   return ErrorCode::kSuccess;
 }
 

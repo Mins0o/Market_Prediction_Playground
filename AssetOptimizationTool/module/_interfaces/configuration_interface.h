@@ -6,28 +6,19 @@
 #include "types.h"
 
 namespace asset_optimization_tool::modules {
-class IAssetSelections {
- public:
-  IAssetSelections() = default;
-  virtual ErrorCode AddToSelection(const std::string& asset_name) = 0;
-  virtual ErrorCode AddBulkToSelection(
-      const std::set<std::string>& asset_names) = 0;
-  virtual ErrorCode RemoveFromSelection(const std::string& asset_name) = 0;
-  virtual ErrorCode RemoveBulkFromSelection(
-      const std::set<std::string>& asset_names) = 0;
-  virtual ErrorCode GetSelection(std::set<std::string>& asset_names) const = 0;
-  virtual ErrorCode ClearSelection() = 0;
-};
-
-class ISimulationConfigurations {
- public:
-  ISimulationConfigurations() = default;
-  virtual ErrorCode SetRepCount(size_t rep_count) = 0;
-};
-
 class IConfiguration {
  public:
   virtual ~IConfiguration() = default;
-};
+  virtual ErrorCode LoadConfiguration(const std::string& config_path) = 0;
+  virtual ErrorCode GetConfigurationKeys(std::set<std::string>& keys) const = 0;
+  virtual ErrorCode GetConfigurationValue(const std::string& key,
+                                          std::string& value) const = 0;
 
+  virtual ErrorCode SetAssetSelection(
+      const std::set<std::string>& asset_names) = 0;
+  virtual ErrorCode SetSimulationOption(const std::string& key,
+                                        const std::string& value) = 0;
+  virtual ErrorCode SetOptimizationOption(const std::string& key,
+                                          const std::string& value) = 0;
+};
 }  // namespace asset_optimization_tool::modules

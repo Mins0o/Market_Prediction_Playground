@@ -11,7 +11,9 @@
 namespace asset_optimization_tool {
 class AssetOptimizationToolImpl : public AssetOptimizationTool {
  public:
-  ErrorCode Initialize(const std::string& data_path) override;
+  ErrorCode Initialize(const std::string& data_path,
+                       const std::string& config_path) override;
+  ErrorCode ReloadConfiguration() override;
   ErrorCode GetAssetNames(std::set<std::string>& asset_names) const override;
   ErrorCode SelectAssets(const std::set<std::string>& asset_names) override;
   ErrorCode SetSimulationOption(const std::string& key,
@@ -29,12 +31,15 @@ class AssetOptimizationToolImpl : public AssetOptimizationTool {
                      const OptimizationOptions& evaluation_method,
                      double result) override;
 
-  explicit AssetOptimizationToolImpl(modules::IData* data_interface);
+  explicit AssetOptimizationToolImpl(modules::IData* data_interface,
+                                     modules::IConfiguration* config_interface);
 
  private:  // methods
  public:   // data members
  private:  // data members
   std::unique_ptr<modules::IData> data_interface_;
-  std::unique_ptr<modules::IConfiguration> configuration_interface_;
+  std::unique_ptr<modules::IConfiguration> config_interface_;
+  std::string data_path_;
+  std::string config_path_;
 };
 }  // namespace asset_optimization_tool

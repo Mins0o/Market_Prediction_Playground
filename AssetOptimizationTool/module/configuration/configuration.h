@@ -6,72 +6,75 @@
 #include "types.h"
 
 namespace asset_optimization_tool::modules {
-class AssetSelections : public IAssetSelections {
- public:
-  AssetSelections() = default;
-  AssetSelections(const std::set<std::string>& asset_names)
-      : asset_names_(asset_names) {};
-  ErrorCode AddToSelection(const std::string& asset_name);
-  ErrorCode AddBulkToSelection(const std::set<std::string>& asset_names);
-  ErrorCode RemoveFromSelection(const std::string& asset_name);
-  ErrorCode RemoveBulkFromSelection(const std::set<std::string>& asset_names);
-  ErrorCode GetSelection(std::set<std::string>& asset_names) const;
-  ErrorCode ClearSelection();
-
- private:
-  std::set<std::string> asset_names_;
-};
-
 class SimulationConfigurations {
- public:
   enum class PortfolioMixingStrategy {
     DailyRebalancing = 0,
     IntervalRebalancing,
     MonthlyRebalancing,
     NeverRebalance
   };
-  SimulationConfigurations() = default;
-  ErrorCode SetRepCount(size_t rep_count);
-  ErrorCode SetMixingStrategy(PortfolioMixingStrategy strategy);
+
+ public:
+  ErrorCode SetSimulationOption(const std::string& key,
+                                const std::string& value);
 
  private:
-  size_t rep_count_ = 10'000;
+  ErrorCode SetRepetitionCount(std::string count);
+  ErrorCode SetPortfolioMixingStrategy(std::string strategy);
+
+  size_t rep_count = 10'000;
+  PortfolioMixingStrategy portfolio_mixing_strategy =
+      PortfolioMixingStrategy::DailyRebalancing;
 };
 
-class EvaluationConfiguration {
- public:
+class EvaluationConfigurations {
   enum class RiskStrategy {
     StandardDeviation = 0,
     LossLikelihood,
   };
-  enum class ExpectedReturnStrategy { SimpleMean = 0, DiscountedMean };
-  EvaluationConfiguration() = default;
-  ErrorCode SetRiskStrategy(RiskStrategy strategy);
-  ErrorCode SetExpectedReturnStrategy(ExpectedReturnStrategy strategy);
+  enum class ExpectedReturnStrategy {
+    SimpleMean = 0,
+    DiscountedMean,
+    Median,
+  };
+  enum class EvaluationMethod {
+    SharpeRatio = 0,
+    SortinoRatio,
+    MaximumDrawdown,
+    Volatility,
+    ReturnRate
+  };
+
+ public:
+  ErrorCode SetEvaluationOption(const std::string& key,
+                                const std::string& value);
+  ErrorCode SetRiskStrategy(std::string strategy);
+  ErrorCode SetExpectedReturnStrategy(std::string strategy);
 
  private:
-  RiskStrategy risk_strategy_ = RiskStrategy::StandardDeviation;
-  ExpectedReturnStrategy expected_return_strategy_ =
+  RiskStrategy risk_strategy = RiskStrategy::StandardDeviation;
+  ExpectedReturnStrategy expected_return_strategy =
       ExpectedReturnStrategy::SimpleMean;
 };
 
 class Configuration : public IConfiguration {
  public:
-  Configuration() = default;
-  ErrorCode SetAssetSelections(const AssetSelections& asset_selections);
-  ErrorCode SetSimulationConfigurations(
-      const SimulationConfigurations& simulation_configurations);
-  ErrorCode SetEvaluationConfiguration(
-      const EvaluationConfiguration& evaluation_configuration);
-  ErrorCode GetAssetSelections(AssetSelections& asset_selections) const;
-  ErrorCode GetSimulationConfigurations(
-      SimulationConfigurations& simulation_configurations) const;
-  ErrorCode GetEvaluationConfiguration(
-      EvaluationConfiguration& evaluation_configuration) const;
+  ErrorCode LoadConfiguration(const std::string& config_path) override;
+  ErrorCode GetConfigurationKeys(std::set<std::string>& keys) const override;
+  ErrorCode GetConfigurationValue(const std::string& key,
+                                  std::string& value) const override;
+
+  ErrorCode SetAssetSelection(
+      const std::set<std::string>& asset_names) override;
+  ErrorCode SetSimulationOption(const std::string& key,
+                                const std::string& value) override;
+  ErrorCode SetOptimizationOption(const std::string& key,
+                                  const std::string& value) override;
 
  private:
-  AssetSelections asset_selections_;
+  private:
+  std::set<std::string> asset_selection_;
   SimulationConfigurations simulation_configurations_;
-  EvaluationConfiguration evaluation_configuration_;
+  EvaluationConfigurations evaluation_configurations_;
 };
 }  // namespace asset_optimization_tool::modules

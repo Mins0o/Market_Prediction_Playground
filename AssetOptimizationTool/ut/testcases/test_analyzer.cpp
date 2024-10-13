@@ -3,7 +3,6 @@
 #include "gtest/gtest.h"
 
 using ::asset_optimization_tool::modules::Analyzer;
-using ::testing::Return;
 
 // Example test case for the Analyzer class
 TEST(AnalyzerTest, AnalyzeMethod) {

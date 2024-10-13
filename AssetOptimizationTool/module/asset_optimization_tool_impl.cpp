@@ -5,12 +5,24 @@
 
 namespace asset_optimization_tool {
 
-ErrorCode AssetOptimizationToolImpl::Initialize(const std::string &data_path) {
+ErrorCode AssetOptimizationToolImpl::Initialize(
+    const std::string &data_path, const std::string &config_path) {
+  data_path_ = data_path;
+  config_path_ = config_path;
   // Initialize the asset optimization tool
   if (ErrorCode err = data_interface_->LoadData(data_path);
       err != ErrorCode::kSuccess) {
     return err;
   }
+  if (ErrorCode err = config_interface_->LoadConfiguration(config_path);
+      err != ErrorCode::kSuccess) {
+    return err;
+  }
+  return ErrorCode::kSuccess;
+}
+
+ErrorCode AssetOptimizationToolImpl::ReloadConfiguration() {
+  // Reload the configuration
   return ErrorCode::kSuccess;
 }
 
@@ -26,8 +38,6 @@ ErrorCode AssetOptimizationToolImpl::GetAssetNames(
 
 ErrorCode AssetOptimizationToolImpl::SelectAssets(
     const std::set<std::string> &asset_names) {
-  // Select the assets
-
   return ErrorCode::kSuccess;
 }
 
@@ -81,8 +91,10 @@ ErrorCode AssetOptimizationToolImpl::Evaluate(
 }
 
 AssetOptimizationToolImpl::AssetOptimizationToolImpl(
-    modules::IData *data_interface)
-    : data_interface_(std::unique_ptr<modules::IData>(data_interface)) {}
+    modules::IData *data_interface, modules::IConfiguration *config_interface)
+    : data_interface_(std::unique_ptr<modules::IData>(data_interface)),
+      config_interface_(
+          std::unique_ptr<modules::IConfiguration>(config_interface)) {}
 
 // static std::unique_ptr<AssetOptimizationTool> Create()
 // is implemented in module_factory_impl.h

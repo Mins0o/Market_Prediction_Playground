@@ -12,7 +12,9 @@ class AssetOptimizationTool {
  public:
   virtual ~AssetOptimizationTool() = default;
 
-  virtual ErrorCode Initialize(const std::string& data_path) = 0;
+  virtual ErrorCode Initialize(const std::string& data_path,
+                               const std::string& config_path) = 0;
+  virtual ErrorCode ReloadConfiguration() = 0;
   virtual ErrorCode GetAssetNames(
       /*O*/ std::set<std::string>& asset_names) const = 0;
   virtual ErrorCode SelectAssets(
