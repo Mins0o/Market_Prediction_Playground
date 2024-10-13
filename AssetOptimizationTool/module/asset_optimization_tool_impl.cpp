@@ -23,6 +23,10 @@ ErrorCode AssetOptimizationToolImpl::Initialize(
 
 ErrorCode AssetOptimizationToolImpl::ReloadConfiguration() {
   // Reload the configuration
+  if (ErrorCode err = config_interface_->LoadConfiguration(config_path_);
+      err != ErrorCode::kSuccess) {
+    return err;
+  }
   return ErrorCode::kSuccess;
 }
 
@@ -38,7 +42,7 @@ ErrorCode AssetOptimizationToolImpl::GetAssetNames(
 
 ErrorCode AssetOptimizationToolImpl::SelectAssets(
     const std::set<std::string> &asset_names) {
-  return ErrorCode::kSuccess;
+    return ErrorCode::kSuccess;
 }
 
 ErrorCode AssetOptimizationToolImpl::SetSimulationOption(

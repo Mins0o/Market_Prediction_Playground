@@ -15,13 +15,7 @@ class SimulationConfigurations {
   };
 
  public:
-  ErrorCode SetSimulationOption(const std::string& key,
-                                const std::string& value);
-
  private:
-  ErrorCode SetRepetitionCount(std::string count);
-  ErrorCode SetPortfolioMixingStrategy(std::string strategy);
-
   size_t rep_count = 10'000;
   PortfolioMixingStrategy portfolio_mixing_strategy =
       PortfolioMixingStrategy::DailyRebalancing;
@@ -46,11 +40,6 @@ class EvaluationConfigurations {
   };
 
  public:
-  ErrorCode SetEvaluationOption(const std::string& key,
-                                const std::string& value);
-  ErrorCode SetRiskStrategy(std::string strategy);
-  ErrorCode SetExpectedReturnStrategy(std::string strategy);
-
  private:
   RiskStrategy risk_strategy = RiskStrategy::StandardDeviation;
   ExpectedReturnStrategy expected_return_strategy =
@@ -72,7 +61,7 @@ class Configuration : public IConfiguration {
                                   const std::string& value) override;
 
  private:
-  private:
+ private:
   std::set<std::string> asset_selection_;
   SimulationConfigurations simulation_configurations_;
   EvaluationConfigurations evaluation_configurations_;
