@@ -1,6 +1,5 @@
 #pragma once
 
-#include <map>
 #include <memory>
 #include <set>
 #include <vector>
@@ -14,9 +13,10 @@ class AssetOptimizationTool {
   virtual ~AssetOptimizationTool() = default;
 
   virtual ErrorCode Initialize(const std::string& data_path) = 0;
-  virtual ErrorCode GetAssetTable(
-      /*O*/ std::map<std::string, AssetId>& asset_name_id_table) const = 0;
-  virtual ErrorCode SelectAssets(/*I*/ const std::set<AssetId>& asset_ids) = 0;
+  virtual ErrorCode GetAssetNames(
+      /*O*/ std::set<std::string>& asset_names) const = 0;
+  virtual ErrorCode SelectAssets(
+      /*I*/ const std::set<std::string>& asset_names) = 0;
   virtual ErrorCode SetSimulationOption(/*I*/ const std::string& key,
                                         /*I*/ const std::string& value) = 0;
   virtual ErrorCode Simulate(/*I*/ size_t num_simulations,
@@ -28,7 +28,7 @@ class AssetOptimizationTool {
   virtual ErrorCode Optimize(/*I*/ SimulationId simulation_id) = 0;
   virtual ErrorCode Optimize() = 0;
   virtual ErrorCode Test(
-      /*I*/ const std::vector<AssetId>& asset_ids,
+      /*I*/ const std::vector<std::string>& asset_names,
       /*I*/ const std::vector<double>& weights,
       /*O*/ const OptimizationOptions& evaluation_method) = 0;
   virtual ErrorCode Evaluate(/*I*/ const std::vector<double>& simulation_result,

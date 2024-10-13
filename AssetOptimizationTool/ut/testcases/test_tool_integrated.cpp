@@ -1,8 +1,6 @@
-#include <map>
 #include <memory>
 #include <set>
 #include <string>
-#include <vector>
 
 #include "_interfaces/data_interface.h"
 #include "asset_optimization_tool.h"  //testing class
@@ -10,7 +8,6 @@
 #include "gtest/gtest.h"
 #include "types.h"
 
-using asset_optimization_tool::AssetId;
 using asset_optimization_tool::AssetOptimizationTool;
 using asset_optimization_tool::ErrorCode;
 
@@ -24,11 +21,11 @@ TEST(ToolIntegrationTest, InitializeMethod) {
   EXPECT_EQ(tool->Initialize(kDataPath), ErrorCode::kSuccess);
 }
 
-TEST(ToolIntegrationTest, GetAssetTableMethod) {
+TEST(ToolIntegrationTest, GetAssetNamesMethod) {
   std::unique_ptr<AssetOptimizationTool> tool(
       asset_optimization_tool::AssetOptimizationTool::Create());
-  std::map<std::string, AssetId> asset_name_table;
+  std::set<std::string> asset_names;
   EXPECT_EQ(tool->Initialize(kDataPath), ErrorCode::kSuccess);
-  EXPECT_EQ(tool->GetAssetTable(asset_name_table), ErrorCode::kSuccess);
-  EXPECT_EQ(asset_name_table.size(), 4);
+  EXPECT_EQ(tool->GetAssetNames(asset_names), ErrorCode::kSuccess);
+  EXPECT_EQ(asset_names.size(), 4);
 }

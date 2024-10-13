@@ -1,13 +1,12 @@
-#include "data/data.h"  // testing class
 #include "_interfaces/data_interface.h"
+#include "data/data.h"  // testing class
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "types.h"
 
-using ::asset_optimization_tool::AssetId;
 using ::asset_optimization_tool::ErrorCode;
-using ::asset_optimization_tool::modules::IAsset;
 using ::asset_optimization_tool::modules::Data;
+using ::asset_optimization_tool::modules::IAsset;
 using ::testing::Return;
 
 namespace {
@@ -44,30 +43,25 @@ TEST(DataTest, LoadWrongDelimitter) {
             ErrorCode::kInvalidDelimiter);
 }
 
-TEST(DataTest, GetAssetTableMethod) {
+TEST(DataTest, GetAssetNamesMethod) {
   Data data;
 
-  std::map<std::string, AssetId> asset_name_table;
-  std::vector<std::string> asset_names;
+  std::set<std::string> asset_names;
 
   ASSERT_EQ(data.LoadData(::kDataPath), ErrorCode::kSuccess);
-  ASSERT_EQ(data.GetAssetTable(asset_name_table), ErrorCode::kSuccess);
-  ASSERT_EQ(asset_name_table.size(), 4);
-  for (const auto& [name, id] : asset_name_table) {
-    asset_names.push_back(name);
-  }
+  ASSERT_EQ(data.GetAssetNames(asset_names), ErrorCode::kSuccess);
+  ASSERT_EQ(asset_names.size(), 4);
   ASSERT_THAT(asset_names, ::testing::UnorderedElementsAreArray(kAssetNames));
 }
 
 TEST(DataTest, GetAssetDataByIdsMethod) {
   Data data;
 
-  std::set<AssetId> asset_ids = {1, 2, 3,4};
-  std::map<std::string, AssetId> asset_name_table;
-  std::vector<std::unique_ptr<IAsset>> asset_data;
+  std::vector<const IAsset*> asset_data;
 
   ASSERT_EQ(data.LoadData(::kDataPath), ErrorCode::kSuccess);
-  ASSERT_EQ(data.GetAssetDataByIds(asset_ids, asset_data), ErrorCode::kSuccess);
+  ASSERT_EQ(data.GetAssetDataByNames(kAssetNames, asset_data),
+            ErrorCode::kSuccess);
   ASSERT_EQ(asset_data.size(), 4);
   for (const auto& asset : asset_data) {
     ASSERT_THAT(kAssetNames, ::testing::Contains(asset->GetName()));

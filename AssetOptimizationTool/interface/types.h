@@ -8,7 +8,6 @@ namespace asset_optimization_tool {
 using SimulationId = size_t;
 using SimulationOptions = std::map<std::string, std::string>;
 using OptimizationOptions = std::map<std::string, std::string>;
-using AssetId = size_t;
 
 enum class ErrorCode {
   kSuccess = 0,
@@ -19,8 +18,8 @@ enum class ErrorCode {
   kFileNotFound,
   kInvalidDelimiter,
   kInvalidArgument,
-  kInvalidAssetId,
   kInvalidData,
+  kAssetNotFound,
 };
 
 inline ErrorCode operator&&(ErrorCode lhs, ErrorCode rhs) {

@@ -14,10 +14,10 @@ ErrorCode AssetOptimizationToolImpl::Initialize(const std::string &data_path) {
   return ErrorCode::kSuccess;
 }
 
-ErrorCode AssetOptimizationToolImpl::GetAssetTable(
-    std::map<std::string, AssetId> &asset_name_id_table) const {
+ErrorCode AssetOptimizationToolImpl::GetAssetNames(
+    std::set<std::string> &asset_names) const {
   // Get the list of assets
-  if (ErrorCode err = data_interface_->GetAssetTable(asset_name_id_table);
+  if (ErrorCode err = data_interface_->GetAssetNames(asset_names);
       err != ErrorCode::kSuccess) {
     return err;
   }
@@ -25,7 +25,7 @@ ErrorCode AssetOptimizationToolImpl::GetAssetTable(
 }
 
 ErrorCode AssetOptimizationToolImpl::SelectAssets(
-    const std::set<AssetId> &asset_ids) {
+    const std::set<std::string> &asset_names) {
   // Select the assets
 
   return ErrorCode::kSuccess;
@@ -66,7 +66,8 @@ ErrorCode AssetOptimizationToolImpl::Optimize() {
 }
 
 ErrorCode AssetOptimizationToolImpl::Test(
-    const std::vector<AssetId> &asset_ids, const std::vector<double> &weights,
+    const std::vector<std::string> &asset_names,
+    const std::vector<double> &weights,
     const OptimizationOptions &evaluation_method) {
   // Test the asset
   return ErrorCode::kSuccess;

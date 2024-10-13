@@ -1,13 +1,26 @@
 #include "data/data.h"
 
-#include <ctime>
 #include <fstream>
 #include <iostream>
-#include <map>
-#include <set>
+#include <rapidfuzz/fuzz.hpp>
 #include <sstream>
-#include <string>
-#include <vector>
+
+namespace {
+std::vector<std::pair<std::string, double>> extract(
+    const std::string& query, const std::set<std::string>& choices,
+    const double score_cutoff = 0.0) {
+  std::vector<std::pair<std::string, double>> results;
+  rapidfuzz::fuzz::CachedRatio<char> scorer(query);
+
+  for (const auto& choice : choices) {
+    double score = scorer.similarity(choice, score_cutoff);
+    if (score >= score_cutoff) {
+      results.emplace_back(choice, score);
+    }
+  }
+  return results;
+}
+}  // namespace
 
 namespace asset_optimization_tool::modules {
 // ------------------- DateLine -------------------
@@ -47,46 +60,50 @@ ErrorCode Data::LoadData(const std::string& data_path) {
 
   return ErrorCode::kSuccess;
 }
-ErrorCode Data::GetAssetTable(
-    std::map<std::string, AssetId>& asset_name_id_table) const {
-  asset_name_id_table.clear();
-  bool error_encountered = false;
-  for (const auto& asset : assets_) {
-    const auto& name = asset.second.GetName();
-    asset_name_id_table[name] = asset.first;
-  }
-  if (error_encountered) {
-    return ErrorCode::kInvalidData;
+ErrorCode Data::GetAssetNames(std::set<std::string>& asset_names) const {
+  for (const auto& [asset_name, asset] : assets_) {
+    asset_names.insert(asset_name);
   }
   return ErrorCode::kSuccess;
 }
 
-ErrorCode Data::GetAssetDataByIds(
-    const std::set<AssetId>& asset_ids,
-    std::vector<std::unique_ptr<IAsset>>& asset_data) const {
+ErrorCode Data::GetAssetDataByNames(
+    const std::set<std::string>& asset_names,
+    std::vector<const IAsset*>& asset_data) const {
   asset_data.clear();
-  bool error_encountered = false;
-  for (const auto& asset_id : asset_ids) {
-    const auto& asset = assets_.find(asset_id);
-    if (asset == assets_.end()) {
-      std::cerr << "Data::GetAssetDataByIds: Invalid asset id - " << asset_id
-                << std::endl;
-      error_encountered = true;
-      continue;
-    }
-    asset_data.emplace_back(std::make_unique<Asset>(asset->second));
+  std::set<std::string> current_asset_names;
+  for (const auto& [asset_name, asset] : assets_) {
+    current_asset_names.insert(asset_name);
   }
-  if (error_encountered) {
-    return ErrorCode::kInvalidAssetId;
+  for (const auto& asset_name : asset_names) {
+    auto search_results = ::extract(asset_name, current_asset_names, 80);
+    if (search_results.empty()) {
+      std::cerr << "Data::GetAssetDataByNames: No search results" << std::endl;
+      std::cerr << "Did you mean:" << std::endl;
+      for (const auto& candidate :
+           ::extract(asset_name, current_asset_names, 49)) {
+        std::cerr << candidate.first << std::endl;
+      }
+      return ErrorCode::kAssetNotFound;
+    }
+    double max_score = 0;
+    std::string match;
+    for (const auto& result : search_results) {
+      if (result.second > max_score) {
+        match = result.first;
+        max_score = result.second;
+      }
+    }
+    asset_data.emplace_back(&assets_.at(match));
   }
   return ErrorCode::kSuccess;
 }
 
-const IAsset& Data::operator[](AssetId id) const {
+const IAsset& Data::operator[](std::string id) const {
   const auto& asset = assets_.find(id);
   if (asset == assets_.end()) {
     std::cerr << "Data::operator[]: Invalid asset id - " << id << std::endl;
-    throw ErrorCode::kInvalidAssetId;
+    throw ErrorCode::kAssetNotFound;
   }
   return asset->second;
 }
@@ -127,8 +144,8 @@ ErrorCode Data::ParseDataFile(const std::string& data_path) {
     return ErrorCode::kFileNotFound;
   }
 
-  std::map<AssetId, Asset> assets;
-  std::set<AssetId> added_ids;
+  std::map<std::string, Asset> assets;
+  std::set<std::string> added_ids;
   auto date_line = std::make_shared<DateLine>();
 
   std::string first_line;
@@ -162,7 +179,7 @@ ErrorCode Data::ParseDataFile(const std::string& data_path) {
 
 ErrorCode Data::ParseDataHeaderRow(const std::string& first_line,
                                    std::shared_ptr<const DateLine> date_line,
-                                   std::map<AssetId, Asset>& assets) {
+                                   std::map<std::string, Asset>& assets) {
   std::vector<std::string> tokens;
   TokenizeLine(first_line, tokens);
 
@@ -170,19 +187,19 @@ ErrorCode Data::ParseDataHeaderRow(const std::string& first_line,
   for (const auto& token : tokens) {
     auto asset_name = token;
     if (seen_asset_names_.find(token) != seen_asset_names_.end()) {
-      asset_name += "_" + std::to_string(uuid_tracker_);
+      asset_name += "_" + std::to_string(uuid_tracker_++);
     } else {
       seen_asset_names_.insert(token);
     }
-    assets[uuid_tracker_++] = Asset(std::move(asset_name), date_line);
+    assets[asset_name] = Asset(std::move(asset_name), date_line);
   }
   return ErrorCode::kSuccess;
 }
 
-ErrorCode Data::ParseDataContentRow(const std::string& line,
-                                    const std::set<AssetId>& added_ids,
-                                    std::shared_ptr<DateLine> date_line,
-                                    std::map<AssetId, Asset>& assets) const {
+ErrorCode Data::ParseDataContentRow(
+    const std::string& line, const std::set<std::string>& added_ids,
+    std::shared_ptr<DateLine> date_line,
+    std::map<std::string, Asset>& assets) const {
   std::vector<std::string> tokens;
   TokenizeLine(line, tokens);
 

@@ -48,12 +48,11 @@ class Data : public IData {
   // methods
  public:
   ErrorCode LoadData(const std::string& data_path) override;
-  ErrorCode GetAssetTable(
-      std::map<std::string, AssetId>& asset_name_id_table) const override;
-  ErrorCode GetAssetDataByIds(
-      const std::set<AssetId>& asset_ids,
-      std::vector<std::unique_ptr<IAsset>>& asset_data) const override;
-  const IAsset& operator[](AssetId id) const override;
+  ErrorCode GetAssetNames(std::set<std::string>& asset_names) const override;
+  ErrorCode GetAssetDataByNames(
+      const std::set<std::string>& asset_names,
+      std::vector<const IAsset*>& asset_data) const override;
+  const IAsset& operator[](std::string id) const override;
 
  private:
   ErrorCode ValidateData(const std::string& data_path) const;
@@ -61,11 +60,12 @@ class Data : public IData {
   ErrorCode ParseDataHeaderRow(
       /*I*/ const std::string& first_line,
       /*I*/ std::shared_ptr<const DateLine> date_line_p,
-      /*O*/ std::map<AssetId, Asset>& assets);
-  ErrorCode ParseDataContentRow(/*I*/ const std::string& line,
-                                /*I*/ const std::set<AssetId>& added_ids,
-                                /*O*/ std::shared_ptr<DateLine> date_line_p,
-                                /*O*/ std::map<AssetId, Asset>& assets) const;
+      /*O*/ std::map<std::string, Asset>& assets);
+  ErrorCode ParseDataContentRow(
+      /*I*/ const std::string& line,
+      /*I*/ const std::set<std::string>& added_ids,
+      /*O*/ std::shared_ptr<DateLine> date_line_p,
+      /*O*/ std::map<std::string, Asset>& assets) const;
   ErrorCode TokenizeLine(const std::string& line,
                          std::vector<std::string>& tokens) const;
 
@@ -74,7 +74,7 @@ class Data : public IData {
   // data members
   size_t uuid_tracker_ = 1;
   std::set<std::string> seen_asset_names_;
-  std::map<AssetId, Asset> assets_;
+  std::map<std::string, Asset> assets_;
   std::list<std::shared_ptr<DateLine>> date_lines_;
 };
 }  // namespace asset_optimization_tool::modules
