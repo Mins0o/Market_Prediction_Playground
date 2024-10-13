@@ -84,7 +84,7 @@ ErrorCode Data::GetAssetDataByNames(
            ::extract(asset_name, current_asset_names, 49)) {
         std::cerr << candidate.first << std::endl;
       }
-      return ErrorCode::kAssetNotFound;
+      continue;
     }
     double max_score = 0;
     std::string match;
@@ -94,6 +94,8 @@ ErrorCode Data::GetAssetDataByNames(
         max_score = result.second;
       }
     }
+    std::cout << "Matched asset name for " << asset_name << ": " << match
+              << std::endl;
     asset_data.emplace_back(&assets_.at(match));
   }
   return ErrorCode::kSuccess;
