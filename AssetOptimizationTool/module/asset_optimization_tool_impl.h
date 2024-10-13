@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 
+#include "_interfaces/configuration_interface.h"
 #include "_interfaces/data_interface.h"
 #include "_interfaces/module_factory_interface.h"
 #include "asset_optimization_tool.h"
@@ -34,6 +35,6 @@ class AssetOptimizationToolImpl : public AssetOptimizationTool {
  public:   // data members
  private:  // data members
   std::unique_ptr<modules::IData> data_interface_;
-  std::unique_ptr<modules::ICofigurator> configurator_interface_;
+  std::unique_ptr<modules::IConfiguration> configuration_interface_;
 };
 }  // namespace asset_optimization_tool

@@ -1,1 +1,0 @@
-add_library(configurator configurator.cpp)
