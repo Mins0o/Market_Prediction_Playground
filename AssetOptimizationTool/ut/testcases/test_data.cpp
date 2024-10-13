@@ -16,6 +16,11 @@ std::string kDataPathWrongExt = "./build/ut/data_wrong_ext.txt";
 std::string kDataPathWrongDelimitter = "./build/ut/data_wrong_delimitter.csv";
 std::set<std::string> kAssetNames = {"asset1", "asset2", "3asset", "4asset"};
 std::set<std::string> kAssetNameQuery = {"set1", "ast2", "3ast", "4set"};
+std::map<std::string, std::vector<double>> kAssetData = {
+    {"asset1", {0, 0, 0, 0, 0.3}},
+    {"asset2", {0, 0, 0.1, -0.5, 0}},
+    {"3asset", {0, 0, 0, -1, 0}},
+    {"4asset", {0, 0, 0, 2, 0.2}}};
 }  // namespace
 
 // Example test case for the Analyzer class
@@ -66,10 +71,7 @@ TEST(DataTest, GetAssetDataByNamesMethod) {
   ASSERT_EQ(asset_data.size(), 4);
   for (const auto& asset : asset_data) {
     ASSERT_THAT(kAssetNames, ::testing::Contains(asset->GetName()));
-    std::cout << asset->GetName() << "\t";
-    for (const auto& rate : asset->GetChangeRates()) {
-      std::cout << rate << "\t";
-    }
-    std::cout << std::endl;
+    ASSERT_THAT(kAssetData[asset->GetName()],
+                ::testing::ContainerEq(asset->GetChangeRates()));
   }
 }

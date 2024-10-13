@@ -13,6 +13,7 @@ using asset_optimization_tool::ErrorCode;
 
 namespace {
 std::string kDataPath = "./build/ut/data_example.tsv";
+std::set<std::string> kAssetNames = {"asset1", "asset2", "3asset", "4asset"};
 }  // namespace
 
 TEST(ToolIntegrationTest, InitializeMethod) {
@@ -28,4 +29,5 @@ TEST(ToolIntegrationTest, GetAssetNamesMethod) {
   EXPECT_EQ(tool->Initialize(kDataPath), ErrorCode::kSuccess);
   EXPECT_EQ(tool->GetAssetNames(asset_names), ErrorCode::kSuccess);
   EXPECT_EQ(asset_names.size(), 4);
+  EXPECT_THAT(asset_names, ::testing::UnorderedElementsAreArray(kAssetNames));
 }
