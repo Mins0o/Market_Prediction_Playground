@@ -8,5 +8,12 @@ add_subdirectory("simulation_data_manager")
 add_subdirectory("simulator")
 
 add_library(asset_optimization_tool SHARED asset_optimization_tool_impl.cpp)
-target_link_libraries(asset_optimization_tool analyzer asset_mixer configuration data simulation_data_manager simulator)
+target_link_libraries(asset_optimization_tool 
+                    analyzer 
+                    asset_mixer 
+                    configuration 
+                    data 
+                    simulation_data_manager 
+                    simulator 
+                    jsoncpp)
 

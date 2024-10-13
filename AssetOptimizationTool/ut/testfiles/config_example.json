@@ -1,7 +1,15 @@
 {
-    "asset_choices": [
+    "AssetSelection": [
         "asset1",
         "asset2",
         "3asset"
-    ]
+    ],
+    "SimulationOptions": {
+        "repetitions": 10000,
+        "portfolio_mix_strategy": "never_rebalance"
+    },
+    "EvaluationOptions": {
+        "risk_free_rate": 0.02,
+        "expected_return_strategy": "discounted_mean"
+    }
 }
