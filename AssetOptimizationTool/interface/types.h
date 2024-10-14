@@ -15,7 +15,6 @@ enum class ErrorCode {
   kUnknownError,
   kInvalidFileType,
   kCannotReadFile,
-  kFileNotFound,
   kInvalidDelimiter,
   kInvalidArgument,
   kInvalidData,

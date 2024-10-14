@@ -3,10 +3,10 @@
 #include <memory>
 #include <string>
 
-#include "_interfaces/configuration_interface.h"
 #include "_interfaces/data_interface.h"
 #include "_interfaces/module_factory_interface.h"
 #include "asset_optimization_tool.h"
+#include "configuration/configuration.h"
 
 namespace asset_optimization_tool {
 class AssetOptimizationToolImpl : public AssetOptimizationTool {
@@ -32,13 +32,13 @@ class AssetOptimizationToolImpl : public AssetOptimizationTool {
                      double result) override;
 
   explicit AssetOptimizationToolImpl(modules::IData* data_interface,
-                                     modules::IConfiguration* config_interface);
+                                     modules::Configuration* config_);
 
  private:  // methods
  public:   // data members
  private:  // data members
   std::unique_ptr<modules::IData> data_interface_;
-  std::unique_ptr<modules::IConfiguration> config_interface_;
+  std::unique_ptr<modules::Configuration> config_;
   std::string data_path_;
   std::string config_path_;
 };

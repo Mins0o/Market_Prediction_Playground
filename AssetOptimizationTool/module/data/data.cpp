@@ -121,7 +121,7 @@ ErrorCode Data::ValidateData(const std::string& data_path) const {
   std::ifstream data_file(data_path);
   if (!data_file.is_open()) {
     std::cerr << "ValidateData: File not found - " << data_path << std::endl;
-    return ErrorCode::kFileNotFound;
+    return ErrorCode::kCannotReadFile;
   }
 
   std::string line;
@@ -144,7 +144,7 @@ ErrorCode Data::ValidateData(const std::string& data_path) const {
 ErrorCode Data::ParseDataFile(const std::string& data_path) {
   std::ifstream data_file(data_path);
   if (!data_file.is_open()) {
-    return ErrorCode::kFileNotFound;
+    return ErrorCode::kCannotReadFile;
   }
 
   std::map<std::string, Asset> assets;

@@ -33,7 +33,7 @@ TEST(DataTest, LoadMethod) {
 TEST(DataTest, LoadNonExistentFile) {
   Data data;
 
-  ASSERT_EQ(data.LoadData(kDataPathWrong), ErrorCode::kFileNotFound);
+  ASSERT_EQ(data.LoadData(kDataPathWrong), ErrorCode::kCannotReadFile);
 }
 
 TEST(DataTest, LoadWrongFileType) {
