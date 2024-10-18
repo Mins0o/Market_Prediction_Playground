@@ -287,7 +287,7 @@ void Analysis::OptimizePortfolio(size_t simulation_count){
 	auto optimal_set = FindOptimalMix(current_result);
 
 	optimal_mixes_.emplace_back(optimal_set);
-	std::cout << "Simulation id: " << simulation_id << " Simulation index: " << optimal_mixes_.size()-1 << std::endl;
+	//std::cout << "Simulation id: " << simulation_id << " Simulation index: " << optimal_mixes_.size()-1 << std::endl;
 }
 
 }; // namespace analysis

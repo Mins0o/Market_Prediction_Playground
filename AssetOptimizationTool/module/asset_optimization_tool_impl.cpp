@@ -42,18 +42,13 @@ ErrorCode AssetOptimizationToolImpl::GetAssetNames(
 
 ErrorCode AssetOptimizationToolImpl::SelectAssets(
     const std::set<std::string> &asset_names) {
+  config_->SetAssetSelection(asset_names);
   return ErrorCode::kSuccess;
 }
 
 ErrorCode AssetOptimizationToolImpl::SetSimulationOption(
     const std::string &key, const std::string &value) {
   // Set the simulation option
-  return ErrorCode::kSuccess;
-}
-
-ErrorCode AssetOptimizationToolImpl::Simulate(size_t num_simulations,
-                                              SimulationId) {
-  // Simulate the asset
   return ErrorCode::kSuccess;
 }
 

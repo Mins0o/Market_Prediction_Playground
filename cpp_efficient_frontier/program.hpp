@@ -309,7 +309,7 @@ void optimize_portfolio(/*I*/ const std::vector<security_column>& selections,
 		simulate_daily_rebalance(returns, daily_sim_results);
 		simulate_monthly_rebalance(returns, monthly_sim_results);
 		simulate_longterm_hold(returns, long_term_sim_results);
-		std::cout << sim_cnt+1 << " / " << num_simulations << "\r";
+		//std::cout << sim_cnt+1 << " / " << num_simulations << "\r";
 	}
 
 	std::cout << std::endl;

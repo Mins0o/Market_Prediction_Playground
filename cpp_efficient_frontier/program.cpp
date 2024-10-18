@@ -30,11 +30,14 @@ int wrapper(int argc, char* argv[]){
         std::vector<std::string> security_choices = {
             "ACE 미국S&P 500",
             "KOSEF 인도 Nifty50",
+	    "유한앙행",
             "Kodex 한국대만IT프리미어",
+	    "한화에어로스페이스",
+            "ACE중국본토CSI300",
             "현대차",
             "종근당",
-            "ACE중국본토CSI300",
             "ACE 일본Nikkei255",
+	    "삼성전자",
             "하이브",
             "NAVER",
             "TIGER 글로벌리튬&2차전지SOLACTIVE합성)()"};
@@ -58,7 +61,7 @@ int wrapper(int argc, char* argv[]){
 
 	test_analysis.SetRebalancingParameter(first_day_of_months);
 	MEASURE_TIME(optimize,
-	test_analysis.OptimizePortfolio(199'999);
+	test_analysis.OptimizePortfolio(999'999);
 	);
 	test_analysis.PrintOptimalMixes(-1);
 

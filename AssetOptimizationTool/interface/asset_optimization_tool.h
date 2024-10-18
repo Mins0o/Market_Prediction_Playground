@@ -21,8 +21,6 @@ class AssetOptimizationTool {
       /*I*/ const std::set<std::string>& asset_names) = 0;
   virtual ErrorCode SetSimulationOption(/*I*/ const std::string& key,
                                         /*I*/ const std::string& value) = 0;
-  virtual ErrorCode Simulate(/*I*/ size_t num_simulations,
-                             /*O*/ SimulationId) = 0;
   virtual ErrorCode Simulate(/*I*/ const SimulationOptions& options,
                              /*O*/ SimulationId) = 0;
   virtual ErrorCode SetOptimizationOption(/*I*/ const std::string& key,

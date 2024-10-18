@@ -18,7 +18,6 @@ class AssetOptimizationToolImpl : public AssetOptimizationTool {
   ErrorCode SelectAssets(const std::set<std::string>& asset_names) override;
   ErrorCode SetSimulationOption(const std::string& key,
                                 const std::string& value) override;
-  ErrorCode Simulate(size_t num_simulations, SimulationId) override;
   ErrorCode Simulate(const SimulationOptions& options, SimulationId) override;
   ErrorCode SetOptimizationOption(const std::string& key,
                                   const std::string& value) override;

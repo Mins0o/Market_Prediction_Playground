@@ -1,13 +1,16 @@
 #pragma once
 
-#include <rapidfuzz/fuzz.hpp>
+#include <json/json.h>
+
 #include <set>
 #include <string>
 
 #include "types.h"
 
 namespace asset_optimization_tool::modules {
+
 class SimulationConfigurations {
+ public:  // type definition
   enum class PortfolioMixingStrategy {
     DailyRebalancing = 0,
     IntervalRebalancing,
@@ -15,30 +18,24 @@ class SimulationConfigurations {
     NeverRebalance
   };
 
- public:
-  ErrorCode SetRepetition(std::string repetition);
+ public:  // methods
+  ErrorCode SetRepetition(const std::string& repetition);
   ErrorCode SetRepetition(size_t repetition);
-  ErrorCode GetRepetition(size_t& repetition) const {
-    repetition = repetition_;
-  }
-  ErrorCode SetPortfolioMixingStrategy(std::string strategy);
+  ErrorCode GetRepetition(size_t& repetition) const;
+  ErrorCode SetPortfolioMixingStrategy(const std::string& strategy);
   ErrorCode GetPortfolioMixingStrategy(
-      PortfolioMixingStrategy& portfolio_mixing_strategy) const {
-    portfolio_mixing_strategy = portfolio_mixing_strategy_;
-  }
+      PortfolioMixingStrategy& portfolio_mixing_strategy) const;
 
- private:
+ private:  // data members
   size_t repetition_ = 10'000;
   PortfolioMixingStrategy portfolio_mixing_strategy_ =
       PortfolioMixingStrategy::DailyRebalancing;
-  std::map<const char*, PortfolioMixingStrategy> portfolio_mixing_strategy_map_{
-      {"DailyRebalancing", PortfolioMixingStrategy::DailyRebalancing},
-      {"IntervalRebalancing", PortfolioMixingStrategy::IntervalRebalancing},
-      {"MonthlyRebalancing", PortfolioMixingStrategy::MonthlyRebalancing},
-      {"NeverRebalance", PortfolioMixingStrategy::NeverRebalance}};
+  static std::map<std::string_view, PortfolioMixingStrategy>
+      portfolio_mixing_strategy_map_;
 };
 
 class EvaluationConfigurations {
+ public:  // type definition
   enum class RiskStrategy {
     StandardDeviation = 0,
     LossLikelihood,
@@ -56,20 +53,31 @@ class EvaluationConfigurations {
     ReturnRate
   };
 
- public:
- private:
-  RiskStrategy risk_strategy = RiskStrategy::StandardDeviation;
-  ExpectedReturnStrategy expected_return_strategy =
+ public:  // methods
+  ErrorCode SetRiskStrategy(const std::string& risk_strategy);
+  ErrorCode SetExpectedReturnStrategy(
+      const std::string& expected_return_strategy);
+  ErrorCode GetRiskStrategy(RiskStrategy& risk_strategy) const;
+  ErrorCode GetExpectedReturnStrategy(
+      ExpectedReturnStrategy& expected_return_strategy) const;
+
+ private:  // data members
+  RiskStrategy risk_strategy_ = RiskStrategy::StandardDeviation;
+  ExpectedReturnStrategy expected_return_strategy_ =
       ExpectedReturnStrategy::SimpleMean;
+  static std::map<std::string_view, RiskStrategy> risk_strategy_map_;
+  static std::map<std::string_view, ExpectedReturnStrategy>
+      expected_return_strategy_map_;
 };
 
 class Configuration {
  public:
   ErrorCode LoadConfiguration(const std::string& config_path);
+  ErrorCode LoadConfigurationString(const std::string& config_string);
   ErrorCode GetAssetSelection(std::set<std::string>& asset_names) const;
   ErrorCode GetSimulationOption(
       SimulationConfigurations& simulation_configurations) const;
-  ErrorCode GetOptimizationOption(
+  ErrorCode GetEvaluationOption(
       EvaluationConfigurations& evaluation_configurations) const;
 
   ErrorCode SetAssetSelection(const std::set<std::string>& asset_names);
@@ -79,6 +87,8 @@ class Configuration {
                                   const std::string& value);
 
  private:
+  ErrorCode LoadConfigurationJson(const Json::Value& config_json);
+
  private:
   std::set<std::string> asset_selection_;
   SimulationConfigurations simulation_configurations_;
