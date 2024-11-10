@@ -11,3 +11,4 @@ cscope*
 simulation_results*
 .cache
 analysis_config.json
+user_data.json

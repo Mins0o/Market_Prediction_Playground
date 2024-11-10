@@ -6,6 +6,8 @@ import threading
 from datetime import datetime
 import time
 import argparse
+import requests
+import json
 
 OHLCV_REPLACE_NAMINGS = {"날짜": "date", 
                          "시가": "Open", 
@@ -217,6 +219,7 @@ if __name__ == "__main__":
     """
     If user inputs a date, it will be processed as an argument setting the modes.
     """
+    json_data = json.load(open("./user_data.json", "r"))
     parser = argparse.ArgumentParser(description="Data Fetcher")
     parser.add_argument("--date", type=str, help="Starting date for data collection.\nFormat: YYYYMMDD")
     args = parser.parse_args()
@@ -228,4 +231,8 @@ if __name__ == "__main__":
     stocks_data = data_fetcher.save_all_data()
 
     data_fetcher.set_mode("etf")
-    etf_data = data_fetcher.save_all_data()
+    try:
+        etf_data = data_fetcher.save_all_data()
+    except:
+        requests.post(json_data["notification_url"], data="etf collection failed")
+    requests.post(json_data["notification_path"], data="data collection finished.")
