@@ -71,6 +71,21 @@ ErrorCode AssetOptimizationToolImpl::Optimize(SimulationId simulation_id) {
 
 ErrorCode AssetOptimizationToolImpl::Optimize() {
   // Optimize the asset
+  // 1. Retrieve selection stock data
+  std::set<std::string> asset_selections;
+  std::vector<const modules::IAsset *> selected_data;
+  if (ErrorCode err = config_->GetAssetSelection(asset_selections);
+      err != ErrorCode::kSuccess) {
+    return err;
+  }
+  if (ErrorCode err =
+          data_interface_->GetAssetDataByNames(asset_selections, selected_data);
+      err != ErrorCode::kSuccess) {
+    return err;
+  }
+
+  // 2. Align data of the stocks
+  // 3. Should I give this to an optimizer or a simulator?
   return ErrorCode::kSuccess;
 }
 
