@@ -1,0 +1,9 @@
+{
+    "AssetChoices": [
+        "ACE 미국S&P 500",
+        "삼성전자"
+    ],
+    "SingleShotRepetitions": 20,
+    "LongTermRepetitions": 20,
+    "LongTermPeriod": 70
+}

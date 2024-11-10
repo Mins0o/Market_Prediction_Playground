@@ -10,3 +10,4 @@ pye_fin
 cscope*
 simulation_results*
 .cache
+analysis_config.json
