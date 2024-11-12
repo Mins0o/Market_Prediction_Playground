@@ -234,5 +234,5 @@ if __name__ == "__main__":
     try:
         etf_data = data_fetcher.save_all_data()
     except:
-        requests.post(json_data["notification_url"], data="etf collection failed")
+        requests.post(json_data["notification_path"], data="etf collection failed")
     requests.post(json_data["notification_path"], data="data collection finished.")
