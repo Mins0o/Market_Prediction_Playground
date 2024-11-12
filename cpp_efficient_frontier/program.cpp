@@ -29,14 +29,12 @@ int wrapper(int argc, char* argv[]) {
   reading_file.open(argv[1]);
   MEASURE_TIME(parsing, data::Data security_data = data::Data(reading_file););
 
-  // read the json file "analysis_config.json"
   std::ifstream config_file;
   config_file.open("analysis_config.json");
   Json::Value root;
   config_file >> root;
   config_file.close();
 
-  // vectorize the "AssetChoices" from the json file
   std::vector<std::string> security_choices = {};
   for (auto& choice : root["AssetChoices"]) {
     security_choices.push_back(choice.asString());
