@@ -85,6 +85,11 @@ ErrorCode AssetOptimizationToolImpl::Optimize() {
   }
 
   // 2. Align data of the stocks
+  if (ErrorCode err = data_transformer_->PrepareData(selected_data);
+      err != ErrorCode::kSuccess) {
+    return err;
+  }
+
   // 3. Should I give this to an optimizer or a simulator?
   return ErrorCode::kSuccess;
 }
@@ -107,7 +112,8 @@ ErrorCode AssetOptimizationToolImpl::Evaluate(
 AssetOptimizationToolImpl::AssetOptimizationToolImpl(
     modules::IData *data_interface, modules::Configuration *config_)
     : data_interface_(std::unique_ptr<modules::IData>(data_interface)),
-      config_(std::unique_ptr<modules::Configuration>(config_)) {}
+      config_(std::unique_ptr<modules::Configuration>(config_)),
+      data_transformer_(std::make_unique<modules::DataTransformerImpl>()) {}
 
 // static std::unique_ptr<AssetOptimizationTool> Create()
 // is implemented in module_factory_impl.h

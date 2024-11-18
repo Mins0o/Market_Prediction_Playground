@@ -1,1 +1,1 @@
-add_library(data data.cpp)
+add_library(data data.cpp data_transformer.cpp)

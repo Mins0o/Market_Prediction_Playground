@@ -4,7 +4,7 @@ participant "ProgramInterface(MainLogic)" as I
 participant Data as D
 participant Optimizer as O
 participant Configurations as C
-participant DataManipulator as DM
+participant DataTransformer as DM
 participant "PortfolioAnalyzer(Evaluator)" as PA
 participant "MathLibrary(?)" as M
 participant "PortfolioMixer(?Should it be a part of the optimizer)" as PM

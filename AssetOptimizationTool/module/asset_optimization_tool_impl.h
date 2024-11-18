@@ -7,6 +7,7 @@
 #include "_interfaces/module_factory_interface.h"
 #include "asset_optimization_tool.h"
 #include "configuration/configuration.h"
+#include "data/data_transformer.h"
 
 namespace asset_optimization_tool {
 class AssetOptimizationToolImpl : public AssetOptimizationTool {
@@ -38,6 +39,7 @@ class AssetOptimizationToolImpl : public AssetOptimizationTool {
  private:  // data members
   std::unique_ptr<modules::IData> data_interface_;
   std::unique_ptr<modules::Configuration> config_;
+  std::unique_ptr<modules::IDataTransformer> data_transformer_;
   std::string data_path_;
   std::string config_path_;
 };
