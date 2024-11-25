@@ -1,11 +1,14 @@
 #include "_interfaces/data_interface.h"
-#include "data/data.h"  // testing class
+#include "_interfaces/data_transformer_interface.h"
+#include "data/data.h"              // testing class
+#include "data/data_transformer.h"  //testing class
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "types.h"
 
 using ::asset_optimization_tool::ErrorCode;
 using ::asset_optimization_tool::modules::Data;
+using ::asset_optimization_tool::modules::DataTransformer;
 using ::asset_optimization_tool::modules::IAsset;
 using ::testing::Return;
 
@@ -63,15 +66,39 @@ TEST(DataTest, GetAssetNamesMethod) {
 TEST(DataTest, GetAssetDataByNamesMethod) {
   Data data;
 
-  std::vector<const IAsset*> asset_data;
+  std::vector<const IAsset *> asset_data;
 
   ASSERT_EQ(data.LoadData(::kDataPath), ErrorCode::kSuccess);
   ASSERT_EQ(data.GetAssetDataByNames(kAssetNameQuery, asset_data),
             ErrorCode::kSuccess);
   ASSERT_EQ(asset_data.size(), 4);
-  for (const auto& asset : asset_data) {
+  for (const auto &asset : asset_data) {
     ASSERT_THAT(kAssetNames, ::testing::Contains(asset->GetName()));
     ASSERT_THAT(kAssetData[asset->GetName()],
                 ::testing::ContainerEq(asset->GetChangeRates()));
+  }
+}
+
+TEST(DataTransformerTest, PrepareEmptyData) {
+  DataTransformer data_transformer;
+  std::vector<const IAsset *> data;
+  std::vector<std::unique_ptr<IAsset>> prepared_data;
+  ASSERT_EQ(data_transformer.PrepareData(data, prepared_data),
+            asset_optimization_tool::ErrorCode::kInvalidData);
+}
+
+TEST(DataTransformerTest, PrepareData) {
+  DataTransformer data_transformer;
+  Data data;
+  std::vector<const IAsset *> asset_data;
+  std::vector<std::unique_ptr<IAsset>> prepared_data;
+  data.LoadData(::kDataPath);
+  data.GetAssetDataByNames(kAssetNames, asset_data);
+  ASSERT_EQ(data_transformer.PrepareData(asset_data, prepared_data),
+            asset_optimization_tool::ErrorCode::kSuccess);
+  for (size_t i = 0; i < asset_data.size(); ++i) {
+    ASSERT_EQ(asset_data[i]->GetName(), prepared_data[i]->GetName());
+    ASSERT_THAT(asset_data[i]->GetChangeRates(),
+                ::testing::ContainerEq(prepared_data[i]->GetChangeRates()));
   }
 }

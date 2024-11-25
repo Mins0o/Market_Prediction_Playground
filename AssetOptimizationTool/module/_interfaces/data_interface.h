@@ -10,6 +10,7 @@
 namespace asset_optimization_tool::modules {
 class IAsset {
  public:
+  IAsset() = default;
   virtual ~IAsset() = default;
   virtual std::string GetName() const = 0;
   virtual std::vector<double> GetChangeRates() const = 0;

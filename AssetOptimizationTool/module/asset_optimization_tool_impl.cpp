@@ -74,6 +74,7 @@ ErrorCode AssetOptimizationToolImpl::Optimize() {
   // 1. Retrieve selection stock data
   std::set<std::string> asset_selections;
   std::vector<const modules::IAsset *> selected_data;
+  std::vector<std::unique_ptr<modules::IAsset>> prepared_data;
   if (ErrorCode err = config_->GetAssetSelection(asset_selections);
       err != ErrorCode::kSuccess) {
     return err;
@@ -84,8 +85,8 @@ ErrorCode AssetOptimizationToolImpl::Optimize() {
     return err;
   }
 
-  // 2. Align data of the stocks
-  if (ErrorCode err = data_transformer_->PrepareData(selected_data);
+  if (ErrorCode err =
+          data_transformer_->PrepareData(selected_data, prepared_data);
       err != ErrorCode::kSuccess) {
     return err;
   }
@@ -113,7 +114,7 @@ AssetOptimizationToolImpl::AssetOptimizationToolImpl(
     modules::IData *data_interface, modules::Configuration *config_)
     : data_interface_(std::unique_ptr<modules::IData>(data_interface)),
       config_(std::unique_ptr<modules::Configuration>(config_)),
-      data_transformer_(std::make_unique<modules::DataTransformerImpl>()) {}
+      data_transformer_(std::make_unique<modules::DataTransformer>()) {}
 
 // static std::unique_ptr<AssetOptimizationTool> Create()
 // is implemented in module_factory_impl.h

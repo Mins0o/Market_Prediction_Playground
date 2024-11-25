@@ -27,8 +27,17 @@ namespace asset_optimization_tool::modules {
 ErrorCode DateLine::ParseAndAddDate(const std::string& date_string) {
   std::tm date;
   strptime(date_string.c_str(), "%Y-%m-%d", &date);
-  dates_.emplace_back(std::mktime(&date));
+  insert(std::mktime(&date));
   return ErrorCode::kSuccess;
+}
+
+bool DateLine::insert(time_t value) {
+  auto it = std::lower_bound(dates_.begin(), dates_.end(), value);
+  if (it != dates_.end() && *it == value) {
+    return false;
+  }
+  dates_.insert(it, value);
+  return true;
 }
 // ------------------- Asset -------------------
 ErrorCode Asset::ParseAndAddChangeRate(const std::string& change_rate) {
@@ -194,7 +203,7 @@ ErrorCode Data::ParseDataHeaderRow(const std::string& first_line,
     } else {
       seen_asset_names_.insert(token);
     }
-    assets[asset_name] = Asset(std::move(asset_name), date_line);
+    assets.emplace(asset_name, Asset(asset_name, date_line));
   }
   return ErrorCode::kSuccess;
 }

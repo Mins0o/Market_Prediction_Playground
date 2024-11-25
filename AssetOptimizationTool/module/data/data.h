@@ -16,6 +16,8 @@ class DateLine {
   // methods
  public:
   ErrorCode ParseAndAddDate(const std::string& date);
+  bool insert(time_t value);
+  const std::vector<time_t>& GetDates() const { return dates_; }
 
  private:
   // data members
@@ -32,8 +34,9 @@ class Asset : public IAsset {
         std::shared_ptr<const DateLine> date_line_p)
       : asset_name_(asset_name), date_line_p_(date_line_p) {};
   ErrorCode ParseAndAddChangeRate(const std::string& change_rate);
-  std::string GetName() const { return asset_name_; }
-  std::vector<double> GetChangeRates() const { return change_rates_; }
+  std::string GetName() const override { return asset_name_; }
+  std::vector<double> GetChangeRates() const override { return change_rates_; }
+  std::weak_ptr<const DateLine> GetDateLine() const { return date_line_p_; }
 
  private:
   // data members
